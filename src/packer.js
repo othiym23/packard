@@ -32,7 +32,6 @@ function readRoot (root, cb_) {
     let i = entries.length
     for (let entry of entries) {
       if (cruft.indexOf(entry) !== -1) {
-        --i
         next()
         continue
       }
@@ -44,21 +43,19 @@ function readRoot (root, cb_) {
           readArtist(root, entry, function (error, artist) {
             if (error) return cb(error)
 
-            --i
             artists.push(artist)
 
             next()
           })
         }
         else {
-          --i
           next()
         }
       })
     }
 
     function next () {
-      if (i === 0) cb(null, artists, artists.reduce((t, a) => t.concat(a.albums), []))
+      if (--i === 0) cb(null, artists, artists.reduce((t, a) => t.concat(a.albums), []))
     }
   })
 }
@@ -74,7 +71,6 @@ function readArtist (root, directory, cb_) {
     let i = entries.length
     for (let entry of entries) {
       if (cruft.indexOf(entry) !== -1) {
-        --i
         next()
         continue
       }
@@ -87,13 +83,11 @@ function readArtist (root, directory, cb_) {
           readAlbum(root, directory, entry, function (error, album) {
             if (error) return cb(error)
 
-            --i
             albums.push(album)
             next()
           })
         }
         else if (stats.isFile()) {
-          --i
           const ext = extname(entry)
           const base = resolve(artistPath, basename(entry, ext))
           switch (ext) {
@@ -125,7 +119,7 @@ function readArtist (root, directory, cb_) {
     }
 
     function next () {
-      if (i > 0) return
+      if (--i > 0) return
 
       for (let a of albums) {
         const p = a.path
@@ -151,19 +145,16 @@ function readAlbum (root, artist, album, cb_) {
     let i = entries.length
     for (let entry of entries) {
       if (cruft.indexOf(entry) !== -1) {
-        i--
         next()
         continue
       }
 
       stat(resolve(albumPath, entry), function (error, stats) {
         if (stats.isDirectory()) {
-          i--
           console.log("witaf. what is a directory doing here?", entry)
           next()
         }
         else if (stats.isFile()) {
-          i--
           switch (extname(entry)) {
             case ".flac":
             case ".mp3":
@@ -188,7 +179,6 @@ function readAlbum (root, artist, album, cb_) {
           next()
         }
         else {
-          i--
           console.log("what", entry)
           next()
         }
@@ -196,7 +186,7 @@ function readAlbum (root, artist, album, cb_) {
     }
 
     function next () {
-      if (i > 0) return
+      if (--i > 0) return
 
       const a = new Multitrack(album, artist, albumPath, tracks)
       if (covers.length) a.pictures = covers
