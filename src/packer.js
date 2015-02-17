@@ -22,7 +22,7 @@ const cruft = [
 const cues = new Map()
 
 function readRoot (root, cb_) {
-  let cb = once(cb_)
+  const cb = once(cb_)
 
   readdir(root, function (error, entries) {
     if (error) return cb(error)
