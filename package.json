@@ -1,0 +1,36 @@
+{
+  "name": "music-packer",
+  "version": "1.0.0",
+  "description": "many music files onto few devices",
+  "main": "lib/packer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/othiym23/music-packer"
+  },
+  "keywords": [
+    "utility",
+    "music",
+    "mp3",
+    "flac",
+    "arguably",
+    "useful"
+  ],
+  "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/othiym23/music-packer/issues"
+  },
+  "homepage": "https://github.com/othiym23/music-packer",
+  "dependencies": {
+    "babel": "^4.0.2",
+    "once": "^1.3.1",
+    "uniq": "^1.0.1"
+  },
+  "scripts": {
+    "transpile": "babel src -d lib",
+    "prepublish": "npm run transpile"
+  }
+}
