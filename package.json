@@ -1,10 +1,11 @@
 {
   "name": "music-packer",
-  "version": "1.0.0",
+  "version": "1.0.0-0",
   "description": "many music files onto few devices",
   "main": "lib/packer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "transpile": "babel src -d lib",
+    "prepublish": "npm run transpile"
   },
   "repository": {
     "type": "git",
@@ -28,9 +29,5 @@
     "babel": "^4.0.2",
     "once": "^1.3.1",
     "uniq": "^1.0.1"
-  },
-  "scripts": {
-    "transpile": "babel src -d lib",
-    "prepublish": "npm run transpile"
   }
 }
