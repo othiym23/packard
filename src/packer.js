@@ -30,10 +30,11 @@ function readRoot (root, cb_) {
     const artists = []
 
     let i = entries.length
-    entries.forEach(function (entry) {
+    for (let entry of entries) {
       if (cruft.indexOf(entry) !== -1) {
         --i
-        return next()
+        next()
+        continue
       }
 
       stat(resolve(root, entry), function (error, stats) {
@@ -54,7 +55,7 @@ function readRoot (root, cb_) {
           next()
         }
       })
-    })
+    }
 
     function next () {
       if (i === 0) cb(null, artists, artists.reduce((t, a) => t.concat(a.albums), []))
@@ -71,10 +72,11 @@ function readArtist (root, directory, cb_) {
     const albums = []
 
     let i = entries.length
-    entries.forEach(function (entry) {
+    for (let entry of entries) {
       if (cruft.indexOf(entry) !== -1) {
         --i
-        return next()
+        next()
+        continue
       }
 
       const currentPath = resolve(artistPath, entry)
@@ -120,17 +122,17 @@ function readArtist (root, directory, cb_) {
           console.log("rando in artist directory:", directory, entry)
         }
       })
-    })
+    }
 
     function next () {
       if (i > 0) return
 
-      albums.forEach((a) => {
+      for (let a of albums) {
         const p = a.path
         const ext = extname(p)
         const base = resolve(dirname(p), basename(p, ext))
         if (cues.get(base)) a.cuesheet = cues.get(base)
-      })
+      }
       cb(null, new Artist(directory, albums))
     }
   })
@@ -147,10 +149,11 @@ function readAlbum (root, artist, album, cb_) {
     const covers = []
 
     let i = entries.length
-    entries.forEach(function (entry) {
+    for (let entry of entries) {
       if (cruft.indexOf(entry) !== -1) {
         i--
-        return next()
+        next()
+        continue
       }
 
       stat(resolve(albumPath, entry), function (error, stats) {
@@ -190,7 +193,7 @@ function readAlbum (root, artist, album, cb_) {
           next()
         }
       })
-    })
+    }
 
     function next () {
       if (i > 0) return
@@ -206,6 +209,6 @@ function readAlbum (root, artist, album, cb_) {
 readRoot(roots[0], function (error, artists, albums) {
   if (error) throw error
 
-  albums.forEach((a) => console.log("%s - %s [%s]", a.artist, a.name, a.getSize(1024 * 1024)))
-  artists.forEach((a) => console.log("%s [%s]", a.name, a.getSize(1024 * 1024)))
+  for (let a of albums) { console.log("%s - %s [%s]", a.artist, a.name, a.getSize(1024 * 1024)) }
+  for (let a of artists) { console.log("%s [%s]", a.name, a.getSize(1024 * 1024)) }
 })
