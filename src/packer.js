@@ -112,8 +112,8 @@ function readArtist (root, directory, cb_) {
           next()
         }
         else {
-          i--
           console.log("rando in artist directory:", directory, entry)
+          next()
         }
       })
     }
