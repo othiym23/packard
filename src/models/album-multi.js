@@ -1,7 +1,7 @@
-var Album = require("./album-base.js")
+const Album = require("./album-base.js")
 
 class MultitrackAlbum extends Album {
-  constructor (name, artist, path, tracks) {
+  constructor (name, artist, path, tracks = []) {
     super(name, artist, path)
 
     this.tracks = tracks
