@@ -3,7 +3,7 @@ const promisify = require("es6-promisify")
 const {basename, dirname, extname} = require("path")
 const readdir = promisify(require("fs").readdir)
 const stat = promisify(require("fs").stat)
-const path = require("path")
+const resolve = require("path").resolve
 
 const Artist = require("./models/artist.js")
 const Cover = require("./models/cover.js")
@@ -22,18 +22,18 @@ const cruft = [
 
 const cues = new Map()
 
-function readRoot (root) {
+function visit (root, visitor) {
   return readdir(root).then(function (entries) {
-    const tasks = []
-
-    for (let entry of entries) {
-      if (cruft.indexOf(entry) !== -1) continue
-
-      tasks.push(stat(path.resolve(root, entry)).then(withStatsReadArtist(entry)))
-    }
-
-    return Promise.all(tasks)
+    return Promise.all(
+      entries
+        .filter((e) => cruft.indexOf(e) === -1)
+        .map((entry) => stat(resolve(root, entry)).then(visitor(entry)))
+    )
   })
+}
+
+function readRoot (root) {
+  return visit(root, withStatsReadArtist)
 
   function withStatsReadArtist (entry) {
     return function selectArtist (stats) {
@@ -45,24 +45,14 @@ function readRoot (root) {
 }
 
 function readArtist (root, directory) {
-  const artistPath = path.resolve(root, directory)
-  return readdir(artistPath).then(function (entries) {
-    const tasks = []
+  const artistPath = resolve(root, directory)
 
-    for (let entry of entries) {
-      if (cruft.indexOf(entry) !== -1) continue
-
-      const currentPath = path.resolve(artistPath, entry)
-      tasks.push(stat(currentPath).then(withStatsReadAlbum(entry)))
-    }
-
-    return Promise.all(tasks)
-  }).then(function (albums) {
+  return visit(artistPath, withStatsReadAlbum).then((albums) => {
     var unholy = albums.filter((a) => a)
     for (let a of unholy) {
       const p = a.path
       const ext = extname(p)
-      const base = path.resolve(dirname(p), basename(p, ext))
+      const base = resolve(dirname(p), basename(p, ext))
       if (cues.get(base)) a.cuesheet = cues.get(base)
     }
 
@@ -70,14 +60,14 @@ function readArtist (root, directory) {
   })
 
   function withStatsReadAlbum (entry) {
-    const currentPath = path.resolve(artistPath, entry)
+    const currentPath = resolve(artistPath, entry)
     return function selectAlbum (stats) {
       if (stats.isDirectory()) {
         return readAlbum(root, directory, entry)
       }
       else if (stats.isFile()) {
         const ext = extname(entry)
-        const base = path.resolve(artistPath, basename(entry, ext))
+        const base = resolve(artistPath, basename(entry, ext))
         switch (ext) {
           case ".flac":
           case ".mp3":
@@ -105,18 +95,8 @@ function readArtist (root, directory) {
 }
 
 function readAlbum (root, artist, album) {
-  const albumPath = path.resolve(root, artist, album)
-  return readdir(albumPath).then(function (entries) {
-    const tasks = []
-
-    for (let entry of entries) {
-      if (cruft.indexOf(entry) !== -1) continue
-
-      tasks.push(stat(path.resolve(albumPath, entry)).then(withStatsReadTrack(entry)))
-    }
-
-    return Promise.all(tasks)
-  }).then(function (files) {
+  const albumPath = resolve(root, artist, album)
+  return visit(albumPath, withStatsReadFiles).then((files) => {
     var tracks = files.filter((f) => f instanceof Track)
     var covers = files.filter((f) => f instanceof Cover)
 
@@ -126,7 +106,7 @@ function readAlbum (root, artist, album) {
     return a
   })
 
-  function withStatsReadTrack (entry) {
+  function withStatsReadFiles (entry) {
     return function selectFiles (stats) {
       if (stats.isFile()) {
         switch (extname(entry)) {
@@ -142,7 +122,7 @@ function readAlbum (root, artist, album) {
           case ".pdf":
           case ".png":
             return new Cover(
-              path.resolve(albumPath, entry),
+              resolve(albumPath, entry),
               stats
             )
           default:
