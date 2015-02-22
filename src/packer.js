@@ -23,9 +23,7 @@ const cruft = [
 ]
 
 
-function isThing (thing) {
-  return thing ? true : false
-}
+function isThing (thing) { return thing }
 
 function visit (root, visitor) {
   return readdir(root).then((entries) => Promise.all(
@@ -52,8 +50,7 @@ function readArtist (root, directory) {
   const cues = new Map()
 
   return visit(artistPath, withStatsReadAlbum).then((albums) => {
-    var unholy = albums.filter(isThing)
-    for (let a of unholy) {
+    for (let a of albums.filter(isThing)) {
       const p = a.path
       const ext = extname(p)
       const base = basename(p, ext)
@@ -147,8 +144,7 @@ function reverseSize (a, b) {
 Promise.all(roots.map((r) => readRoot(r))).then((trees) => {
   let artists = new Map()
   for (let tree of trees) {
-    const unholy = tree.filter(isThing)
-    for (let a of unholy) {
+    for (let a of tree.filter(isThing)) {
       const artist = artists.get(a.name)
       if (artist) {
         artist.albums = artist.albums.concat(a.albums)
