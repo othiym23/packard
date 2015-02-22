@@ -28,6 +28,7 @@
   "dependencies": {
     "babel": "^4.0.2",
     "es6-promisify": "^1.1.1",
+    "es6-shim": "^0.25.2",
     "uniq": "^1.0.1"
   }
 }

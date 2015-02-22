@@ -1,3 +1,4 @@
+require("es6-shim")
 const promisify = require("es6-promisify")
 
 const {basename, extname} = require("path")
@@ -12,7 +13,8 @@ const Singletrack = require("./models/album-single.js")
 const Track = require("./models/track.js")
 
 const roots = [
-  "/Users/ogd/Music/flac"
+  "/Users/ogd/Music/flac",
+  "/Users/ogd/Music/mp3"
 ]
 
 const cruft = [
@@ -22,13 +24,11 @@ const cruft = [
 
 
 function visit (root, visitor) {
-  return readdir(root).then(function (entries) {
-    return Promise.all(
-      entries
-        .filter((e) => cruft.indexOf(e) === -1)
-        .map((entry) => stat(resolve(root, entry)).then(visitor(entry)))
-    )
-  })
+  return readdir(root).then((entries) => Promise.all(
+    entries
+      .filter((e) => cruft.indexOf(e) === -1)
+      .map((entry) => stat(resolve(root, entry)).then(visitor(entry)))
+  ))
 }
 
 function readRoot (root) {
@@ -136,18 +136,40 @@ function readAlbum (root, artist, album) {
   }
 }
 
-readRoot(roots[0]).then(function (artists) {
+function isHole (thing) {
+  return thing ? true : false
+}
+
+function reverseSize (a, b) {
+  return b.getSize() - a.getSize()
+}
+
+Promise.all(roots.map((r) => readRoot(r))).then((trees) => {
+  let artists = new Map()
+  for (let tree of trees) {
+    const unholy = tree.filter(isHole)
+    for (let a of unholy) {
+      const artist = artists.get(a.name)
+      if (artist) {
+        artist.albums = artist.albums.concat(a.albums)
+      }
+      else {
+        artists.set(a.name, a)
+      }
+    }
+  }
+
   console.log("ARTISTS\n=======\n")
-  const unholy = artists.filter((a) => a)
-                        .sort((a, b) => b.getSize() - a.getSize())
-  for (let a of unholy) {
+  const sorted = Array.from(artists.values())
+                      .sort(reverseSize)
+  for (let a of sorted) {
     console.log("%s [%s]", a.name, a.getSize(1024 * 1024))
   }
 
   console.log("\n\nALBUMS\n======\n")
-  const flattened = unholy.reduce((t, a) => t.concat(a.albums), [])
-                          .sort((a, b) => b.getSize() - a.getSize())
-  for (let a of flattened) {
+  const albums = sorted.reduce((l, r) => l.concat(r.albums), [])
+                       .sort(reverseSize)
+  for (let a of albums) {
     console.log(
       "%s - %s [%s]%s",
       a.artist,
@@ -156,6 +178,4 @@ readRoot(roots[0]).then(function (artists) {
       a.cuesheet ? " [c]" : ""
     )
   }
-}).catch(function (error) {
-  console.error("HURF DURF", error.stack)
-})
+}).catch((error) => console.error("HURF DURF", error.stack))
