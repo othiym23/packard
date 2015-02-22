@@ -26,10 +26,10 @@ const cruft = [
 function isThing (thing) { return thing }
 
 function visit (root, visitor) {
-  return readdir(root).then((entries) => Promise.all(
+  return readdir(root).then(entries => Promise.all(
     entries
-      .filter((e) => cruft.indexOf(e) === -1)
-      .map((entry) => stat(resolve(root, entry)).then(visitor(entry)))
+      .filter(e => cruft.indexOf(e) === -1)
+      .map(entry => stat(resolve(root, entry)).then(visitor(entry)))
   ))
 }
 
@@ -49,7 +49,7 @@ function readArtist (root, directory) {
   const artistPath = resolve(root, directory)
   const cues = new Map()
 
-  return visit(artistPath, withStatsReadAlbum).then((albums) => {
+  return visit(artistPath, withStatsReadAlbum).then(albums => {
     for (let a of albums.filter(isThing)) {
       const p = a.path
       const ext = extname(p)
@@ -97,9 +97,9 @@ function readArtist (root, directory) {
 
 function readAlbum (root, artist, album) {
   const albumPath = resolve(root, artist, album)
-  return visit(albumPath, withStatsReadFiles).then((files) => {
-    var tracks = files.filter((f) => f instanceof Track)
-    var covers = files.filter((f) => f instanceof Cover)
+  return visit(albumPath, withStatsReadFiles).then(files => {
+    var tracks = files.filter(f => f instanceof Track)
+    var covers = files.filter(f => f instanceof Cover)
 
     const a = new Multitrack(album, artist, albumPath, tracks)
     if (covers.length) a.pictures = covers
@@ -141,7 +141,7 @@ function reverseSize (a, b) {
   return b.getSize() - a.getSize()
 }
 
-Promise.all(roots.map((r) => readRoot(r))).then((trees) => {
+Promise.all(roots.map(r => readRoot(r))).then(trees => {
   let artists = new Map()
   for (let tree of trees) {
     for (let a of tree.filter(isThing)) {
@@ -174,4 +174,4 @@ Promise.all(roots.map((r) => readRoot(r))).then((trees) => {
       a.cuesheet ? " [c]" : ""
     )
   }
-}).catch((error) => console.error("HURF DURF", error.stack))
+}).catch(error => console.error("HURF DURF", error.stack))
