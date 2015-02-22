@@ -1,6 +1,6 @@
 const promisify = require("es6-promisify")
 
-const {basename, dirname, extname} = require("path")
+const {basename, extname} = require("path")
 const readdir = promisify(require("fs").readdir)
 const stat = promisify(require("fs").stat)
 const resolve = require("path").resolve
@@ -20,7 +20,6 @@ const cruft = [
   "Thumbs.db"  // yes, I do run Windows sometimes
 ]
 
-const cues = new Map()
 
 function visit (root, visitor) {
   return readdir(root).then(function (entries) {
@@ -46,13 +45,14 @@ function readRoot (root) {
 
 function readArtist (root, directory) {
   const artistPath = resolve(root, directory)
+  const cues = new Map()
 
   return visit(artistPath, withStatsReadAlbum).then((albums) => {
     var unholy = albums.filter((a) => a)
     for (let a of unholy) {
       const p = a.path
       const ext = extname(p)
-      const base = resolve(dirname(p), basename(p, ext))
+      const base = basename(p, ext)
       if (cues.get(base)) a.cuesheet = cues.get(base)
     }
 
@@ -67,7 +67,7 @@ function readArtist (root, directory) {
       }
       else if (stats.isFile()) {
         const ext = extname(entry)
-        const base = resolve(artistPath, basename(entry, ext))
+        const base = basename(entry, ext)
         switch (ext) {
           case ".flac":
           case ".mp3":
@@ -148,7 +148,13 @@ readRoot(roots[0]).then(function (artists) {
   const flattened = unholy.reduce((t, a) => t.concat(a.albums), [])
                           .sort((a, b) => b.getSize() - a.getSize())
   for (let a of flattened) {
-    console.log("%s - %s [%s]", a.artist, a.name, a.getSize(1024 * 1024))
+    console.log(
+      "%s - %s [%s]%s",
+      a.artist,
+      a.name,
+      a.getSize(1024 * 1024),
+      a.cuesheet ? " [c]" : ""
+    )
   }
 }).catch(function (error) {
   console.error("HURF DURF", error.stack)
