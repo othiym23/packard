@@ -8,7 +8,7 @@
   "scripts": {
     "transpile": "babel src -d lib",
     "prepublish": "npm run transpile",
-    "test": "tap test/*.js"
+    "test": "npm run transpile && tap test/*.js"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,9 @@
     "yargs": "^3.2.1"
   },
   "devDependencies": {
+    "mkdirp": "^0.5.0",
     "nixt": "^0.4.1",
+    "rimraf": "^2.2.8",
     "tap": "^0.6.0"
   },
   "license": "MIT"
