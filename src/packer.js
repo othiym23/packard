@@ -1,8 +1,9 @@
-const {basename, dirname, extname} = require("path")
-const {readdir, stat} = require("fs")
-const resolve = require("path").resolve
+const promisify = require("es6-promisify")
 
-const once = require("once")
+const {basename, dirname, extname} = require("path")
+const readdir = promisify(require("fs").readdir)
+const stat = promisify(require("fs").stat)
+const path = require("path")
 
 const Artist = require("./models/artist.js")
 const Cover = require("./models/cover.js")
@@ -21,184 +22,154 @@ const cruft = [
 
 const cues = new Map()
 
-function readRoot (root, cb_) {
-  const cb = once(cb_)
+function readRoot (root) {
+  return readdir(root).then(function (entries) {
+    const tasks = []
 
-  readdir(root, function (error, entries) {
-    if (error) return cb(error)
-
-    const artists = []
-
-    let i = entries.length
     for (let entry of entries) {
-      if (cruft.indexOf(entry) !== -1) {
-        next()
-        continue
-      }
+      if (cruft.indexOf(entry) !== -1) continue
 
-      stat(resolve(root, entry), function (error, stats) {
-        if (error) return cb(error)
-
-        if (stats.isDirectory()) {
-          readArtist(root, entry, function (error, artist) {
-            if (error) return cb(error)
-
-            artists.push(artist)
-
-            next()
-          })
-        }
-        else {
-          next()
-        }
-      })
+      tasks.push(stat(path.resolve(root, entry)).then(withStatsReadArtist(entry)))
     }
 
-    function next () {
-      if (--i === 0) cb(null, artists, artists.reduce((t, a) => t.concat(a.albums), []))
-    }
+    return Promise.all(tasks)
   })
+
+  function withStatsReadArtist (entry) {
+    return function selectArtist (stats) {
+      if (stats.isDirectory()) return readArtist(root, entry)
+
+      console.log("WARN: unexpected thing", entry, "in root", root)
+    }
+  }
 }
 
-function readArtist (root, directory, cb_) {
-  const cb = once(cb_)
-  const artistPath = resolve(root, directory)
-  readdir(artistPath, function (error, entries) {
-    if (error) return cb(error)
+function readArtist (root, directory) {
+  const artistPath = path.resolve(root, directory)
+  return readdir(artistPath).then(function (entries) {
+    const tasks = []
 
-    const albums = []
-
-    let i = entries.length
     for (let entry of entries) {
-      if (cruft.indexOf(entry) !== -1) {
-        next()
-        continue
-      }
+      if (cruft.indexOf(entry) !== -1) continue
 
-      const currentPath = resolve(artistPath, entry)
-      stat(currentPath, function (error, stats) {
-        if (error) return cb(error)
-
-        if (stats.isDirectory()) {
-          readAlbum(root, directory, entry, function (error, album) {
-            if (error) return cb(error)
-
-            albums.push(album)
-            next()
-          })
-        }
-        else if (stats.isFile()) {
-          const ext = extname(entry)
-          const base = resolve(artistPath, basename(entry, ext))
-          switch (ext) {
-            case ".flac":
-            case ".mp3":
-              albums.push(new Singletrack(
-                entry,
-                directory,
-                currentPath,
-                stats
-              ))
-              break
-            case ".cue":
-              cues.set(base, currentPath)
-              break
-            case ".log":
-              // nothing to do with these
-              break
-            default:
-              console.log("not sure what to do", entry)
-          }
-          next()
-        }
-        else {
-          console.log("rando in artist directory:", directory, entry)
-          next()
-        }
-      })
+      const currentPath = path.resolve(artistPath, entry)
+      tasks.push(stat(currentPath).then(withStatsReadAlbum(entry)))
     }
 
-    function next () {
-      if (--i > 0) return
-
-      for (let a of albums) {
-        const p = a.path
-        const ext = extname(p)
-        const base = resolve(dirname(p), basename(p, ext))
-        if (cues.get(base)) a.cuesheet = cues.get(base)
-      }
-      cb(null, new Artist(directory, albums))
+    return Promise.all(tasks)
+  }).then(function (albums) {
+    var unholy = albums.filter((a) => a)
+    for (let a of unholy) {
+      const p = a.path
+      const ext = extname(p)
+      const base = path.resolve(dirname(p), basename(p, ext))
+      if (cues.get(base)) a.cuesheet = cues.get(base)
     }
+
+    return new Artist(directory, albums.filter((a) => a))
   })
+
+  function withStatsReadAlbum (entry) {
+    const currentPath = path.resolve(artistPath, entry)
+    return function selectAlbum (stats) {
+      if (stats.isDirectory()) {
+        return readAlbum(root, directory, entry)
+      }
+      else if (stats.isFile()) {
+        const ext = extname(entry)
+        const base = path.resolve(artistPath, basename(entry, ext))
+        switch (ext) {
+          case ".flac":
+          case ".mp3":
+            return new Singletrack(
+              entry,
+              directory,
+              currentPath,
+              stats
+            )
+          case ".cue":
+            cues.set(base, currentPath)
+            break
+          case ".log":
+            // nothing to do with these
+            break
+          default:
+            console.log("not sure what to do with", entry)
+        }
+      }
+      else {
+        console.log("rando in artist directory:", directory, entry)
+      }
+    }
+  }
 }
 
-function readAlbum (root, artist, album, cb_) {
-  const cb = once(cb_)
+function readAlbum (root, artist, album) {
+  const albumPath = path.resolve(root, artist, album)
+  return readdir(albumPath).then(function (entries) {
+    const tasks = []
 
-  const albumPath = resolve(root, artist, album)
-  readdir(albumPath, function (error, entries) {
-    if (error) return cb(error)
-
-    const tracks = []
-    const covers = []
-
-    let i = entries.length
     for (let entry of entries) {
-      if (cruft.indexOf(entry) !== -1) {
-        next()
-        continue
-      }
+      if (cruft.indexOf(entry) !== -1) continue
 
-      stat(resolve(albumPath, entry), function (error, stats) {
-        if (stats.isDirectory()) {
-          console.log("witaf. what is a directory doing here?", entry)
-          next()
-        }
-        else if (stats.isFile()) {
-          switch (extname(entry)) {
-            case ".flac":
-            case ".mp3":
-              tracks.push(new Track(
-                artist,
-                album,
-                entry,
-                stats
-              ))
-              break
-            case ".jpg":
-            case ".pdf":
-            case ".png":
-              covers.push(new Cover(
-                resolve(albumPath, entry),
-                stats
-              ))
-              break
-            default:
-              console.log("I dunno, boss", entry)
-          }
-          next()
-        }
-        else {
-          console.log("what", entry)
-          next()
-        }
-      })
+      tasks.push(stat(path.resolve(albumPath, entry)).then(withStatsReadTrack(entry)))
     }
 
-    function next () {
-      if (--i > 0) return
+    return Promise.all(tasks)
+  }).then(function (files) {
+    var tracks = files.filter((f) => f instanceof Track)
+    var covers = files.filter((f) => f instanceof Cover)
 
-      const a = new Multitrack(album, artist, albumPath, tracks)
-      if (covers.length) a.pictures = covers
+    const a = new Multitrack(album, artist, albumPath, tracks)
+    if (covers.length) a.pictures = covers
 
-      cb(null, a)
-    }
+    return a
   })
+
+  function withStatsReadTrack (entry) {
+    return function selectFiles (stats) {
+      if (stats.isFile()) {
+        switch (extname(entry)) {
+          case ".flac":
+          case ".mp3":
+            return new Track(
+              artist,
+              album,
+              entry,
+              stats
+            )
+          case ".jpg":
+          case ".pdf":
+          case ".png":
+            return new Cover(
+              path.resolve(albumPath, entry),
+              stats
+            )
+          default:
+            console.log("I dunno, boss", entry)
+        }
+      }
+      else {
+        console.log("what", entry)
+      }
+    }
+  }
 }
 
-readRoot(roots[0], function (error, artists, albums) {
-  if (error) throw error
+readRoot(roots[0]).then(function (artists) {
+  console.log("ARTISTS\n=======\n")
+  const unholy = artists.filter((a) => a)
+                        .sort((a, b) => b.getSize() - a.getSize())
+  for (let a of unholy) {
+    console.log("%s [%s]", a.name, a.getSize(1024 * 1024))
+  }
 
-  for (let a of albums) { console.log("%s - %s [%s]", a.artist, a.name, a.getSize(1024 * 1024)) }
-  for (let a of artists) { console.log("%s [%s]", a.name, a.getSize(1024 * 1024)) }
+  console.log("\n\nALBUMS\n======\n")
+  const flattened = unholy.reduce((t, a) => t.concat(a.albums), [])
+                          .sort((a, b) => b.getSize() - a.getSize())
+  for (let a of flattened) {
+    console.log("%s - %s [%s]", a.artist, a.name, a.getSize(1024 * 1024))
+  }
+}).catch(function (error) {
+  console.error("HURF DURF", error.stack)
 })
