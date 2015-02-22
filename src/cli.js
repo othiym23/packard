@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const scanArtists = require("./artists.js")
 
 const yargs = require("yargs")
