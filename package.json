@@ -1,11 +1,14 @@
 {
-  "name": "music-packer",
+  "name": "packard",
   "version": "1.0.0",
+  "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
   "description": "many music files onto few devices",
   "main": "lib/packer.js",
+  "bin": "lib/cli.js",
   "scripts": {
     "transpile": "babel src -d lib",
-    "prepublish": "npm run transpile"
+    "prepublish": "npm run transpile",
+    "test": "tap test/*.js"
   },
   "repository": {
     "type": "git",
@@ -19,8 +22,6 @@
     "arguably",
     "useful"
   ],
-  "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/othiym23/music-packer/issues"
   },
@@ -29,6 +30,11 @@
     "babel": "^4.0.2",
     "es6-promisify": "^1.1.1",
     "es6-shim": "^0.25.2",
-    "uniq": "^1.0.1"
-  }
+    "yargs": "^3.2.1"
+  },
+  "devDependencies": {
+    "nixt": "^0.4.1",
+    "tap": "^0.6.0"
+  },
+  "license": "MIT"
 }

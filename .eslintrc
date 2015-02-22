@@ -19,6 +19,7 @@
     "no-lonely-if": 1,
     "no-unused-vars": [2, {"vars" : "all", "args" : "after-used"}],
     "no-mixed-requires": 0,
+    "no-process-exit": 0,
     "no-shadow": 0,
     "space-infix-ops": 0,
     "key-spacing": 0,
