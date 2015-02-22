@@ -1,6 +1,6 @@
 {
   "name": "music-packer",
-  "version": "1.0.0-0",
+  "version": "1.0.0",
   "description": "many music files onto few devices",
   "main": "lib/packer.js",
   "scripts": {
