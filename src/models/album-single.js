@@ -1,4 +1,4 @@
-var Album = require("./album-base.js")
+var Album = require('./album-base.js')
 
 class SingletrackAlbum extends Album {
   constructor (name, artist, path, stats) {

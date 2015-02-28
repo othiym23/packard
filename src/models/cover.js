@@ -1,4 +1,4 @@
-const extname = require("path").extname
+const extname = require('path').extname
 
 class Cover {
   constructor (path, stats) {

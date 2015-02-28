@@ -1,6 +1,6 @@
-require("es6-shim")
-const readRoot = require("./read-root.js")
-// import readRoot from "./read-root.js"
+require('es6-shim')
+const readRoot = require('./read-root.js')
+// import readRoot from './read-root.js'
 
 function isThing (thing) { return thing }
 
@@ -16,8 +16,7 @@ function scanArtists (roots) {
         const artist = artists.get(a.name)
         if (artist) {
           artist.albums = artist.albums.concat(a.albums)
-        }
-        else {
+        } else {
           artists.set(a.name, a)
         }
       }
