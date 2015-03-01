@@ -13,9 +13,11 @@ var lines = function () {/*
 
 Commands:
   artists    generate a list of artists from roots
+  unpack     unpack a set of files into a staging directory
 
 Options:
   -h, --help  Show help
+  --loglevel  logging level        [default: "info"]
   --version   Show version number
 
 Not enough non-option arguments: got 0, need at least 1
