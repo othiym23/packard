@@ -7,11 +7,42 @@ class Track {
     this.blockSize = stats.blksize
     this.blocks = stats.blocks
     this.albumArtist = albumArtist
+    this.index = 0
+    this.disc = 0
+    this.date = null
+    this.path = null
+    this.ext = '.unknown'
   }
 
   getSize (bs = 1) {
     return Math.ceil(this.size / bs)
   }
+
+  fullName () {
+    let base = ''
+    if (this.index) base += this.index + '. '
+    if (this.artist) base += this.artist + ' - '
+    if (this.album) base += this.album + ' - '
+    return base + this.name + this.ext
+  }
+
+  safeName () {
+    return this.fullName().replace(/[^ ()\]\[A-Za-z0-9.-]/g, '')
+  }
+}
+
+Track.fromFLAC = md => {
+  const track = new Track(
+    md.ARTIST,
+    md.ALBUM,
+    md.TITLE,
+    md.stats
+  )
+  track.ext = '.flac'
+  track.path = md.filename
+  track.index = md.TRACKNUMBER
+  track.date = md.DATE
+  return track
 }
 
 module.exports = Track

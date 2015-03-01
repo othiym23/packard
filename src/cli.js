@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 const promisify = require('es6-promisify')
 
-const {randomBytes, createHash} = require('crypto')
-const {createReadStream, createWriteStream} = require('fs')
-const {join, dirname, basename, extname} = require('path')
+const {randomBytes} = require('crypto')
+const {join, dirname, extname} = require('path')
 const os = require('os')
-const stat = promisify(require('fs').stat)
 
 const glob = promisify(require('glob'))
-const FLAC = require('flac-parser')
 const log = require('npmlog')
-const mkdirp = promisify(require('mkdirp'))
 const rimraf = promisify(require('rimraf'))
 const untildify = require('untildify')
-const openZip = promisify(require('yauzl').open)
+
+const Album = require('./models/album-multi.js')
+const Track = require('./models/track.js')
+const flac = require('./metadata/flac.js')
+const scanArtists = require('./artists.js')
+const trackers = require('./trackers.js')
+const unzip = require('./zip-utils.js').unpack
 
 const config = require('rc')(
   'packard',
@@ -35,10 +37,6 @@ const yargs = require('yargs')
                 .command('unpack', 'unpack a set of files into a staging directory')
                 .version(() => require('../package').version)
                 .demand(1)
-
-const scanArtists = require('./artists.js')
-const Track = require('./models/track.js')
-const Album = require('./models/album-multi.js')
 
 let options = {
   R: {
@@ -83,32 +81,47 @@ switch (yargs.argv._[0]) {
           .argv
     const files = argv._.slice(1)
 
-    let locate = Promise.resolve(files)
-    if (argv.P) locate = locate.then(files => {
-      log.verbose('unpack', 'initial files', files)
-      return glob(join(untildify(argv.R[0]), argv.P))
-        .then(globbed => files.concat(globbed))
-    })
-
-    log.enableProgress()
-    locate.then(files => {
-      log.verbose('unpack', 'files', files)
-      return Promise.all(files.map(f => extractReleaseMetadata(f)))
-    }).then(m => {
-      log.disableProgress()
-      log.info('metadata', m)
-      makeAlbums(m)
-      log.verbose('removing', tmpdir)
-      return rimraf(tmpdir)
-    }).catch(error => {
-      log.disableProgress()
-      log.error('unpack', error.stack)
-      log.verbose('not removing', tmpdir)
-    })
-    break
+    return unpack(files, argv.R[0], argv.P)
   default:
     yargs.showHelp()
     process.exit(1)
+}
+
+function unpack (files, root, pattern) {
+  log.enableProgress()
+  let locate = Promise.resolve(files)
+  if (pattern) locate = locate.then(files => {
+    log.verbose('unpack', 'initial files', files)
+    return glob(join(untildify(root), pattern))
+      .then(globbed => files.concat(globbed))
+  })
+
+  locate.then(files => {
+    log.verbose('unpack', 'files', files)
+    return Promise.all(files.map(f => extractReleaseMetadata(f)))
+  }).then(m => {
+    log.disableProgress()
+    makeAlbums(m)
+    log.verbose('removing', tmpdir)
+    return rimraf(tmpdir)
+  }).catch(error => {
+    log.disableProgress()
+    log.error('unpack', error.stack)
+    log.verbose('not removing', tmpdir)
+  })
+}
+
+function extractReleaseMetadata (filename) {
+  trackers.set(filename, log.newGroup('archive: ' + filename))
+
+  return unzip(filename, tmpdir).then(list => {
+    log.verbose('extractReleaseMetadata', 'files', list)
+    return Promise.all(
+      [].concat(...list)
+       .filter(e => extname(e) === '.flac')
+       .map(e => flac.scan(filename, e))
+    )
+  })
 }
 
 function makeAlbums (metadata) {
@@ -126,14 +139,10 @@ function makeAlbums (metadata) {
     let tracks = new Set()
     let dirs = new Set()
     for (let track of albums.get(album)) {
+      log.silly('makeAlbums', 'track', track)
       artists.add(track.ARTIST)
       dirs.add(dirname(track.filename))
-      tracks.add(new Track(
-        track.ARTIST,
-        track.ALBUM,
-        track.TITLE,
-        track.stats
-      ))
+      tracks.add(Track.fromFLAC(track))
     }
 
     const minArtists = Array.from(artists.values())
@@ -155,80 +164,7 @@ function makeAlbums (metadata) {
     finished.add(new Album(album, artist, minDirs[0], Array.from(tracks.values())))
   }
 
-  log.info('makeAlbums', Array.from(finished.values()))
-}
-
-function unpackFile (filename, directory = tmpdir) {
-  const tracker = trackers.get(filename).newItem('unpacking: ' + basename(filename), 0)
-  const path = join(tmpdir, createHash('sha1').update(filename).digest('hex'))
-  return mkdirp(path).then(() => new Promise((resolve, reject) => {
-    log.verbose('unpackFile', 'made', path)
-    openZip(filename).then(zf => {
-      const paths = []
-      log.verbose('unpackFile', zf.entryCount, 'entries to unpack')
-      tracker.addWork(zf.entryCount)
-      zf.on('error', reject)
-      zf.on('entry', entry => {
-        tracker.completeWork(1)
-        if (/\/$/.test(entry.fileName)) {
-          log.verbose('unpackFile', 'skipping directory', entry.fileName)
-          return
-        }
-
-        log.silly('unpackFile', 'entry', entry)
-        const extractPath = join(path, entry.fileName)
-        const writeTracker = log.newStream(
-          'writing: ' + basename(extractPath),
-          entry.uncompressedSize
-        )
-        zf.openReadStream(entry, function (err, zipstream) {
-          if (err) return reject(err)
-          log.verbose('unpackFile', 'writing', extractPath, entry.uncompressedSize)
-          zipstream.pipe(writeTracker)
-                   .pipe(createWriteStream(extractPath))
-                   .on('error', reject)
-                   .on('finish', () => {
-                     log.verbose('unpackFile', 'finished writing', extractPath)
-                     paths.push(extractPath)
-                   })
-        })
-      })
-      zf.on('close', () => {
-        log.silly('unpackFile', 'resolving', filename, 'with', paths)
-        resolve(paths)
-      })
-    })
-  }))
-}
-
-function readMetadata (sourceArchive, filename) {
-  log.verbose('readMetadata', 'extracting from', filename)
-  return stat(filename).then(stats => new Promise((resolve, reject) => {
-    const tag = {filename, stats}
-    const tracker = trackers.get(sourceArchive).newStream(
-      'metadata: ' + basename(filename),
-      stats.size
-    )
-    createReadStream(filename)
-      .pipe(tracker)
-      .pipe(new FLAC())
-      .on('data', d => tag[d.type] = d.value)
-      .on('error', reject)
-      .on('finish', () => resolve(tag))
-  }))
-}
-
-const trackers = new Map()
-
-function extractReleaseMetadata (filename) {
-  trackers.set(filename, log.newGroup('archive: ' + filename))
-
-  return unpackFile(filename).then(list => {
-    log.verbose('extractReleaseMetadata', 'files', list)
-    return Promise.all(
-      [].concat(...list)
-       .filter(e => extname(e) === '.flac')
-       .map(e => readMetadata(filename, e))
-    )
-  })
+  for (let album of finished.values()) {
+    console.log(album.dump())
+  }
 }
