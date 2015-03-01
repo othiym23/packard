@@ -1,3 +1,5 @@
+const sprintf = require('sprintf')
+
 class Track {
   constructor (artist, album, name, stats, albumArtist = artist) {
     this.artist = artist
@@ -20,9 +22,9 @@ class Track {
 
   fullName () {
     let base = ''
-    if (this.index) base += this.index + '. '
     if (this.artist) base += this.artist + ' - '
     if (this.album) base += this.album + ' - '
+    if (this.index) base += sprintf("%02d", this.index) + ' - '
     return base + this.name + this.ext
   }
 
@@ -40,7 +42,7 @@ Track.fromFLAC = md => {
   )
   track.ext = '.flac'
   track.path = md.filename
-  track.index = md.TRACKNUMBER
+  track.index = parseInt(md.TRACKNUMBER, 10)
   track.date = md.DATE
   return track
 }

@@ -26,7 +26,7 @@ class MultitrackAlbum extends Album {
   }
 
   dump () {
-    let dumped = this.toPath() + '\n'
+    let dumped = this.toPath() + '/\n'
     for (let track of this.tracks.sort((a, b) => (a.index || 0) - (b.index || 0))) {
       dumped += '  ' + track.safeName() + '\n'
     }
