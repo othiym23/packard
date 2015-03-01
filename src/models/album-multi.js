@@ -1,4 +1,4 @@
-const join = require('path').join
+const {join, basename} = require('path')
 
 const Album = require('./album-base.js')
 
@@ -30,7 +30,11 @@ class MultitrackAlbum extends Album {
     for (let track of this.tracks.sort((a, b) => (a.index || 0) - (b.index || 0))) {
       dumped += '  ' + track.safeName() + '\n'
     }
-    dumped += '(' + this.path + ')\n\n'
+
+    for (let cover of this.pictures) {
+      dumped += 'c: ' + join(this.toPath(), basename(cover.path)) + '\n'
+    }
+    dumped += '(' + this.path + ')\n'
 
     return dumped
   }

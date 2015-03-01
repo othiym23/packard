@@ -28,7 +28,7 @@ function scan (sourceArchive, filename) {
   }))
 }
 
-function albumsFromTracks (metadata) {
+function albumsFromTracks (metadata, covers) {
   const albums = new Map()
   const tracks = [].concat(...metadata)
   for (let track of tracks) {
@@ -58,7 +58,6 @@ function albumsFromTracks (metadata) {
         artist = minArtists[0]
         break
       case 2:
-        log.warn('makeAlbums', '2 artists found; assuming split', minArtists)
         let [first, second] = minArtists
         if (first.indexOf(second) !== -1) {
           artist = first
@@ -72,12 +71,15 @@ function albumsFromTracks (metadata) {
             artist = second + ' / ' + first
           }
         }
+        log.warn('makeAlbums', '2 artists found; assuming split', artist)
         break
       default:
         log.warn('makeAlbums', 'many artists found; assuming compilation', minArtists)
         artist = 'Various Artists'
     }
-    finished.add(new Album(album, artist, minDirs[0], Array.from(tracks.values())))
+    const a = new Album(album, artist, minDirs[0], Array.from(tracks.values()))
+    if (covers.get(a.path)) a.pictures = covers.get(a.path)
+    finished.add(a)
   }
 
   for (let album of finished.values()) {

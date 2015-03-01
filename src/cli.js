@@ -2,14 +2,16 @@
 const promisify = require('es6-promisify')
 
 const {randomBytes} = require('crypto')
-const {join, extname} = require('path')
+const {join, dirname, extname} = require('path')
 const os = require('os')
+const stat = promisify(require('fs').stat)
 
 const glob = promisify(require('glob'))
 const log = require('npmlog')
 const rimraf = promisify(require('rimraf'))
 const untildify = require('untildify')
 
+const Cover = require('./models/cover.js')
 const flac = require('./metadata/flac.js')
 const scanArtists = require('./artists.js')
 const trackers = require('./trackers.js')
@@ -36,7 +38,7 @@ const yargs = require('yargs')
                 .version(() => require('../package').version)
                 .demand(1)
 
-let options = {
+const options = {
   R: {
     alias: 'root',
     array: true,
@@ -59,6 +61,7 @@ let options = {
   }
 }
 
+const covers = new Map()
 const tmpdir = join(os.tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 log.level = yargs.argv.loglevel
 
@@ -102,7 +105,7 @@ function unpack (files, root, pattern) {
     return Promise.all(files.map(f => extractReleaseMetadata(f)))
   }).then(m => {
     log.disableProgress()
-    flac.albumsFromTracks(m)
+    flac.albumsFromTracks(m, covers)
     log.verbose('removing', tmpdir)
     return rimraf(tmpdir)
   }).catch(error => {
@@ -117,11 +120,32 @@ function extractReleaseMetadata (filename) {
   trackers.set(filename, log.newGroup('archive: ' + filename))
 
   return unzip(filename, tmpdir).then(list => {
-    log.verbose('extractReleaseMetadata', 'files', list)
     return Promise.all(
-      [].concat(...list)
-       .filter(e => extname(e) === '.flac')
-       .map(e => flac.scan(filename, e))
-    )
+      [].concat(...list).map(e => {
+        switch (extname(e)) {
+          case '.flac':
+            return flac.scan(filename, e)
+          case '.jpg':
+          case '.pdf':
+          case '.png':
+            return stat(filename).then(stats => new Cover(e, stats))
+          default:
+            log.error('extractReleaseMetadata', "don't recognize type of", filename)
+            return Promise.resolve(new Error("don't recognize type of " + filename))
+        }
+      })
+    ).then(list => {
+      list.filter(e => e instanceof Cover)
+          .forEach(c => {
+            const directory = dirname(c.path)
+            if (!covers.get(directory)) {
+              log.silly('extractReleaseMetadata', 'creating image list for', directory)
+              covers.set(directory, [])
+            }
+            log.silly('extractReleaseMetadata', 'cover', c)
+            covers.get(directory).push(c)
+          })
+      return list.filter(e => !(e instanceof Cover || e instanceof Error))
+    })
   })
 }
