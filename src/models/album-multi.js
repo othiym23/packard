@@ -28,13 +28,13 @@ class MultitrackAlbum extends Album {
   dump () {
     let dumped = this.toPath() + '/\n'
     for (let track of this.tracks.sort((a, b) => (a.index || 0) - (b.index || 0))) {
-      dumped += '  ' + track.safeName() + '\n'
+      dumped += '   ' + track.safeName() + '\n'
     }
 
     for (let cover of this.pictures) {
       dumped += 'c: ' + join(this.toPath(), basename(cover.path)) + '\n'
     }
-    dumped += '(' + this.path + ')\n'
+    dumped += '(unpacked to ' + this.path + ')\n'
 
     return dumped
   }
