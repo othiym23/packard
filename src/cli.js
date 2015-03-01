@@ -2,18 +2,18 @@
 const promisify = require('es6-promisify')
 
 const {randomBytes, createHash} = require('crypto')
-const {createReadStream} = require('fs')
+const {createReadStream, createWriteStream} = require('fs')
 const {join, basename, extname} = require('path')
 const os = require('os')
 const stat = promisify(require('fs').stat)
 
 const glob = promisify(require('glob'))
-const Decompressor = require('decompress-zip')
 const FLAC = require('flac-parser')
 const log = require('npmlog')
 const mkdirp = promisify(require('mkdirp'))
 const rimraf = promisify(require('rimraf'))
 const untildify = require('untildify')
+const openZip = promisify(require('yauzl').open)
 
 const config = require('rc')(
   'packard',
@@ -116,23 +116,48 @@ switch (yargs.argv._[0]) {
 }
 
 function unpackFile (filename, directory = tmpdir) {
-  const tracker = log.newItem('unpacking: ' + basename(filename), 2)
+  const tracker = log.newItem('unpacking: ' + basename(filename), 0)
   const path = join(tmpdir, createHash('sha1').update(filename).digest('hex'))
   return mkdirp(path).then(() => new Promise((resolve, reject) => {
     log.verbose('unpackFile', 'made', path)
-    new Decompressor(filename)
-          .on('error', reject)
-          .on('progress', (i, t) => {
-            if (i === 0) tracker.addWork(t)
-            tracker.completeWork(1)
-          })
-          .on(
-            'extract',
-            l => resolve(
-              l.map(e => e.deflated).filter(Boolean).map(e => join(path, e))
-            )
-          )
-          .extract({path})
+    openZip(filename).then(zf => {
+      const paths = []
+      log.verbose('unpackFile', zf.entryCount, 'entries to unpack')
+      tracker.addWork(zf.entryCount)
+      zf.on('error', reject)
+      zf.on('entry', entry => {
+        tracker.completeWork(1)
+        if (/\/$/.test(entry.fileName)) {
+          log.verbose('unpackFile', 'skipping directory', entry.fileName)
+          return
+        }
+
+        log.silly('unpackFile', 'entry', entry)
+        const extractPath = join(path, entry.fileName)
+        const writeTracker = log.newStream(
+          'writing: ' + basename(extractPath),
+          entry.uncompressedSize
+        )
+        zf.openReadStream(entry, function (err, zipstream) {
+          if (err) {
+            console.log('unpackFile', 'stream error', err.stack)
+            return reject(err)
+          }
+          log.verbose('unpackFile', 'writing', extractPath, entry.uncompressedSize)
+          zipstream.pipe(writeTracker)
+                   .pipe(createWriteStream(extractPath))
+                   .on('error', reject)
+                   .on('finish', () => {
+                     log.verbose('unpackFile', 'finished writing', extractPath)
+                     paths.push(extractPath)
+                   })
+        })
+      })
+      zf.on('close', () => {
+        log.silly('unpackFile', 'resolving', filename, 'with', paths)
+        resolve(paths)
+      })
+    })
   }))
 }
 
@@ -142,8 +167,7 @@ function readMetadata (filename) {
     const tag = {filename}
     const tracker = log.newStream(
       'metadata: ' + basename(filename),
-      stats.size,
-      3
+      stats.size
     )
     createReadStream(filename)
       .pipe(tracker)

@@ -28,7 +28,6 @@
   "homepage": "https://github.com/othiym23/music-packer",
   "dependencies": {
     "babel": "^4.6.3",
-    "decompress-zip": "^0.1.0",
     "es6-promisify": "^1.1.1",
     "es6-shim": "^0.26.1",
     "flac-parser": "^0.3.1",
@@ -39,7 +38,8 @@
     "rc": "^0.6.0",
     "rimraf": "^2.2.8",
     "untildify": "^2.0.0",
-    "yargs": "^3.4.4"
+    "yargs": "^3.4.4",
+    "yauzl": "^2.2.1"
   },
   "devDependencies": {
     "mkdirp": "^0.5.0",
