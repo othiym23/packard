@@ -1,21 +1,18 @@
 #!/usr/bin/env node
 const promisify = require('es6-promisify')
 
-const {randomBytes} = require('crypto')
-const {join, dirname, extname} = require('path')
 const os = require('os')
-const stat = promisify(require('fs').stat)
+const join = require('path').join
+const randomBytes = require('crypto').randomBytes
 
 const glob = promisify(require('glob'))
 const log = require('npmlog')
 const rimraf = promisify(require('rimraf'))
 const untildify = require('untildify')
 
-const Cover = require('./models/cover.js')
 const flac = require('./metadata/flac.js')
 const scanArtists = require('./artists.js')
-const trackers = require('./trackers.js')
-const unzip = require('./zip-utils.js').unpack
+const extractRelease = require('./metdata/index.js').extractRelease
 
 const config = require('rc')(
   'packard',
@@ -102,7 +99,7 @@ function unpack (files, root, pattern) {
 
   locate.then(files => {
     log.verbose('unpack', 'files', files)
-    return Promise.all(files.map(f => extractReleaseMetadata(f)))
+    return Promise.all(files.map(f => extractRelease(f, tmpdir, covers)))
   }).then(m => {
     log.disableProgress()
     flac.albumsFromTracks(m, covers)
@@ -112,40 +109,5 @@ function unpack (files, root, pattern) {
     log.disableProgress()
     log.error('unpack', error.stack)
     log.verbose('not removing', tmpdir)
-  })
-}
-
-function extractReleaseMetadata (filename) {
-  log.verbose('extractReleaseMetadata', 'archive:', filename)
-  trackers.set(filename, log.newGroup('archive: ' + filename))
-
-  return unzip(filename, tmpdir).then(list => {
-    return Promise.all(
-      [].concat(...list).map(e => {
-        switch (extname(e)) {
-          case '.flac':
-            return flac.scan(filename, e)
-          case '.jpg':
-          case '.pdf':
-          case '.png':
-            return stat(filename).then(stats => new Cover(e, stats))
-          default:
-            log.error('extractReleaseMetadata', "don't recognize type of", filename)
-            return Promise.resolve(new Error("don't recognize type of " + filename))
-        }
-      })
-    ).then(list => {
-      list.filter(e => e instanceof Cover)
-          .forEach(c => {
-            const directory = dirname(c.path)
-            if (!covers.get(directory)) {
-              log.silly('extractReleaseMetadata', 'creating image list for', directory)
-              covers.set(directory, [])
-            }
-            log.silly('extractReleaseMetadata', 'cover', c)
-            covers.get(directory).push(c)
-          })
-      return list.filter(e => !(e instanceof Cover || e instanceof Error))
-    })
   })
 }
