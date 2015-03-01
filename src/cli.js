@@ -113,6 +113,7 @@ function unpack (files, root, pattern) {
 }
 
 function extractReleaseMetadata (filename) {
+  log.verbose('extractReleaseMetadata', 'archive:', filename)
   trackers.set(filename, log.newGroup('archive: ' + filename))
 
   return unzip(filename, tmpdir).then(list => {

@@ -1,6 +1,6 @@
 const promisify = require('es6-promisify')
 
-const {basename, dirname} = require('path').basename
+const {basename, dirname} = require('path')
 const createReadStream = require('fs').createReadStream
 const stat = promisify(require('fs').stat)
 
@@ -12,7 +12,7 @@ const Track = require('../models/track.js')
 const trackers = require('../trackers.js')
 
 function scan (sourceArchive, filename) {
-  log.verbose('readMetadata', 'extracting from', filename)
+  log.verbose('readMetadata', 'scanning', filename, 'source archive', sourceArchive)
   return stat(filename).then(stats => new Promise((resolve, reject) => {
     const tag = {filename, stats}
     const tracker = trackers.get(sourceArchive).newStream(
@@ -35,7 +35,6 @@ function albumsFromTracks (metadata) {
     if (!albums.get(track.ALBUM)) albums.set(track.ALBUM, [])
     albums.get(track.ALBUM).push(track)
   }
-  log.info('albums', Array.from(albums.keys()))
 
   const finished = new Set()
   for (let album of albums.keys()) {
@@ -59,10 +58,23 @@ function albumsFromTracks (metadata) {
         artist = minArtists[0]
         break
       case 2:
-        log.warn('makeAlbums', '2 artists found; assuming split')
-        artist = minArtists[0] + ' / ' + minArtists[1]
+        log.warn('makeAlbums', '2 artists found; assuming split', minArtists)
+        let [first, second] = minArtists
+        if (first.indexOf(second) !== -1) {
+          artist = first
+        } else if (second.indexOf(first) !== -1) {
+          artist = second
+        } else {
+          const sorted = Array.from(tracks.values()).sort((a, b) => (a.index || 0) - (b.index || 0))
+          if (sorted[0].artist === first) {
+            artist = first + ' / ' + second
+          } else {
+            artist = second + ' / ' + first
+          }
+        }
         break
       default:
+        log.warn('makeAlbums', 'many artists found; assuming compilation', minArtists)
         artist = 'Various Artists'
     }
     finished.add(new Album(album, artist, minDirs[0], Array.from(tracks.values())))
