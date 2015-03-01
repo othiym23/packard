@@ -2,7 +2,7 @@
 const promisify = require('es6-promisify')
 
 const {randomBytes} = require('crypto')
-const {join, dirname, extname} = require('path')
+const {join, extname} = require('path')
 const os = require('os')
 
 const glob = promisify(require('glob'))
@@ -10,8 +10,6 @@ const log = require('npmlog')
 const rimraf = promisify(require('rimraf'))
 const untildify = require('untildify')
 
-const Album = require('./models/album-multi.js')
-const Track = require('./models/track.js')
 const flac = require('./metadata/flac.js')
 const scanArtists = require('./artists.js')
 const trackers = require('./trackers.js')
@@ -55,6 +53,9 @@ let options = {
     alias: 'staging',
     describe: 'where to create the tree for unpacked artists',
     required: 'must have a place to put unpacked files'
+  },
+  archive: {
+    describe: 'after other operations, archive original files'
   }
 }
 
@@ -101,7 +102,7 @@ function unpack (files, root, pattern) {
     return Promise.all(files.map(f => extractReleaseMetadata(f)))
   }).then(m => {
     log.disableProgress()
-    makeAlbums(m)
+    flac.albumsFromTracks(m)
     log.verbose('removing', tmpdir)
     return rimraf(tmpdir)
   }).catch(error => {
@@ -122,49 +123,4 @@ function extractReleaseMetadata (filename) {
        .map(e => flac.scan(filename, e))
     )
   })
-}
-
-function makeAlbums (metadata) {
-  const albums = new Map()
-  const tracks = [].concat(...metadata)
-  for (let track of tracks) {
-    if (!albums.get(track.ALBUM)) albums.set(track.ALBUM, [])
-    albums.get(track.ALBUM).push(track)
-  }
-  log.info('albums', Array.from(albums.keys()))
-
-  const finished = new Set()
-  for (let album of albums.keys()) {
-    let artists = new Set()
-    let tracks = new Set()
-    let dirs = new Set()
-    for (let track of albums.get(album)) {
-      log.silly('makeAlbums', 'track', track)
-      artists.add(track.ARTIST)
-      dirs.add(dirname(track.filename))
-      tracks.add(Track.fromFLAC(track))
-    }
-
-    const minArtists = Array.from(artists.values())
-    const minDirs = Array.from(dirs.values())
-    if (minDirs.length > 1) log.warn('makeAlbums', 'minDirs too big', minDirs)
-
-    let artist
-    switch (minArtists.length) {
-      case 1:
-        artist = minArtists[0]
-        break
-      case 2:
-        log.warn('makeAlbums', '2 artists found; assuming split')
-        artist = minArtists[0] + ' / ' + minArtists[1]
-        break
-      default:
-        artist = 'Various Artists'
-    }
-    finished.add(new Album(album, artist, minDirs[0], Array.from(tracks.values())))
-  }
-
-  for (let album of finished.values()) {
-    console.log(album.dump())
-  }
 }
