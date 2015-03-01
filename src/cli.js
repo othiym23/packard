@@ -12,7 +12,7 @@ const untildify = require('untildify')
 
 const flac = require('./metadata/flac.js')
 const scanArtists = require('./artists.js')
-const extractRelease = require('./metdata/index.js').extractRelease
+const extractRelease = require('./metadata/index.js').extractRelease
 
 const config = require('rc')(
   'packard',

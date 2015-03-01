@@ -5,7 +5,7 @@ const stat = promisify(require('fs').stat)
 
 const log = require('npmlog')
 
-const Cover = require('./models/cover.js')
+const Cover = require('../models/cover.js')
 const flac = require('./flac.js')
 const trackers = require('../trackers.js')
 const unzip = require('../zip-utils.js').unpack
