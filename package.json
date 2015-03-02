@@ -44,9 +44,7 @@
     "yauzl": "^2.2.1"
   },
   "devDependencies": {
-    "mkdirp": "^0.5.0",
     "nixt": "^0.4.1",
-    "rimraf": "^2.2.8",
     "tap": "^0.7.1"
   },
   "license": "MIT"
