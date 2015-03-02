@@ -107,6 +107,13 @@ const options = {
 const covers = new Map()
 const tmpdir = join(os.tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 log.level = yargs.argv.loglevel
+log.setGaugeTemplate([
+  {type: 'name', separated: true, maxLength: 40, minLength: 40, align: 'left'},
+  {type: 'spinner', separated: true},
+  {type: 'startgroup'},
+  {type: 'completionbar'},
+  {type: 'endgroup'}
+])
 
 log.verbose('config', config)
 
