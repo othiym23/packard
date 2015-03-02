@@ -96,7 +96,7 @@ const options = {
   archive: {
     describe: 'after other operations, archive original files',
     boolean: true,
-    default: config.archive['enabled-by-default']
+    default: Boolean(config.archive['enabled-by-default'])
   },
   archiveRoot: {
     describe: "where to archive zip files once they've been unpacked",
