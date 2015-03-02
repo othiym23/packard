@@ -2,7 +2,7 @@
 const promisify = require('es6-promisify')
 
 const os = require('os')
-const join = require('path').join
+const {join, resolve} = require('path')
 const randomBytes = require('crypto').randomBytes
 const writeFile = promisify(require('fs').writeFile)
 
@@ -168,7 +168,12 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
   if (pattern) locate = locate.then(files => {
     log.verbose('unpack', 'initial files', files)
     return glob(join(untildify(root), pattern))
-      .then(globbed => files.concat(globbed))
+      .then(globbed => {
+        const full = files.concat(globbed)
+        if (!archiveRoot) return full
+        // don't reprocess stuff that's already been archived
+        return full.filter(f => resolve(f).indexOf(resolve(archiveRoot)) === -1)
+      })
   })
 
   return locate.then(files => {
