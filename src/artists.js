@@ -22,7 +22,7 @@ function scanArtists (roots) {
       }
     }
 
-    return [...artists].sort(reverseSize)
+    return [...artists.values()].sort(reverseSize)
   })
 }
 

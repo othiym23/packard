@@ -133,6 +133,11 @@ switch (yargs.argv._[0]) {
                 .options({
                   R: options.R
                 })
+                .check(argv => {
+                  if (argv.R.length) return true
+
+                  return 'must pass 1 or more root directories'
+                })
                 .argv
     const roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
@@ -157,7 +162,7 @@ switch (yargs.argv._[0]) {
                 .check(argv => {
                   if (argv._.length > 1 || argv.R.length && argv.P) return true
 
-                  return 'must pass either 1 or more zipfiles or root and glob pattern.'
+                  return 'must pass either 1 or more zipfiles or root and glob pattern'
                 })
                 .argv
 

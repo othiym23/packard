@@ -18,7 +18,7 @@ Options:
   --archive       after other operations, archive original files         [default: false]
   --archive-root  where to archive zip files once they've been unpacked  [default: ""]
 
-must pass either 1 or more zipfiles or root and glob pattern.
+must pass either 1 or more zipfiles or root and glob pattern
 */}.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: node ' + r + ' [options] unpack [zipfile [zipfile...]]'
