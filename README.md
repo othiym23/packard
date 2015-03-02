@@ -5,7 +5,13 @@ Optimize the storage of media files on fixed-size storage volumes.
 ## usage
 
 ```
-$ packard unpack -s ~/Downloads/archives ~/Downloads/flac_SHXCXCHCXSH-STRGTHS.zip --archive
+$ packard unpack -s ~/Downloads/flac ~/Downloads/flac_SHXCXCHCXSH-STRGTHS.zip --archive
+new albums from this run:
+
+/Users/ogd/Downloads/flac/SHXCXCHCXSH/[2013] STRGTHS
+
+full details:
+
 SHXCXCHCXSH/[2013] STRGTHS/
    SHXCXCHCXSH - STRGTHS - 01 - SLVRBBL.flac
    SHXCXCHCXSH - STRGTHS - 02 - LTTLWLF.flac
@@ -16,6 +22,11 @@ SHXCXCHCXSH/[2013] STRGTHS/
    SHXCXCHCXSH - STRGTHS - 07 - LLDTMPS.flac
 c: SHXCXCHCXSH/[2013] STRGTHS/cover.jpg
 (unpacked to /var/folders/bf/1f70gl7x2_g0s1dchcrw97xm0000gn/T/packard-fecf5c346649efb4/49901c567bc9ae3ba1ffa13358beec2e9e525950)
+
+now archived:
+
+/Users/ogd/Downloads/flac_SHXCXCHCXSH-STRGTHS.zip
+  -> /Users/ogd/Downloads/archives/flac_SHXCXCHCXSH-STRGTHS.zip
 ```
 
 ```
