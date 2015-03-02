@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/othiym23/music-packer"
+    "url": "https://github.com/othiym23/packard"
   },
   "keywords": [
     "utility",
@@ -23,9 +23,9 @@
     "useful"
   ],
   "bugs": {
-    "url": "https://github.com/othiym23/music-packer/issues"
+    "url": "https://github.com/othiym23/packard/issues"
   },
-  "homepage": "https://github.com/othiym23/music-packer",
+  "homepage": "https://github.com/othiym23/packard",
   "dependencies": {
     "babel": "^4.6.3",
     "es6-promisify": "^1.1.1",
