@@ -170,6 +170,7 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
     return glob(join(untildify(root), pattern))
       .then(globbed => {
         const full = files.concat(globbed)
+        log.verbose('unpack', 'globbed files', full)
         if (!archiveRoot) return full
         // don't reprocess stuff that's already been archived
         return full.filter(f => resolve(f).indexOf(resolve(archiveRoot)) === -1)
@@ -177,6 +178,11 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
   })
 
   return locate.then(files => {
+    if (files.length === 0) {
+      log.info('unpack', 'no archives to process! CU L8R SAILOR')
+      log.disableProgress()
+      process.exit(0)
+    }
     log.verbose('unpack', 'files', files)
     return Promise.all(files.map(f => extractRelease(f, tmpdir, covers)))
   }).then(m => {
