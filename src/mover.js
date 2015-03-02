@@ -6,6 +6,7 @@ const {join, resolve, basename} = require('path')
 const log = require('npmlog')
 const mkdirp = promisify(require('mkdirp'))
 const mv = promisify(require('mv'))
+const stat = promisify(require('fs').stat)
 
 const moveTracker = log.newGroup('placing tracks')
 
@@ -24,18 +25,21 @@ function place (albums, newRoot) {
 
         return Promise.all(
           album.tracks.map(track => {
-            log.silly('place', 'newRoot', newRoot)
-            log.silly('place', 'album path', album.toPath())
-            log.silly('safe track name', track.safeName())
             const destination = resolve(
               newRoot,
               album.toPath(),
               track.safeName()
             )
 
-            return mv(track.path, destination).then(() => {
-              track.path = destination
+            return stat(destination).then(() => {
+              log.warn('place', destination, 'already exists; not overwriting')
               tracker.completeWork(1)
+            }).catch((er) => {
+              if (er.code !== 'ENOENT') throw er
+              return mv(track.path, destination).then(() => {
+                track.path = destination
+                tracker.completeWork(1)
+              })
             })
           })
         )
@@ -54,9 +58,15 @@ function place (albums, newRoot) {
               basename(picture.path)
             )
 
-            return mv(picture.path, destination).then(() => {
-              picture.path = destination
+            return stat(destination).then(() => {
+              log.warn('place', destination, 'already exists; not overwriting')
               tracker.completeWork(1)
+            }).catch((er) => {
+              if (er.code !== 'ENOENT') throw er
+              return mv(picture.path, destination).then(() => {
+                picture.path = destination
+                tracker.completeWork(1)
+              })
             })
           })
         )
