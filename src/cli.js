@@ -12,9 +12,10 @@ const log = require('npmlog')
 const rimraf = promisify(require('rimraf'))
 const untildify = require('untildify')
 
+const {place, moveToArchive} = require('./mover.js')
+const extractRelease = require('./metadata/index.js').extractRelease
 const flac = require('./metadata/flac.js')
 const scanArtists = require('./artists.js')
-const extractRelease = require('./metadata/index.js').extractRelease
 
 const configPath = untildify('~/.packardrc')
 const config = require('rc')(
@@ -34,6 +35,9 @@ const config = require('rc')(
 
 function saveConfig (argv) {
   log.verbose('saveConfig', 'saving to', configPath)
+  // JSON.parse(JSON.Stringify()) is an easy way to clear out undefined values,
+  // which ini will go ahead and save as the string "undefined", which is not
+  // what I want.
   const toSave = JSON.parse(JSON.stringify({
     loglevel: argv.loglevel,
     roots: argv.root,
@@ -145,7 +149,12 @@ switch (yargs.argv._[0]) {
     const files = argv._.slice(1)
     log.silly('unpack', 'argv', argv)
 
-    let finish = unpack(files, argv.R[0], argv.P)
+    let finish = unpack(
+      files,
+      argv.s,
+      argv.R[0], argv.P,
+      argv.archive, argv.archiveRoot
+    )
     if (argv.saveConfig) finish = finish.then(() => saveConfig(argv))
     return finish.catch(e => log.error('unpack', e.stack))
   default:
@@ -153,7 +162,7 @@ switch (yargs.argv._[0]) {
     process.exit(1)
 }
 
-function unpack (files, root, pattern) {
+function unpack (files, staging, root, pattern, archive, archiveRoot) {
   log.enableProgress()
   let locate = Promise.resolve(files)
   if (pattern) locate = locate.then(files => {
@@ -167,7 +176,13 @@ function unpack (files, root, pattern) {
     return Promise.all(files.map(f => extractRelease(f, tmpdir, covers)))
   }).then(m => {
     log.disableProgress()
-    flac.albumsFromTracks(m, covers)
+    return place(flac.albumsFromTracks(m, covers), staging)
+  }).then(placed => {
+    if (!archive) return Promise.resolve(placed)
+    return moveToArchive(placed, archiveRoot).then(() => placed)
+  }).then(albums => {
+    report(albums, staging)
+    if (archive) reportArchived(albums)
     log.verbose('removing', tmpdir)
     return rimraf(tmpdir)
   }).catch(error => {
@@ -175,4 +190,26 @@ function unpack (files, root, pattern) {
     log.error('unpack', error.stack)
     log.verbose('not removing', tmpdir)
   })
+}
+
+function report (albums, root, archives, archiveRoot) {
+  const sorted = [...albums].sort((first, second) => {
+    let result = first.getDate().localeCompare(second.getDate())
+    if (result !== 0) return result
+
+    return first.toPath().toLowerCase().localeCompare(second.toPath().toLowerCase())
+  })
+
+  console.log('new albums from this run:\n')
+  for (let album of sorted) console.log(join(root, album.toPath()))
+
+  console.log('\nfull details:\n')
+  for (let album of sorted) console.log(album.dump())
+}
+
+function reportArchived (albums) {
+  console.log('now archived:\n')
+  for (let album of albums) {
+    console.log(album.sourceArchive, '\n  ->', album.destArchive)
+  }
 }

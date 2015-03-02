@@ -14,7 +14,7 @@ const trackers = require('../trackers.js')
 function scan (sourceArchive, filename) {
   log.verbose('readMetadata', 'scanning', filename, 'source archive', sourceArchive)
   return stat(filename).then(stats => new Promise((resolve, reject) => {
-    const tag = {filename, stats}
+    const tag = {sourceArchive, filename, stats}
     const tracker = trackers.get(sourceArchive).newStream(
       'metadata: ' + basename(filename),
       stats.size
@@ -41,16 +41,23 @@ function albumsFromTracks (metadata, covers) {
     let artists = new Set()
     let tracks = new Set()
     let dirs = new Set()
+    let archives = new Set()
     for (let track of albums.get(album)) {
       log.silly('makeAlbums', 'track', track)
       artists.add(track.ARTIST)
       dirs.add(dirname(track.filename))
+      archives.add(track.sourceArchive)
       tracks.add(Track.fromFLAC(track))
     }
 
-    const minArtists = Array.from(artists.values())
-    const minDirs = Array.from(dirs.values())
+    const minArtists = [...artists]
+    const minDirs = [...dirs]
+    const minArchism = [...archives]
     if (minDirs.length > 1) log.warn('makeAlbums', 'minDirs too big', minDirs)
+    if (minArchism.length > 1) {
+      log.warn('makeAlbums', 'more than one source archive', minArchism)
+      log.warn('makeAlbums', '--archive may not work as expected')
+    }
 
     let artist
     switch (minArtists.length) {
@@ -64,7 +71,7 @@ function albumsFromTracks (metadata, covers) {
         } else if (second.indexOf(first) !== -1) {
           artist = second
         } else {
-          const sorted = Array.from(tracks.values()).sort((a, b) => (a.index || 0) - (b.index || 0))
+          const sorted = [...tracks].sort((a, b) => (a.index || 0) - (b.index || 0))
           if (sorted[0].artist === first) {
             artist = first + ' / ' + second
           } else {
@@ -77,15 +84,13 @@ function albumsFromTracks (metadata, covers) {
         log.warn('makeAlbums', 'many artists found; assuming compilation', minArtists)
         artist = 'Various Artists'
     }
-    const a = new Album(album, artist, minDirs[0], Array.from(tracks.values()))
+    const a = new Album(album, artist, minDirs[0], [...tracks])
+    a.sourceArchive = minArchism[0]
     if (covers.get(a.path)) a.pictures = covers.get(a.path)
     finished.add(a)
   }
 
-  for (let album of finished.values()) {
-    console.log(album.dump())
-  }
-
+  log.verbose('makeAlbums', 'processed', finished.size, 'albums')
   return finished
 }
 

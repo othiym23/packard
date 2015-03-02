@@ -1,3 +1,5 @@
+const promisify = require('es6-promisify')
+
 const {join, basename} = require('path')
 
 const Album = require('./album-base.js')
@@ -7,6 +9,8 @@ class MultitrackAlbum extends Album {
     super(name, artist, path)
 
     this.tracks = tracks
+    this.sourceArchive = null
+    this.destArchive = null
   }
 
   getSize (bs = 1) {
@@ -17,7 +21,7 @@ class MultitrackAlbum extends Album {
   toPath () {
     const dates = this.tracks.reduce((s, t) => s.add(t.date), new Set())
     let name = ''
-    if (dates.size > 0) name += '[' + Array.from(dates.values()) + '] '
+    if (dates.size > 0) name += '[' + [...dates][0] + '] '
     name += this.name
     return join(
       safe(this.artist),
@@ -37,6 +41,17 @@ class MultitrackAlbum extends Album {
     dumped += '(unpacked to ' + this.path + ')\n'
 
     return dumped
+  }
+
+  getDate () {
+    const dates = this.tracks.reduce((s, t) => s.add(t.date), new Set())
+    if (dates.size > 1) log.warn(
+      'album',
+      'tracks have inconsistent dates',
+      [...dates]
+    )
+
+    return [...dates][0] || ""
   }
 }
 
