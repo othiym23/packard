@@ -114,6 +114,14 @@ log.setGaugeTemplate([
   {type: 'completionbar'},
   {type: 'endgroup'}
 ])
+log.gauge.setTheme({
+  startgroup: '╢',
+  endgroup: '╟',
+  complete: '█',
+  incomplete: '░',
+  spinner: '◴◷◶◵',
+  subsection: '→'
+})
 
 log.verbose('config', config)
 
