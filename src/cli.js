@@ -234,8 +234,11 @@ function report (albums, root, archives, archiveRoot) {
 }
 
 function reportArchived (albums) {
+  const archived = [...albums].filter(a => a.destArchive)
+  if (archived.length === 0) return
+
   console.log('now archived:\n')
-  for (let album of albums) {
+  for (let album of archived) {
     console.log(album.sourceArchive, '\n  ->', album.destArchive)
   }
 }

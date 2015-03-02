@@ -77,6 +77,7 @@ function place (albums, newRoot) {
 }
 
 function moveToArchive (albums, root) {
+  const tracker = moveTracker.newItem('archiving zip files', albums.size)
   return mkdirp(root).then(() => Promise.all(
     [...albums].map(album => {
       const file = album.sourceArchive
@@ -87,7 +88,16 @@ function moveToArchive (albums, root) {
         )
       }
       log.verbose('moveToArchive', 'moving', file, 'to', destination)
-      return mv(file, destination).then(() => album.destArchive = destination)
+      return stat(destination).then(() => {
+        log.warn('moveToArchive', destination, 'already exists; not overwriting')
+        tracker.completeWork(1)
+      }).catch((er) => {
+        if (er.code !== 'ENOENT') throw er
+        return mv(file, destination).then(() => {
+          album.destArchive = destination
+          tracker.completeWork(1)
+        })
+      })
     })
   ))
 }
