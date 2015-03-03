@@ -14,6 +14,7 @@ var lines = function () {/*
 Commands:
   unpack     unpack a set of zipped files into a staging directory
   artists    generate a list of artists from roots
+  inspect    dump all the metadata from a track or album
 
 Options:
   -S, --save-config  save this run's configuration to ~/.packardrc  [default: false]

@@ -63,6 +63,7 @@ const yargs = require('yargs')
                   'unpack a set of zipped files into a staging directory'
                 )
                 .command('artists', 'generate a list of artists from roots')
+                .command('inspect', 'dump all the metadata from a track or album')
                 .option('S', {
                   alias: 'save-config',
                   describe: "save this run's configuration to ~/.packardrc",
@@ -171,7 +172,7 @@ switch (yargs.argv._[0]) {
                 .argv
 
     const files = argv._.slice(1)
-    log.silly('unpack', 'argv', argv)
+    log.silly('unpack argv', argv)
 
     let finish = unpack(
       files,
@@ -181,6 +182,27 @@ switch (yargs.argv._[0]) {
     )
     if (argv.saveConfig) finish = finish.then(() => saveConfig(argv))
     return finish.catch(e => log.error('unpack', e.stack))
+  case 'inspect':
+    argv = yargs.reset()
+                .usage('Usage: $0 [options] inspect [file [dir...]]')
+                .demand(2)
+                .argv
+
+    const things = argv._.slice(1)
+    log.silly('inspect', 'argv', argv)
+    log.silly('inspect', 'things', things)
+
+    log.enableProgress()
+    const group = log.newGroup('inspect')
+    Promise.all(things.map(t => flac.scan({extractedPath: t}, group)))
+           .then(ms => ms.forEach(m => log.info('metadata', m)))
+           .catch(e => {
+             log.disableProgress()
+             log.error('inspect', e.stack)
+           })
+           .then(() => log.disableProgress())
+
+    break
   default:
     yargs.showHelp()
     process.exit(1)
