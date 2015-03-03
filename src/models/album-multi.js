@@ -1,4 +1,4 @@
-const promisify = require('es6-promisify')
+const promisify = require('bluebird').promisify
 
 const {join, basename} = require('path')
 

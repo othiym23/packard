@@ -1,3 +1,7 @@
+/*eslint-disable no-undef*/ // oh eslint
+const Promise = require('bluebird')
+/*eslint-enable no-undef*/
+
 require('es6-shim')
 const readRoot = require('./read-root.js')
 // import readRoot from './read-root.js'

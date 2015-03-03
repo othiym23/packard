@@ -1,4 +1,8 @@
-const promisify = require('es6-promisify')
+/*eslint-disable no-undef*/ // oh eslint
+const Promise = require('bluebird')
+/*eslint-enable no-undef*/
+
+const promisify = Promise.promisify
 
 const {createHash} = require('crypto')
 const {createWriteStream} = require('fs')
