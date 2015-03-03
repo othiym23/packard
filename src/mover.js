@@ -38,6 +38,7 @@ function place (albums, newRoot, groups) {
               tracker.completeWork(1)
             }).catch((er) => {
               if (er.code !== 'ENOENT') throw er
+              log.silly('place', 'moving', track.path, 'to', destination)
               return mv(track.path, destination).then(() => {
                 track.path = destination
                 tracker.completeWork(1)

@@ -59,6 +59,7 @@ function albumsFromTracks (metadata, covers) {
     const minArtists = [...artists]
     const minDirs = [...dirs]
     const minArchism = [...archives]
+    if (minDirs.length === 0) log.warn('makeAlbums', 'minDirs too small', minDirs)
     if (minDirs.length > 1) log.warn('makeAlbums', 'minDirs too big', minDirs)
     if (minArchism.length > 1) {
       log.warn('makeAlbums', 'more than one source archive', minArchism)
@@ -92,6 +93,7 @@ function albumsFromTracks (metadata, covers) {
     }
     const a = new Album(album, artist, minDirs[0], [...tracks])
     a.sourceArchive = minArchism[0]
+    log.verbose('makeAlbums', 'looking up cover for', a.path, minDirs)
     if (covers.get(a.path)) a.pictures = covers.get(a.path)
     finished.add(a)
   }
