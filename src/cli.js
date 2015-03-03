@@ -201,23 +201,30 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
       })
   })
 
+  const groups = new Map()
   return locate.then(files => {
     if (files.length === 0) {
       log.info('unpack', 'no archives to process! CU L8R SAILOR')
       log.disableProgress()
       process.exit(0)
     }
-    log.verbose('unpack', 'files', files)
-    return Promise.all(files.map(f => extractRelease(f, tmpdir, covers)))
+
+    log.verbose('unpack', 'processing', files)
+    files.forEach(f => groups.set(f, log.newGroup('process: ' + f)))
+    return Promise.resolve(files).map(
+      f => extractRelease(f, tmpdir, covers, groups),
+      {concurrency: 2}
+    )
   }).then(m => {
-    log.disableProgress()
-    return place(flac.albumsFromTracks(m, covers), staging)
+    return place(flac.albumsFromTracks(m, covers), staging, groups)
   }).then(placed => {
     if (!archive) return Promise.resolve(placed)
-    return moveToArchive(placed, archiveRoot).then(() => placed)
+    return moveToArchive(placed, archiveRoot, groups).then(() => placed)
   }).then(albums => {
+    log.disableProgress()
     report(albums, staging)
     if (archive) reportArchived(albums)
+    log.silly('unpack', 'tracker debugging', log.tracker.debug())
     log.verbose('removing', tmpdir)
     return rimraf(tmpdir)
   }).catch(error => {

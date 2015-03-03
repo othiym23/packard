@@ -7,42 +7,50 @@ const log = require('npmlog')
 
 const Cover = require('../models/cover.js')
 const flac = require('./flac.js')
-const trackers = require('../trackers.js')
 const unzip = require('../zip-utils.js').unpack
 
-function extractRelease (filename, tmpdir, covers) {
-  log.verbose('extractReleaseMetadata', 'archive:', filename)
-  trackers.set(filename, log.newGroup('archive: ' + filename))
+function extractRelease (zipfile, tmpdir, covers, groups) {
+  log.verbose('extractReleaseMetadata', 'archive:', zipfile)
 
-  return unzip(filename, tmpdir).then(list => {
-    return Promise.all(
-      [].concat(...list).map(e => {
-        switch (extname(e)) {
-          case '.flac':
-            return flac.scan(filename, e)
-          case '.jpg':
-          case '.pdf':
-          case '.png':
-            return stat(filename).then(stats => new Cover(e, stats))
-          default:
-            log.error('extractReleaseMetadata', "don't recognize type of", filename)
-            return Promise.resolve(new Error("don't recognize type of " + filename))
-        }
-      })
-    ).then(list => {
-      list.filter(e => e instanceof Cover)
-          .forEach(c => {
-            const directory = dirname(c.path)
-            if (!covers.get(directory)) {
-              log.silly('extractReleaseMetadata', 'creating image list for', directory)
-              covers.set(directory, [])
-            }
-            log.silly('extractReleaseMetadata', 'cover', c)
-            covers.get(directory).push(c)
-          })
-      return list.filter(e => !(e instanceof Cover || e instanceof Error))
+  return unzip(zipfile, groups, tmpdir)
+          .then(list => scan(list, groups))
+          .then(list => populateImages(list, covers))
+          .then(list => list.filter(e => !(e instanceof Cover ||
+                                           e instanceof Error)))
+}
+
+function scan (files, groups) {
+  return Promise.all(
+    [].concat(...files).map(tag => {
+      const e = tag.extractedPath
+      switch (extname(e)) {
+        case '.flac':
+          return flac.scan(tag, groups)
+        case '.jpg':
+        case '.pdf':
+        case '.png':
+          return stat(e).then(stats => new Cover(e, stats))
+        default:
+          log.error('scan', "don't recognize type of", e)
+          return Promise.resolve(new Error("don't recognize type of " + e))
+      }
     })
-  })
+  )
+}
+
+function populateImages (list, covers) {
+  list.filter(e => e instanceof Cover)
+      .forEach(c => {
+        const directory = dirname(c.path)
+        if (!covers.get(directory)) {
+          log.silly('scan', 'creating image list for', directory)
+          covers.set(directory, [])
+        }
+        log.silly('scan', 'cover', c)
+        covers.get(directory).push(c)
+      })
+
+  return list
 }
 
 module.exports = { extractRelease }

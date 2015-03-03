@@ -13,14 +13,16 @@ const log = require('npmlog')
 
 const Album = require('../models/album-multi.js')
 const Track = require('../models/track.js')
-const trackers = require('../trackers.js')
 
-function scan (sourceArchive, filename) {
-  log.verbose('readMetadata', 'scanning', filename, 'source archive', sourceArchive)
+function scan (tag, groups) {
+  const filename = tag.extractedPath
+  log.verbose('readMetadata', 'scanning', filename)
+  log.silly('readMetadata', 'tag', tag)
+
   return stat(filename).then(stats => new Promise((resolve, reject) => {
-    const tag = {sourceArchive, filename, stats}
-    const tracker = trackers.get(sourceArchive).newStream(
-      'metadata: ' + basename(filename),
+    tag.stats = stats
+    const tracker = groups.get(basename(filename)).newStream(
+      'FLAC scan: ' + basename(filename),
       stats.size
     )
     createReadStream(filename)
@@ -49,7 +51,7 @@ function albumsFromTracks (metadata, covers) {
     for (let track of albums.get(album)) {
       log.silly('makeAlbums', 'track', track)
       artists.add(track.ARTIST)
-      dirs.add(dirname(track.filename))
+      dirs.add(dirname(track.extractedPath))
       archives.add(track.sourceArchive)
       tracks.add(Track.fromFLAC(track))
     }

@@ -13,19 +13,16 @@ const mkdirp = promisify(require('mkdirp'))
 const mv = promisify(require('mv'))
 const stat = promisify(require('fs').stat)
 
-const moveTracker = log.newGroup('placing tracks')
-
-function place (albums, newRoot) {
-  const tracker = moveTracker.newItem('moving albums', albums.size)
+function place (albums, newRoot, groups) {
   return Promise.all(
     [...albums].map(album => {
       const albumPath = join(newRoot, album.toPath())
+      const trackerGroup = groups.get(album.sourceArchive)
       return mkdirp(albumPath).then(() => {
         log.silly('place', 'created', albumPath)
-        const tracker = moveTracker.newItem(
-          'tracks to ' + albumPath,
-          album.tracks.length,
-          2
+        const tracker = trackerGroup.newItem(
+          'moving tracks: ' + albumPath,
+          album.tracks.length
         )
 
         return Promise.all(
@@ -49,10 +46,9 @@ function place (albums, newRoot) {
           })
         )
       }).then(() => {
-        const tracker = moveTracker.newItem(
+        const tracker = trackerGroup.newItem(
           'covers to ' + albumPath,
-          album.pictures.length,
-          2
+          album.pictures.length
         )
 
         return Promise.all(
@@ -75,30 +71,30 @@ function place (albums, newRoot) {
             })
           })
         )
-      }
-      ).then(() => tracker.completeWork(1))
+      })
     })
   ).then(() => albums)
 }
 
-function moveToArchive (albums, root) {
-  const tracker = moveTracker.newItem('archiving zip files', albums.size)
+function moveToArchive (albums, root, groups) {
   return mkdirp(root).then(() => Promise.all(
     [...albums].map(album => {
-      const file = album.sourceArchive
-      const destination = join(root, basename(file))
-      if (!file) {
+      const archive = album.sourceArchive
+      const trackerGroup = groups.get(archive)
+      const tracker = trackerGroup.newItem('archiving: ' + archive, albums.size)
+      const destination = join(root, basename(archive))
+      if (!archive) {
         return Promise.reject(
           new Error(album.name + ' must have source archive path set.')
         )
       }
-      log.verbose('moveToArchive', 'moving', file, 'to', destination)
+      log.verbose('moveToArchive', 'moving', archive, 'to', destination)
       return stat(destination).then(() => {
         log.warn('moveToArchive', destination, 'already exists; not overwriting')
         tracker.completeWork(1)
       }).catch((er) => {
         if (er.code !== 'ENOENT') throw er
-        return mv(file, destination).then(() => {
+        return mv(archive, destination).then(() => {
           album.destArchive = destination
           tracker.completeWork(1)
         })
