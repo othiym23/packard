@@ -41,7 +41,7 @@ Track.fromFLAC = md => {
     md.stats
   )
   track.ext = '.flac'
-  track.path = md.filename
+  track.path = md.extractedPath
   track.index = parseInt(md.TRACKNUMBER, 10)
   track.date = md.DATE
   return track
