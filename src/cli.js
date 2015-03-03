@@ -189,7 +189,7 @@ switch (yargs.argv._[0]) {
 function unpack (files, staging, root, pattern, archive, archiveRoot) {
   log.enableProgress()
   let locate = Promise.resolve(files)
-  if (pattern) locate = locate.then(files => {
+  if (root && pattern) locate = locate.then(files => {
     log.verbose('unpack', 'initial files', files)
     return glob(join(untildify(root), pattern))
       .then(globbed => {
