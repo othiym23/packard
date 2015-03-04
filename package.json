@@ -10,6 +10,11 @@
     "prepublish": "npm run transpile",
     "test": "npm run transpile && tap test/*.js"
   },
+  "standard": {
+    "ignore": [
+      "lib/**"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/othiym23/packard"
