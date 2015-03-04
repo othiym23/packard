@@ -15,7 +15,7 @@ const Album = require('../models/album-multi.js')
 const Track = require('../models/track.js')
 
 function scan (tag, groups) {
-  const filename = tag.extractedPath
+  const filename = tag.fullPath
   log.verbose('readMetadata', 'scanning', filename)
   log.silly('readMetadata', 'tag', tag)
 
@@ -51,7 +51,7 @@ function albumsFromTracks (metadata, covers) {
     for (let track of albums.get(album)) {
       log.silly('makeAlbums', 'track', track)
       artists.add(track.ARTIST)
-      dirs.add(dirname(track.extractedPath))
+      dirs.add(dirname(track.fullPath))
       archives.add(track.sourceArchive)
       tracks.add(Track.fromFLAC(track))
     }

@@ -22,7 +22,7 @@ function extractRelease (zipfile, tmpdir, covers, groups) {
 function scan (files, groups) {
   return Promise.all(
     [].concat(...files).map(tag => {
-      const e = tag.extractedPath
+      const e = tag.fullPath
       switch (extname(e)) {
         case '.flac':
           return flac.scan(tag, groups)

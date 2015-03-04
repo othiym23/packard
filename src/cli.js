@@ -194,7 +194,7 @@ switch (yargs.argv._[0]) {
 
     log.enableProgress()
     const group = log.newGroup('inspect')
-    Promise.all(things.map(t => flac.scan({extractedPath: t}, group)))
+    Promise.all(things.map(t => flac.scan({fullPath: t}, group)))
            .then(ms => ms.forEach(m => log.info('metadata', m)))
            .catch(e => {
              log.disableProgress()

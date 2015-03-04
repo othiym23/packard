@@ -43,7 +43,7 @@ function unpack (sourceArchive, groups, directory) {
         Promise.resolve(entries).map(zipData => new Promise((resolve, reject) => {
           log.silly('unpack', 'zipData', zipData)
 
-          const extractedPath = join(path, zipData.fileName)
+          const fullPath = join(path, zipData.fileName)
           const writeTracker = groups.get(zipData.fileName).newStream(
             'writing: ' + zipData.fileName,
             zipData.uncompressedSize,
@@ -56,14 +56,14 @@ function unpack (sourceArchive, groups, directory) {
               return reject(err)
             }
 
-            log.verbose('unpack', 'writing', extractedPath, zipData.uncompressedSize)
+            log.verbose('unpack', 'writing', fullPath, zipData.uncompressedSize)
             zipstream
               .pipe(writeTracker)
-              .pipe(createWriteStream(extractedPath))
+              .pipe(createWriteStream(fullPath))
               .on('error', reject)
               .on('finish', () => {
-                log.verbose('unpack', 'finished writing', extractedPath)
-                resolve({ sourceArchive, zipData, extractedPath })
+                log.verbose('unpack', 'finished writing', fullPath)
+                resolve({ sourceArchive, zipData, fullPath })
               })
           })
         }), {concurrency: 1}).then(paths => {
