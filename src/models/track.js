@@ -1,10 +1,11 @@
 const sprintf = require('sprintf')
 
 class Track {
-  constructor (artist, album, name, stats, albumArtist = artist) {
+  constructor (artist, album, name, path, stats, albumArtist = artist) {
     this.artist = artist
     this.album = album
     this.name = name
+    this.path = path
     this.size = stats.size
     this.blockSize = stats.blksize
     this.blocks = stats.blocks
@@ -12,7 +13,6 @@ class Track {
     this.index = 0
     this.disc = 0
     this.date = null
-    this.path = null
     this.ext = '.unknown'
   }
 
@@ -33,17 +33,19 @@ class Track {
   }
 }
 
-Track.fromFLAC = md => {
+Track.fromFLAC = (md, path, stats) => {
   const track = new Track(
     md.ARTIST,
     md.ALBUM,
     md.TITLE,
-    md.stats
+    path,
+    stats
   )
   track.ext = '.flac'
-  track.path = md.fullPath
-  track.index = parseInt(md.TRACKNUMBER, 10)
-  track.date = md.DATE
+  if (md.TRACKNUMBER) track.index = parseInt(md.TRACKNUMBER, 10)
+  if (md.DISCNUMBER) track.disc = parseInt(md.DISCNUMBER, 10)
+  if (md.DATE) track.date = md.DATE
+
   return track
 }
 

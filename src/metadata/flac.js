@@ -14,23 +14,21 @@ const log = require('npmlog')
 const Album = require('../models/album-multi.js')
 const Track = require('../models/track.js')
 
-function scan (tag, groups) {
-  const filename = tag.fullPath
-  log.verbose('readMetadata', 'scanning', filename)
-  log.silly('readMetadata', 'tag', tag)
+function scan (path, groups) {
+  log.verbose('flac.scan', 'scanning', path)
 
-  return stat(filename).then(stats => new Promise((resolve, reject) => {
-    tag.stats = stats
-    const tracker = groups.get(basename(filename)).newStream(
-      'FLAC scan: ' + basename(filename),
+  const metadata = {}
+  return stat(path).then(stats => new Promise((resolve, reject) => {
+    const tracker = groups.get(basename(path)).newStream(
+      'FLAC scan: ' + basename(path),
       stats.size
     )
-    createReadStream(filename)
+    createReadStream(path)
       .pipe(tracker)
       .pipe(new FLAC())
-      .on('data', d => tag[d.type] = d.value)
+      .on('data', d => metadata[d.type] = d.value)
       .on('error', reject)
-      .on('finish', () => resolve(tag))
+      .on('finish', () => resolve({ path, stats, metadata }))
   }))
 }
 

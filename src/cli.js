@@ -131,6 +131,7 @@ log.gauge.setTheme({
 log.verbose('config', config)
 
 let argv
+const groups = new Map()
 switch (yargs.argv._[0]) {
   case 'artists':
     options.R.describe = 'directory root for an Artist/Album tree'
@@ -147,9 +148,14 @@ switch (yargs.argv._[0]) {
     const roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
 
-    scanArtists(roots).then(sorted => {
-      for (let a of sorted) {
-        console.log('%s [%sM]', a.name, a.getSize(1024 * 1024))
+    log.enableProgress()
+    scanArtists(roots, groups).then(roots => {
+      log.disableProgress()
+      for (let [root, sorted] of roots) {
+        console.log('\nROOT %s:', root)
+        for (let a of sorted) {
+          console.log('%s [%sM]', a.name, a.getSize(1024 * 1024))
+        }
       }
     }).catch(error => log.error('scanArtists', error.stack))
     break
