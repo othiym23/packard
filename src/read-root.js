@@ -11,6 +11,8 @@ const readdir = promisify(require('fs').readdir)
 const stat = promisify(require('fs').stat)
 const resolve = require('path').resolve
 
+const log = require('npmlog')
+
 const Artist = require('./models/artist.js')
 const Cover = require('./models/cover.js')
 const Multitrack = require('./models/album-multi.js')
@@ -22,79 +24,99 @@ const cruft = [
   'Thumbs.db'  // yes, I do run Windows sometimes
 ]
 
-function isThing (thing) { return thing }
-
-function visit (root, visitor) {
-  return readdir(root).then(entries => Promise.all(
-    entries
-      .filter(e => cruft.indexOf(e) === -1)
-      .map(entry => stat(resolve(root, entry)).then(visitor(entry)))
-  ))
+function visit (root) {
+  return readdir(root)
+           .filter(e => cruft.indexOf(e) === -1)
+           .map(e => stat(resolve(root, e))
+                       .then(stats => { return {path: e, stats} }))
 }
 
 function readRoot (root) {
-  return visit(root, withStatsReadArtist)
+  return visit(root).map(({path, stats}) => {
+    if (stats.isDirectory()) return readArtist(root, path)
 
-  function withStatsReadArtist (entry) {
-    return function selectArtist (stats) {
-      if (stats.isDirectory()) return readArtist(root, entry)
-
-      console.log('WARN: unexpected thing', entry, 'in root', root)
-    }
-  }
+    log.warn('unexpected thing', path, 'in root', root)
+  })
 }
 
 function readArtist (root, directory) {
   const artistPath = resolve(root, directory)
   const cues = new Map()
 
-  return visit(artistPath, withStatsReadAlbum).then(albums => {
-    for (let a of albums.filter(isThing)) {
+  return visit(artistPath).map(({stats, path}) => {
+    const currentPath = resolve(artistPath, path)
+    if (stats.isDirectory()) {
+      return readAlbum(root, directory, path)
+    } else if (stats.isFile()) {
+      const ext = extname(path)
+      const base = basename(path, ext)
+      switch (ext) {
+        case '.flac':
+        case '.mp3':
+          return new Singletrack(
+            path,
+            directory,
+            currentPath,
+            stats
+          )
+        case '.cue':
+          cues.set(base, currentPath)
+          break
+        case '.log':
+          // nothing to do with these
+          break
+        default:
+          log.warn('not sure what to do with', path)
+      }
+    } else {
+      log.warn('rando in artist directory:', directory, path)
+    }
+  })
+  .filter(Boolean)
+  .then(albums => {
+    for (let a of albums) {
       const p = a.path
       const ext = extname(p)
       const base = basename(p, ext)
       if (cues.get(base)) a.cuesheet = cues.get(base)
     }
 
-    return new Artist(directory, albums.filter(isThing))
+    return new Artist(directory, [...albums])
   })
-
-  function withStatsReadAlbum (entry) {
-    const currentPath = resolve(artistPath, entry)
-    return function selectAlbum (stats) {
-      if (stats.isDirectory()) {
-        return readAlbum(root, directory, entry)
-      } else if (stats.isFile()) {
-        const ext = extname(entry)
-        const base = basename(entry, ext)
-        switch (ext) {
-          case '.flac':
-          case '.mp3':
-            return new Singletrack(
-              entry,
-              directory,
-              currentPath,
-              stats
-            )
-          case '.cue':
-            cues.set(base, currentPath)
-            break
-          case '.log':
-            // nothing to do with these
-            break
-          default:
-            console.log('not sure what to do with', entry)
-        }
-      } else {
-        console.log('rando in artist directory:', directory, entry)
-      }
-    }
-  }
 }
 
 function readAlbum (root, artist, album) {
   const albumPath = resolve(root, artist, album)
-  return visit(albumPath, withStatsReadFiles).then(files => {
+  return visit(albumPath).map(({path, stats}) => {
+    if (stats.isFile()) {
+      const fullPath = resolve(albumPath, path)
+      switch (extname(path)) {
+        case '.flac':
+        case '.mp3':
+          const track = new Track(
+            artist,
+            album,
+            path,
+            fullPath,
+            stats
+          )
+          track.ext = extname(path)
+          return track
+        case '.jpg':
+        case '.pdf':
+        case '.png':
+          return new Cover(
+            fullPath,
+            stats
+          )
+        default:
+          log.warn('unknown file type', path)
+      }
+    } else {
+      log.warn('only was expecting file, but got', path)
+    }
+  })
+  .then(files => {
     var tracks = files.filter(f => f instanceof Track)
     var covers = files.filter(f => f instanceof Cover)
 
@@ -103,34 +125,6 @@ function readAlbum (root, artist, album) {
 
     return a
   })
-
-  function withStatsReadFiles (entry) {
-    return function selectFiles (stats) {
-      if (stats.isFile()) {
-        switch (extname(entry)) {
-          case '.flac':
-          case '.mp3':
-            return new Track(
-              artist,
-              album,
-              entry,
-              stats
-            )
-          case '.jpg':
-          case '.pdf':
-          case '.png':
-            return new Cover(
-              resolve(albumPath, entry),
-              stats
-            )
-          default:
-            console.log('Unknown file type', entry)
-        }
-      } else {
-        console.log('Only was expecting file, but got', entry)
-      }
-    }
-  }
 }
 
 module.exports = readRoot
