@@ -5,6 +5,7 @@ const Promise = require('bluebird')
 
 const promisify = Promise.promisify
 
+const basename = require('path').basename
 const writeFile = promisify(require('fs').writeFile)
 
 const inify = require('ini').stringify
@@ -14,6 +15,7 @@ const untildify = require('untildify')
 const flac = require('./metadata/flac.js')
 const scanArtists = require('./artists.js')
 const unpack = require('./unpack.js')
+const Track = require('./models/track.js')
 
 const configPath = untildify('~/.packardrc')
 const config = require('rc')(
@@ -191,14 +193,24 @@ switch (yargs.argv._[0]) {
     log.silly('inspect', 'things', things)
 
     log.enableProgress()
-    const group = log.newGroup('inspect')
-    Promise.all(things.map(t => flac.scan({fullPath: t}, group)))
-           .then(ms => ms.forEach(m => log.info('metadata', m)))
-           .catch(e => {
-             log.disableProgress()
-             log.error('inspect', e.stack)
-           })
-           .then(() => log.disableProgress())
+    Promise.resolve(things).map(f => {
+      groups.set(basename(f), log.newGroup(f))
+      return flac.scan(f, groups)
+    })
+    .map(b => {
+      b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)
+      return b
+    })
+    .each(b => log.info('bundle', b))
+    .each(m => {
+      const tagnames = Object.keys(m.metadata).filter(n => n.match(/^[A-Z_]+$/)).sort()
+      log.info('tag names', tagnames)
+    })
+    .catch(e => {
+      log.disableProgress()
+      log.error('inspect', e.stack)
+    })
+    .then(() => log.disableProgress())
 
     break
   default:
