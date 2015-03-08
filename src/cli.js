@@ -146,9 +146,11 @@ switch (yargs.argv._[0]) {
     scanArtists(roots, groups).then(roots => {
       log.disableProgress()
       for (let [root, sorted] of roots) {
-        console.log('\nROOT %s:', root)
-        for (let a of sorted) {
-          console.log('%s [%sM]', a.name, a.getSize(1024 * 1024))
+        if (sorted.length) {
+          console.log('\nROOT %s:', root)
+          for (let a of sorted) {
+            console.log('%s [%sM]', a.name, a.getSize(1024 * 1024))
+          }
         }
       }
     }).catch(error => log.error('scanArtists', error.stack))
