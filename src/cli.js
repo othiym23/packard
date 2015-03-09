@@ -13,6 +13,7 @@ const log = require('npmlog')
 const untildify = require('untildify')
 
 const flac = require('./metadata/flac.js')
+const scanAlbums = require('./albums.js')
 const scanArtists = require('./artists.js')
 const unpack = require('./unpack.js')
 const Track = require('./models/track.js')
@@ -124,7 +125,7 @@ log.gauge.setTheme({
 
 log.verbose('config', config)
 
-let argv
+let argv, roots
 const groups = new Map()
 switch (yargs.argv._[0]) {
   case 'artists':
@@ -139,7 +140,7 @@ switch (yargs.argv._[0]) {
                   return 'must pass 1 or more root directories'
                 })
                 .argv
-    const roots = argv.R.map(r => untildify(r))
+    roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
 
     log.enableProgress()
@@ -185,6 +186,44 @@ switch (yargs.argv._[0]) {
     })
     .then(() => log.disableProgress())
 
+    break
+  case 'pls':
+    options.R.describe = 'directory root for an Artist/Album tree'
+    argv = yargs.reset()
+                .options({
+                  R: options.R
+                })
+                .check(argv => {
+                  if (argv.R.length) return true
+
+                  return 'must pass 1 or more root directories'
+                })
+                .argv
+    roots = argv.R.map(r => untildify(r))
+    log.silly('pls', 'argv', argv)
+
+    log.enableProgress()
+    scanAlbums(roots, groups).then(roots => {
+      log.disableProgress()
+      let index = 0
+      const playlist = {}
+      for (let [root, sorted] of roots) {
+        log.info('pls', 'Processing', root)
+        for (let album of sorted) {
+          log.verbose('pls', 'album', album.name, 'has date', album.date)
+          for (let track of album.tracks) {
+            index++
+            playlist['File' + index] = track.path
+            playlist['Title' + index] = track.name
+            playlist['Length' + index] = Math.ceil(track.duration)
+          }
+        }
+      }
+      playlist['NumberOfEntries'] = index
+      playlist['Version'] = 2
+      console.log(inify(playlist, {section: 'playlist'}))
+      log.info('pls', 'playlist generated with', index, 'entries')
+    })
     break
   case 'unpack':
     options.R.describe = 'root directory containing zipped files'
