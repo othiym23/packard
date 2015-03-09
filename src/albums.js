@@ -22,13 +22,16 @@ function byDate (a, b) {
 }
 
 function scanAlbums (roots, groups) {
-  return Promise.resolve(roots)
-    .map(root => readRootFlat(root).then(entities => [root, entities]))
-    .map(([root, entities]) => {
+  return Promise.map(
+      roots,
+      root => readRootFlat(root).then(entities => [root, entities])
+    ).map(([root, entities]) => {
       log.verbose('scanAlbums', 'processing', root)
-      return Promise.resolve([...entities])
-        .map(entity => flac.fsEntitiesIntoBundles(entity, groups), {concurrency: 4})
-        .then(bundles => {
+      return Promise.map(
+          [...entities],
+          entity => flac.fsEntitiesIntoBundles(entity, groups),
+          {concurrency: 4}
+        ).then(bundles => {
           const trackSets = flac.bundlesIntoTrackSets(bundles)
           const albums = flac.trackSetsIntoAlbums([...trackSets.values()])
           const sorted = [...albums.values()]

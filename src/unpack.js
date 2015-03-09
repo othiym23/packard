@@ -47,7 +47,8 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
 
     log.verbose('unpack', 'processing', files)
     files.forEach(f => groups.set(f, log.newGroup('process: ' + f)))
-    return Promise.resolve(files).map(
+    return Promise.map(
+      files,
       f => extractRelease(f, tmpdir, covers, groups),
       {concurrency: 2}
     )

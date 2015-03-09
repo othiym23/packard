@@ -40,7 +40,7 @@ function unpack (sourceArchive, groups, directory) {
         entries.push(entry)
       })
       zf.on('end', () => {
-        Promise.resolve(entries).map(zipData => new Promise((resolve, reject) => {
+        Promise.map(entries, zipData => new Promise((resolve, reject) => {
           log.silly('unpack', 'zipData', zipData)
 
           const fullPath = join(path, zipData.fileName)

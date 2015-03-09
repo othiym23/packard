@@ -171,9 +171,9 @@ switch (yargs.argv._[0]) {
     log.silly('inspect', 'things', things)
 
     log.enableProgress()
-    Promise.resolve(things).map(f => {
+    Promise.map(things, f => {
       groups.set(basename(f), log.newGroup(f))
-      return flac.scan(f, groups)
+      return flac.scan({path: f}, groups)
     })
     .map(b => {
       b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)

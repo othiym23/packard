@@ -17,13 +17,16 @@ function safe (string) {
 }
 
 function scanArtists (roots, groups) {
-  return Promise.resolve(roots)
-    .map(root => readRootFlat(root).then(entities => [root, entities]))
-    .map(([root, entities]) => {
+  return Promise.map(
+      roots,
+      root => readRootFlat(root).then(entities => [root, entities])
+    ).map(([root, entities]) => {
       log.verbose('scanArtists', 'processing', root)
-      return Promise.resolve([...entities])
-        .map(entity => flac.fsEntitiesIntoBundles(entity, groups), {concurrency: 4})
-        .then(bundles => {
+      return Promise.map(
+          [...entities],
+          entity => flac.fsEntitiesIntoBundles(entity, groups),
+          {concurrency: 4}
+        ).then(bundles => {
           // 1. bundle the tracks into sets
           const trackSets = flac.bundlesIntoTrackSets(bundles)
 
