@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const log = require('npmlog')
 
 const flac = require('./metadata/flac.js')
-const readRoot = require('./read-root.js')
+const readRootFlat = require('./read-root.js').readRootFlat
 const Artist = require('./models/artist.js')
 
 function reverseSize (a, b) {
@@ -18,17 +18,7 @@ function safe (string) {
 
 function scanArtists (roots, groups) {
   return Promise.resolve(roots)
-    .map(root => {
-      const tracks = new Set()
-      return readRoot(root).then(artists => {
-        for (let artist of artists)
-          for (let album of artist.albums)
-            for (let track of album.tracks)
-              tracks.add({artist, album, track, stats: track.stats})
-
-        return tracks
-      }).then(entities => [root, entities])
-    })
+    .map(root => readRootFlat(root).then(entities => [root, entities]))
     .map(([root, entities]) => {
       log.verbose('scanArtists', 'processing', root)
       return Promise.resolve([...entities])

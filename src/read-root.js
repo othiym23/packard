@@ -39,6 +39,18 @@ function readRoot (root) {
   })
 }
 
+function flatten (root) {
+  return readRoot(root).then(artists => {
+    const tracks = new Set()
+    for (let artist of artists)
+      for (let album of artist.albums)
+        for (let track of album.tracks)
+          tracks.add({artist, album, track, stats: track.stats})
+
+    return tracks
+  })
+}
+
 function readArtist (root, directory) {
   const artistPath = resolve(root, directory)
   const cues = new Map()
@@ -126,6 +138,8 @@ function readAlbum (root, artist, album) {
     return a
   })
 }
+
+readRoot.readRootFlat = flatten
 
 module.exports = readRoot
 // export default readRoot
