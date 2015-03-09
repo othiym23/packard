@@ -42,8 +42,8 @@ function albumsFromTracks (metadata, covers) {
   const albums = new Map()
   const tracks = [].concat(...metadata)
   for (let track of tracks) {
-    if (!albums.get(track.ALBUM)) albums.set(track.ALBUM, [])
-    albums.get(track.ALBUM).push(track)
+    if (!albums.get(track.metadata.ALBUM)) albums.set(track.metadata.ALBUM, [])
+    albums.get(track.metadata.ALBUM).push(track)
   }
 
   const finished = new Set()

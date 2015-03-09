@@ -63,7 +63,7 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
     if (archive) reportArchived(albums)
     log.silly('unpack', 'tracker debugging', log.tracker.debug())
     log.verbose('removing', tmpdir)
-    return rimraf(tmpdir)
+    return rimraf(tmpdir).then(() => albums)
   }).catch(error => {
     log.disableProgress()
     log.error('unpack', error.stack)
