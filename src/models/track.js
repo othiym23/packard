@@ -25,7 +25,7 @@ class Track {
     let base = ''
     if (this.artist) base += this.artist + ' - '
     if (this.album) base += this.album + ' - '
-    if (this.index) base += sprintf("%02d", this.index) + ' - '
+    if (this.index) base += sprintf('%02d', this.index) + ' - '
     return base + this.name + this.ext
   }
 

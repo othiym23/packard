@@ -1,6 +1,6 @@
-const promisify = require('bluebird').promisify
-
 const {join, basename} = require('path')
+
+const log = require('npmlog')
 
 const Album = require('./album-base.js')
 
@@ -45,13 +45,11 @@ class MultitrackAlbum extends Album {
 
   getDate () {
     const dates = this.tracks.reduce((s, t) => s.add(t.date), new Set())
-    if (dates.size > 1) log.warn(
-      'album',
-      'tracks have inconsistent dates',
-      [...dates]
-    )
+    if (dates.size > 1) {
+      log.warn('album', 'tracks have inconsistent dates', [...dates])
+    }
 
-    return [...dates][0] || ""
+    return [...dates][0] || ''
   }
 }
 
