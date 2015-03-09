@@ -55,12 +55,16 @@ function saveConfig (argv) {
 
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
+                .command('artists', 'generate a list of artists from roots')
+                .command('inspect', 'dump all the metadata from a track or album')
+                .command(
+                  'pls',
+                  'print a list of albums as a .pls file, sorted by date'
+                )
                 .command(
                   'unpack',
                   'unpack a set of zipped files into a staging directory'
                 )
-                .command('artists', 'generate a list of artists from roots')
-                .command('inspect', 'dump all the metadata from a track or album')
                 .option('S', {
                   alias: 'save-config',
                   describe: "save this run's configuration to ~/.packardrc",
