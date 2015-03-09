@@ -8,7 +8,7 @@ const flac = require('./metadata/flac.js')
 const readRootFlat = require('./read-root.js').readRootFlat
 const Artist = require('./models/artist.js')
 
-function reverseSize (a, b) {
+function bySizeReverse (a, b) {
   return b.getSize() - a.getSize()
 }
 
@@ -38,7 +38,7 @@ function scanArtists (roots, groups) {
           const artists = albumsAndTracksToArtists(albums, artistTracks)
 
           // 6. compile list per-artist
-          const sorted = [...artists.values()].sort(reverseSize)
+          const sorted = [...artists.values()].sort(bySizeReverse)
 
           return [root, sorted]
         })
