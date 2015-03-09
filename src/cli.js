@@ -155,35 +155,6 @@ switch (yargs.argv._[0]) {
       }
     }).catch(error => log.error('scanArtists', error.stack))
     break
-  case 'unpack':
-    options.R.describe = 'root directory containing zipped files'
-    argv = yargs.reset()
-                .usage('Usage: $0 [options] unpack [zipfile [zipfile...]]')
-                .options({
-                  s: options.s,
-                  R: options.R,
-                  P: options.P,
-                  'archive': options.archive,
-                  'archive-root': options.archiveRoot
-                })
-                .check(argv => {
-                  if (argv._.length > 1 || argv.R.length && argv.P) return true
-
-                  return 'must pass either 1 or more zipfiles or root and glob pattern'
-                })
-                .argv
-
-    const files = argv._.slice(1)
-    log.silly('unpack argv', argv)
-
-    let finish = unpack(
-      files,
-      argv.s,
-      argv.R[0], argv.P,
-      argv.archive, argv.archiveRoot
-    )
-    if (argv.saveConfig) finish = finish.then(() => saveConfig(argv))
-    return finish.catch(e => log.error('unpack', e.stack))
   case 'inspect':
     argv = yargs.reset()
                 .usage('Usage: $0 [options] inspect [file [dir...]]')
@@ -215,6 +186,35 @@ switch (yargs.argv._[0]) {
     .then(() => log.disableProgress())
 
     break
+  case 'unpack':
+    options.R.describe = 'root directory containing zipped files'
+    argv = yargs.reset()
+                .usage('Usage: $0 [options] unpack [zipfile [zipfile...]]')
+                .options({
+                  s: options.s,
+                  R: options.R,
+                  P: options.P,
+                  'archive': options.archive,
+                  'archive-root': options.archiveRoot
+                })
+                .check(argv => {
+                  if (argv._.length > 1 || argv.R.length && argv.P) return true
+
+                  return 'must pass either 1 or more zipfiles or root and glob pattern'
+                })
+                .argv
+
+    const files = argv._.slice(1)
+    log.silly('unpack argv', argv)
+
+    let finish = unpack(
+      files,
+      argv.s,
+      argv.R[0], argv.P,
+      argv.archive, argv.archiveRoot
+    )
+    if (argv.saveConfig) finish = finish.then(() => saveConfig(argv))
+    return finish.catch(e => log.error('unpack', e.stack))
   default:
     yargs.showHelp()
     process.exit(1)
