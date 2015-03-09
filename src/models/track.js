@@ -13,6 +13,7 @@ class Track {
     this.index = 0
     this.disc = 0
     this.date = null
+    this.duration = 0
     this.ext = '.unknown'
   }
 
@@ -42,6 +43,7 @@ Track.fromFLAC = (md, path, stats) => {
     stats
   )
   track.ext = '.flac'
+  if (md.duration) track.duration = parseFloat(md.duration)
   if (md.TRACKNUMBER) track.index = parseInt(md.TRACKNUMBER, 10)
   if (md.DISCNUMBER) track.disc = parseInt(md.DISCNUMBER, 10)
   if (md.DATE) track.date = md.DATE
