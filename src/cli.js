@@ -148,7 +148,7 @@ switch (yargs.argv._[0]) {
     log.silly('artists', 'argv', argv)
 
     log.enableProgress()
-    scanArtists(roots, groups).then(roots => {
+    return scanArtists(roots, groups).then(roots => {
       log.disableProgress()
       for (let [root, sorted] of roots) {
         if (sorted.length) {
@@ -158,8 +158,7 @@ switch (yargs.argv._[0]) {
           }
         }
       }
-    }).catch(error => log.error('scanArtists', error.stack))
-    break
+    }).catch(error => log.error('artists', error.stack))
   case 'inspect':
     argv = yargs.reset()
                 .usage('Usage: $0 [options] inspect [file [dir...]]')

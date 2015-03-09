@@ -13,6 +13,7 @@ const mkdirp = promisify(require('mkdirp'))
 const openZip = promisify(require('yauzl').open)
 
 function unpack (sourceArchive, groups, directory) {
+  log.silly('unpack', 'unpacking', sourceArchive)
   const path = join(directory, createHash('sha1').update(sourceArchive).digest('hex'))
   const group = groups.get(sourceArchive)
   return mkdirp(path).then(() => new Promise((resolve, reject) => {
