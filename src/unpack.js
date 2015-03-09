@@ -67,6 +67,7 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
     log.disableProgress()
     log.error('unpack', error.stack)
     log.verbose('not removing', tmpdir)
+    throw error
   })
 }
 

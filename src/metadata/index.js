@@ -1,4 +1,7 @@
-const promisify = require('bluebird').promisify
+/*eslint-disable no-undef*/ // oh eslint
+const Promise = require('bluebird')
+/*eslint-enable no-undef*/
+const promisify = Promise.promisify
 
 const {dirname, extname} = require('path')
 const stat = promisify(require('fs').stat)
@@ -19,22 +22,23 @@ function extractRelease (zipfile, tmpdir, covers, groups) {
                                            e instanceof Error)))
 }
 
-function scan (files, groups) {
-  return Promise.all(
-    [].concat(...files).map(tag => {
-      const e = tag.fullPath
+function scan (bundles, groups) {
+  return Promise.map(
+    [].concat(...bundles),
+    bundle => {
+      const e = bundle.path
       switch (extname(e)) {
         case '.flac':
-          return flac.scan(tag, groups)
+          return flac.scan(bundle, groups)
         case '.jpg':
         case '.pdf':
         case '.png':
           return stat(e).then(stats => new Cover(e, stats))
         default:
           log.error('scan', "don't recognize type of", e)
-          return Promise.resolve(new Error("don't recognize type of " + e))
+          return Promise.reject(new Error("don't recognize type of " + e))
       }
-    })
+    }
   )
 }
 

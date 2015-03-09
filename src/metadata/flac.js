@@ -2,6 +2,7 @@
 const Promise = require('bluebird')
 /*eslint-enable no-undef*/
 
+require('es6-shim')
 const promisify = Promise.promisify
 
 const {basename, dirname} = require('path')
@@ -15,11 +16,15 @@ const audit = require('./audit.js')
 const Album = require('../models/album-multi.js')
 const Track = require('../models/track.js')
 
-function scan (path, groups) {
+function scan (bundle, groups) {
+  const path = bundle.path
   log.verbose('flac.scan', 'scanning', path)
 
   const metadata = {}
+  bundle.metadata = metadata
+
   return stat(path).then(stats => new Promise((resolve, reject) => {
+    bundle.stats = stats
     const tracker = groups.get(basename(path)).newStream(
       'FLAC scan: ' + basename(path),
       stats.size
@@ -29,7 +34,7 @@ function scan (path, groups) {
       .pipe(new FLAC())
       .on('data', d => metadata[d.type] = d.value)
       .on('error', reject)
-      .on('finish', () => resolve({ path, stats, metadata }))
+      .on('finish', () => resolve(bundle))
   }))
 }
 
@@ -48,11 +53,11 @@ function albumsFromTracks (metadata, covers) {
     let dirs = new Set()
     let archives = new Set()
     for (let track of albums.get(album)) {
-      log.silly('makeAlbums', 'track', track)
-      artists.add(track.ARTIST)
-      dirs.add(dirname(track.fullPath))
+      log.silly('albumsFromTracks', 'track', track)
+      artists.add(track.metadata.ARTIST)
+      dirs.add(dirname(track.path))
       archives.add(track.sourceArchive)
-      tracks.add(Track.fromFLAC(track))
+      tracks.add(Track.fromFLAC(track.metadata, track.path, track.stats))
     }
 
     const minArtists = [...artists]
@@ -104,7 +109,7 @@ function albumsFromTracks (metadata, covers) {
 function fsEntitiesIntoBundles ({artist, album, track}, groups) {
   groups.set(track.name, log.newGroup('read: ' + track.path))
 
-  return scan(track.path, groups)
+  return scan(track, groups)
     .then(b => {
       b.fsArtist = artist
       b.fsAlbum = album

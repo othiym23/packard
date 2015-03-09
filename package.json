@@ -50,8 +50,10 @@
     "yauzl": "^2.2.1"
   },
   "devDependencies": {
+    "flac-metadata": "^0.1.1",
     "nixt": "^0.4.1",
-    "tap": "^0.7.1"
+    "tap": "^0.7.1",
+    "yazl": "^2.1.2"
   },
   "license": "MIT"
 }

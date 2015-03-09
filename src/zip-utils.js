@@ -63,7 +63,7 @@ function unpack (sourceArchive, groups, directory) {
               .on('error', reject)
               .on('finish', () => {
                 log.verbose('unpack', 'finished writing', fullPath)
-                resolve({ sourceArchive, zipData, fullPath })
+                resolve({ sourceArchive, zipData, path: fullPath })
               })
           })
         }), {concurrency: 1}).then(paths => {
@@ -71,7 +71,7 @@ function unpack (sourceArchive, groups, directory) {
           resolve(paths)
         })
       })
-    })
+    }).catch(reject)
   }))
 }
 
