@@ -11,6 +11,7 @@ const stat = promisify(require('fs').stat)
 const FLAC = require('flac-parser')
 const log = require('npmlog')
 
+const audit = require('./audit.js')
 const Album = require('../models/album-multi.js')
 const Track = require('../models/track.js')
 
@@ -100,4 +101,77 @@ function albumsFromTracks (metadata, covers) {
   return finished
 }
 
-module.exports = { scan, albumsFromTracks }
+function fsEntitiesIntoBundles ({artist, album, track}, groups) {
+  groups.set(track.name, log.newGroup('read: ' + track.path))
+
+  return scan(track.path, groups)
+    .then(b => {
+      b.fsArtist = artist
+      b.fsAlbum = album
+      b.fsTrack = track
+      b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)
+
+      log.silly('fsEntitiesIntoBundles', 'bundle', b)
+      return b
+    })
+    .then(audit)
+}
+
+function bundlesIntoTrackSets (bundles) {
+  const trackSets = new Map()
+
+  // 1. bundle the tracks into sets
+  for (let bundle of bundles) {
+    let key
+
+    const albumArtist = bundle.fsAlbum.artist
+    key = albumArtist + ' - ' + bundle.flacTrack.album
+    if (!trackSets.get(key)) {
+      log.verbose('artists', 'creating set for tracks on:', key)
+      trackSets.set(key, new Set())
+    }
+    const trackSet = trackSets.get(key)
+    bundle.trackSet = trackSet
+    trackSet.add(bundle)
+  }
+
+  return trackSets
+}
+
+function trackSetsIntoAlbums (trackSets) {
+  const albums = new Set()
+
+  for (let trackSet of trackSets) {
+    const tracks = [...trackSet].map(t => t.flacTrack)
+    const sorted = tracks.sort((a, b) => a.index - b.index)
+
+    const albumArtists = [...trackSet].reduce((s, b) => s.add(b.fsAlbum.artist), new Set())
+    if (albumArtists.size > 1) {
+      log.warn('artists', 'many artists found', [...albumArtists])
+    }
+
+    const dates = tracks.reduce((s, t) => s.add(t.date), new Set())
+    if (dates.size > 1) {
+      log.warn('artists', 'many dates found', [...dates])
+    }
+
+    const names = tracks.reduce((s, t) => s.add(t.album), new Set())
+    if (dates.size > 1) {
+      log.warn('artists', 'many album names found', [...names])
+    }
+
+    const album = new Album([...names][0], [...albumArtists][0], '-', sorted)
+    album.date = [...dates][0]
+    albums.add(album)
+  }
+
+  return albums
+}
+
+module.exports = {
+  scan,
+  albumsFromTracks,
+  bundlesIntoTrackSets,
+  fsEntitiesIntoBundles,
+  trackSetsIntoAlbums
+}

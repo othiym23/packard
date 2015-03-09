@@ -4,12 +4,9 @@ const Promise = require('bluebird')
 
 const log = require('npmlog')
 
-const audit = require('./metadata/audit.js')
 const flac = require('./metadata/flac.js')
 const readRoot = require('./read-root.js')
-const Album = require('./models/album-multi.js')
 const Artist = require('./models/artist.js')
-const Track = require('./models/track.js')
 
 function reverseSize (a, b) {
   return b.getSize() - a.getSize()
@@ -35,13 +32,13 @@ function scanArtists (roots, groups) {
     .map(([root, entities]) => {
       log.verbose('scanArtists', 'processing', root)
       return Promise.resolve([...entities])
-        .map(entity => fsEntitiesIntoBundles(entity, groups), {concurrency: 4})
+        .map(entity => flac.fsEntitiesIntoBundles(entity, groups), {concurrency: 4})
         .then(bundles => {
           // 1. bundle the tracks into sets
-          const trackSets = bundlesIntoTrackSets(bundles)
+          const trackSets = flac.bundlesIntoTrackSets(bundles)
 
           // 2. convert the sets into albums
-          const albums = trackSetsIntoAlbums([...trackSets.values()])
+          const albums = flac.trackSetsIntoAlbums([...trackSets.values()])
 
           // 3. find artist tracks that aren't on single-artist albums
           const artistTracks = albumsIntoArtistTracks(albums)
@@ -56,71 +53,6 @@ function scanArtists (roots, groups) {
           return [root, sorted]
         })
     })
-}
-
-function fsEntitiesIntoBundles ({artist, album, track}, groups) {
-  groups.set(track.name, log.newGroup('read: ' + track.path))
-
-  return flac
-    .scan(track.path, groups)
-    .then(b => {
-      b.fsArtist = artist
-      b.fsAlbum = album
-      b.fsTrack = track
-      b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)
-
-      return b
-    })
-    .then(audit)
-}
-
-function bundlesIntoTrackSets (bundles) {
-  const trackSets = new Map()
-
-  // 1. bundle the tracks into sets
-  for (let bundle of bundles) {
-    let key
-
-    const albumArtist = bundle.fsAlbum.artist
-    key = albumArtist + ' - ' + bundle.flacTrack.album
-    if (!trackSets.get(key)) {
-      log.verbose('artists', 'creating set for tracks on:', key)
-      trackSets.set(key, new Set())
-    }
-    const trackSet = trackSets.get(key)
-    bundle.trackSet = trackSet
-    trackSet.add(bundle)
-  }
-
-  return trackSets
-}
-
-function trackSetsIntoAlbums (trackSets) {
-  const albums = new Set()
-
-  for (let trackSet of trackSets) {
-    const tracks = [...trackSet].map(t => t.flacTrack)
-    const sorted = tracks.sort((a, b) => a.index - b.index)
-
-    const albumArtists = [...trackSet].reduce((s, b) => s.add(b.fsAlbum.artist), new Set())
-    if (albumArtists.size > 1) {
-      log.warn('artists', 'many artists found', [...albumArtists])
-    }
-
-    const dates = tracks.reduce((s, t) => s.add(t.date), new Set())
-    if (dates.size > 1) {
-      log.warn('artists', 'many dates found', [...dates])
-    }
-
-    const names = tracks.reduce((s, t) => s.add(t.album), new Set())
-    if (dates.size > 1) {
-      log.warn('artists', 'many album names found', [...names])
-    }
-
-    albums.add(new Album([...names][0], [...albumArtists][0], '-', sorted))
-  }
-
-  return albums
 }
 
 function albumsIntoArtistTracks (albums) {
