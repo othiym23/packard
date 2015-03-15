@@ -21,7 +21,7 @@ Options:
 must pass either 1 or more zipfiles or root and glob pattern
 */}.toString().split('\n').slice(1, -1)
 
-var prolog = 'Usage: node ' + r + ' [options] unpack [zipfile [zipfile...]]'
+var prolog = 'Usage: ' + r + ' [options] unpack [zipfile [zipfile...]]'
 
 var root = resolve(__dirname, 'blank-tree')
 

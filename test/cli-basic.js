@@ -26,7 +26,7 @@ Options:
 Not enough non-option arguments: got 0, need at least 1
 */}.toString().split('\n').slice(1, -1)
 
-var prolog = 'Usage: node ' + r + ' [options] <command>'
+var prolog = 'Usage: ' + r + ' [options] <command>'
 
 var root = resolve(__dirname, 'blank-tree')
 
