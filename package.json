@@ -8,7 +8,8 @@
   "scripts": {
     "transpile": "babel src -d lib",
     "prepublish": "npm run transpile",
-    "test": "npm run transpile && tap test/*.js"
+    "test": "npm run transpile && tap test/*.js",
+    "coverage": "npm run transpile && istanbul cover --dir coverage/istanbul node_modules/argg test/*.js --report html"
   },
   "standard": {
     "ignore": [
@@ -50,7 +51,9 @@
     "yauzl": "^2.2.1"
   },
   "devDependencies": {
+    "argg": "0.0.1",
     "flac-metadata": "^0.1.1",
+    "istanbul": "^0.3.7",
     "nixt": "^0.4.1",
     "tap": "^0.7.1",
     "yazl": "^2.1.2"
