@@ -1,5 +1,7 @@
 # packard
 
+[![Coverage Status](https://coveralls.io/repos/othiym23/packard/badge.svg?branch=master)](https://coveralls.io/r/othiym23/packard?branch=master)
+
 Optimize the storage of media files on fixed-size storage volumes.
 
 ## usage
