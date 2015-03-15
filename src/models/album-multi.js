@@ -1,3 +1,4 @@
+require('es6-shim')
 const {join, basename} = require('path')
 
 const log = require('npmlog')
@@ -19,7 +20,10 @@ class MultitrackAlbum extends Album {
   }
 
   toPath () {
-    const dates = this.tracks.reduce((s, t) => s.add(t.date), new Set())
+    const dates = this.tracks.reduce((s, t) => {
+      if (t.date) s.add(t.date); return s
+    }, new Set())
+
     let name = ''
     if (dates.size > 0) name += '[' + [...dates][0] + '] '
     name += this.name
@@ -38,7 +42,7 @@ class MultitrackAlbum extends Album {
     for (let cover of this.pictures) {
       dumped += 'c: ' + join(this.toPath(), basename(cover.path)) + '\n'
     }
-    dumped += '(unpacked to ' + this.path + ')\n'
+    if (this.path) dumped += '(unpacked to ' + this.path + ')\n'
 
     return dumped
   }
@@ -54,7 +58,7 @@ class MultitrackAlbum extends Album {
 }
 
 function safe (string) {
-  return string.replace(/[^ \]\[A-Za-z0-9-]/g, '')
+  return (string || '').replace(/[^ \]\[A-Za-z0-9-]/g, '')
 }
 
 module.exports = MultitrackAlbum
