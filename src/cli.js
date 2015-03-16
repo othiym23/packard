@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-/*eslint-disable no-undef*/ // oh eslint
-const Promise = require('bluebird')
-/*eslint-enable no-undef*/
 
+const Promise = require('bluebird')
 const promisify = Promise.promisify
 
 const basename = require('path').basename

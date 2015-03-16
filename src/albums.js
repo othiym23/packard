@@ -1,9 +1,6 @@
-/*eslint-disable no-undef*/ // oh eslint
-const Promise = require('bluebird')
-/*eslint-enable no-undef*/
-
 const log = require('npmlog')
 const moment = require('moment')
+const Promise = require('bluebird')
 
 const flac = require('./metadata/flac.js')
 const readRootFlat = require('./read-root.js').readRootFlat

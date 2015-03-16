@@ -1,8 +1,6 @@
-/*eslint-disable no-undef*/ // oh eslint
-const Promise = require('bluebird')
-/*eslint-enable no-undef*/
-
 require('es6-shim')
+
+const Promise = require('bluebird')
 const promisify = Promise.promisify
 
 const {basename, dirname} = require('path')

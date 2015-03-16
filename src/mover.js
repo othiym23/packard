@@ -1,9 +1,6 @@
 // SEE YOU IN 2017
 
-/*eslint-disable no-undef*/ // oh eslint
 const Promise = require('bluebird')
-/*eslint-enable no-undef*/
-
 const promisify = Promise.promisify
 
 const {join, resolve, basename} = require('path')

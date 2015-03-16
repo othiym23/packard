@@ -1,9 +1,6 @@
-/*eslint-disable no-undef*/ // oh eslint
-const Promise = require('bluebird')
-/*eslint-enable no-undef*/
-
-const Transform = require('stream').Transform
 const {isObject, isNumber} = require('util')
+const Promise = require('bluebird')
+const Transform = require('stream').Transform
 
 // let's see how ES6 classes deal with Node base classes
 export class TOMLStream extends Transform {
