@@ -1,10 +1,37 @@
-# packard
-
+[![Build Status](https://travis-ci.org/othiym23/packard.svg)](https://travis-ci.org/othiym23/packard)
 [![Coverage Status](https://coveralls.io/repos/othiym23/packard/badge.svg?branch=master)](https://coveralls.io/r/othiym23/packard?branch=master)
 
-Optimize the storage of media files on fixed-size storage volumes.
+# packard
+
+Optimize the storage of media files on fixed-size storage volumes. Currently
+supports FLAC files with Vorbis comments.
 
 ## usage
+
+```
+$ packard
+Usage: packard [options] <command>
+
+Commands:
+  artists    generate a list of artists from roots
+  inspect    dump all the metadata from a track or album
+  pls        print a list of albums as a .pls file, sorted by date
+  unpack     unpack a set of zipped files into a staging directory
+
+Options:
+  -S, --save-config  save this run's configuration to ~/.packardrc [default: false]
+  --loglevel         logging level                                 [default: "info"]
+  -h, --help         Show help
+  --version          Show version number
+```
+
+### unpack a set of zip files containing audio files
+
+```
+$ packard unpack [zipfile [zipfile...]]
+```
+
+example run:
 
 ```
 $ packard unpack -s ~/Downloads/flac ~/Downloads/flac_SHXCXCHCXSH-STRGTHS.zip --archive
@@ -31,31 +58,6 @@ now archived:
   -> /Users/ogd/Downloads/archives/flac_SHXCXCHCXSH-STRGTHS.zip
 ```
 
-```
-$ packard --root=~/Music/flac artists
-Basic Channel [1318M]
-Demdike Stare [2439M]
-Jean Grae [1671M]
-Perc [1358M]
-Shackleton [2257M]
-```
-
-## shared options
-
-* `--loglevel` (_default: `info`_): `packard` uses `npmlog` (I know it,
-  and it has excellent progress bar support). It takes the same log
-  levels as npm: `error`, `warn`, `info`, `verbose`, and `silly`. It
-  probably takes `http`, but there's no use for that. Yet.
-* `--save-config`: Save this run's configuration to `~/.packardrc`.
-
-## commands
-
-### unpack a set of zip files containing tracks
-
-```
-$ packard unpack [zipfile [zipfile...]]
-```
-
 Unpack a set of zipped files containing FLAC files and cover art,
 organizing the files into releases and then moving them, along with
 their cover art, into a staging directory. You can either pass the list
@@ -79,10 +81,51 @@ Options:
 * `--archive-root`: Where to put zip files after extraction. Files in
   `archive-root` will not be unpacked or moved.
 
+### generate a .pls version 2 playlist, sorted by release date
+
+```
+$ packard pls
+```
+
+example run:
+
+```
+$ packard pls -R ~/Downloads/flac2 > ~/Downloads/dark-shadows.pls
+WARN artists many dates found [ '2014-10-17', '2014' ]
+WARN artists many album names found [ 'Serum' ]
+WARN artists many dates found [ '2011-09-12', '2011' ]
+WARN artists many album names found [ 'Carrier' ]
+info pls Processing /Users/ogd/Downloads/flac2
+info pls playlist generated with 275 entries
+```
+
+Read one or more directory trees containing media files, and then generate a
+chronologically sorted playlist of all of the tracks in those trees, auditing
+the files as they go. The playlist is a version 2 .pls file (which includes
+track names and durations as well as locations), and will be printed to
+standard output (a future version will let you specify the output file, but
+redirection works well enough for me for now).
+
+Options:
+
+* `--root`: The root of an `artist/album/tracks` directory tree. This option
+  may be used multiple times.
+
 ### generate a list of artists
 
 ```
 $ packard artists
+```
+
+example run:
+
+```
+$ packard --root=~/Music/flac artists
+Basic Channel [1318M]
+Demdike Stare [2439M]
+Jean Grae [1671M]
+Perc [1358M]
+Shackleton [2257M]
 ```
 
 Scan one or more directory trees recursively, printing out a list of the artist
@@ -94,6 +137,15 @@ Options:
 
 * `--root`: The top level of a directory hierarchy, laid out in
   `root/Artist/Album` format. Can be used more than once.
+
+## shared options
+
+* `--loglevel` (_default: `info`_): `packard` uses `npmlog` (I know it,
+  and it has excellent progress bar support). It takes the same log
+  levels as npm: `error`, `warn`, `info`, `verbose`, and `silly`. It
+  probably takes `http`, but there's no use for that. Yet.
+* `--save-config`: Save this run's configuration to `~/.packardrc`.
+
 
 ## MIT License
 
