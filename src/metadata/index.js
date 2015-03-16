@@ -10,7 +10,7 @@ const log = require('npmlog')
 
 const Cover = require('../models/cover.js')
 const flac = require('./flac.js')
-const unzip = require('../zip-utils.js').unpack
+const unzip = require('../utils/zip.js').unpack
 
 function extractRelease (zipfile, tmpdir, covers, groups) {
   log.verbose('extractReleaseMetadata', 'archive:', zipfile)

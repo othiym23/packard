@@ -9,12 +9,12 @@ var log = require('npmlog')
 var rimraf = promisify(require('rimraf'))
 var test = require('tap').test
 
-var zipUtils = require('../lib/zip-utils.js')
+var zipUtils = require('../lib/utils/zip.js')
 
 var metadata = require('./lib/metadata.js')
 var zip = require('./lib/zip.js')
 
-var root = join(__dirname, 'single-artist-zip-utils')
+var root = join(__dirname, 'single-artist-zipped')
 
 test('unpacking a single-artist album', function (t) {
   var staging = join(root, 'staging', 'flac')
