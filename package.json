@@ -8,7 +8,7 @@
   "scripts": {
     "transpile": "babel src -d lib",
     "prepublish": "npm run transpile",
-    "test": "npm run transpile && tap test/*.js",
+    "test": "npm run transpile && npm run istanbul && npm run coveralls",
     "coverage": "npm run transpile && istanbul cover --dir coverage/istanbul node_modules/argg test/*.js --report html",
     "istanbul": "npm run transpile && istanbul cover --dir coverage/istanbul node_modules/argg test/*.js --report lcovonly",
     "coveralls": "cat ./coverage/istanbul/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
