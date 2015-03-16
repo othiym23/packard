@@ -1,4 +1,4 @@
-class Artist {
+export default class Artist {
   constructor (name, albums = []) {
     this.name = name
     this.albums = albums
@@ -14,6 +14,3 @@ class Artist {
            this.otherTracks.reduce((total, track) => total + track.getSize(bs), 0)
   }
 }
-
-// must export class last because of how classes are transpiled
-module.exports = Artist

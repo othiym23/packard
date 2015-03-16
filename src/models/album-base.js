@@ -1,6 +1,6 @@
 var assert = require('assert')
 
-class Album {
+export default class Album {
   constructor (name, artist, path) {
     assert(name, 'must include an album name')
     assert(artist, 'must include an artist name')
@@ -13,5 +13,3 @@ class Album {
     this.tracks = []
   }
 }
-
-module.exports = Album

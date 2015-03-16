@@ -1,6 +1,6 @@
 var Album = require('./album-base.js')
 
-class SingletrackAlbum extends Album {
+export default class SingletrackAlbum extends Album {
   constructor (name, artist, path, stats) {
     super(name, artist, path)
 
@@ -15,5 +15,3 @@ class SingletrackAlbum extends Album {
     return Math.ceil(this.size / bs)
   }
 }
-
-module.exports = SingletrackAlbum

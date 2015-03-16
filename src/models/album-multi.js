@@ -5,7 +5,7 @@ const log = require('npmlog')
 
 const Album = require('./album-base.js')
 
-class MultitrackAlbum extends Album {
+export default class MultitrackAlbum extends Album {
   constructor (name, artist, path, tracks = []) {
     super(name, artist, path)
 
@@ -60,5 +60,3 @@ class MultitrackAlbum extends Album {
 function safe (string) {
   return (string || '').replace(/[^ \]\[A-Za-z0-9-]/g, '')
 }
-
-module.exports = MultitrackAlbum

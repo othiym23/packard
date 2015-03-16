@@ -6,8 +6,8 @@ const Transform = require('stream').Transform
 const {isObject, isNumber} = require('util')
 
 // let's see how ES6 classes deal with Node base classes
-class TOMLStream extends Transform {
-  constructor (...args) {
+export class TOMLStream extends Transform {
+  constructor () {
     super({objectMode: true})
   }
 
@@ -32,5 +32,3 @@ class TOMLStream extends Transform {
     .catch(cb)
   }
 }
-
-module.exports = { TOMLStream }

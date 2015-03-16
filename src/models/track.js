@@ -1,6 +1,6 @@
 const sprintf = require('sprintf')
 
-class Track {
+export default class Track {
   constructor (artist, album, name, path, stats, albumArtist = artist) {
     this.artist = artist
     this.album = album
@@ -50,5 +50,3 @@ Track.fromFLAC = (md, path, stats) => {
 
   return track
 }
-
-module.exports = Track

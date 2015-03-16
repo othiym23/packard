@@ -1,6 +1,6 @@
 const extname = require('path').extname
 
-class Cover {
+export default class Cover {
   constructor (path, stats) {
     this.path = path
     this.format = extname(path).slice(1)
@@ -13,5 +13,3 @@ class Cover {
     return Math.ceil(this.size / bs)
   }
 }
-
-module.exports = Cover
