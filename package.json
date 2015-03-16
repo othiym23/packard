@@ -11,7 +11,8 @@
     "test": "npm run transpile && tap test/*.js",
     "coverage": "npm run transpile && istanbul cover --dir coverage/istanbul node_modules/argg test/*.js --report html",
     "istanbul": "npm run transpile && istanbul cover --dir coverage/istanbul node_modules/argg test/*.js --report lcovonly",
-    "coveralls": "npm run istanbul && cat ./coverage/istanbul/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "coveralls": "npm run istanbul && cat ./coverage/istanbul/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "standard": "standard"
   },
   "standard": {
     "ignore": [
@@ -60,6 +61,7 @@
     "flac-metadata": "^0.1.1",
     "istanbul": "^0.3.7",
     "nixt": "^0.4.1",
+    "standard": "^3.0.0-beta3",
     "tap": "^0.7.1",
     "yazl": "^2.1.2"
   },
