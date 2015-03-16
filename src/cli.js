@@ -179,10 +179,14 @@ switch (yargs.argv._[0]) {
       b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)
       return b
     })
-    .each(b => log.info('bundle', b))
-    .each(m => {
-      const tagnames = Object.keys(m.metadata).filter(n => n.match(/^[A-Z_]+$/)).sort()
-      log.info('tag names', tagnames)
+    .each(b => {
+      log.verbose('bundle', b)
+      const tagnames = Object.keys(b.metadata).filter(n => n.match(/^[A-Z_]+$/)).sort()
+      log.verbose('tag names', tagnames)
+    })
+    .then(bs => {
+      log.disableProgress()
+      console.log(JSON.stringify(bs, null, 2))
     })
     .catch(e => {
       log.disableProgress()

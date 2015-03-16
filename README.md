@@ -84,7 +84,7 @@ Options:
 ### generate a .pls version 2 playlist, sorted by release date
 
 ```
-$ packard pls
+$ packard [options] pls > playlist.pls
 ```
 
 example run:
@@ -110,6 +110,98 @@ Options:
 
 * `--root`: The root of an `artist/album/tracks` directory tree. This option
   may be used multiple times.
+
+### inspect files and display metadata
+
+```
+$ packard [options] inspect [file [files...]]
+```
+
+example run:
+
+```
+$ packard inspect ~/Downloads/flac2/Overlook/\[2014\]\ False\ \ Everything\ Counts/Overlook\ -\ False\ \ Everything\ Counts\ -\ 02\ -\ Everything\ Counts.flac
+[
+  {
+    "path": "/Users/ogd/Downloads/flac2/Overlook/[2014] False  Everything Counts/Overlook - False  Everything Counts - 02 - Everything Counts.flac",
+    "metadata": {
+      "minBlockSize": 4096,
+      "maxBlockSize": 4096,
+      "minFrameSize": 16,
+      "maxFrameSize": 13001,
+      "sampleRate": 44100,
+      "channels": 2,
+      "bitsPerSample": 16,
+      "samplesInStream": 16177333,
+      "duration": 366.832947845805,
+      "TITLE": "Everything Counts",
+      "RELEASECOUNTRY": "XW",
+      "TOTALDISCS": "1",
+      "LABEL": "Narratives Music",
+      "TOTALTRACKS": "2",
+      "MUSICBRAINZ_ALBUMARTISTID": "b311f974-4961-4e1d-8065-451d2762497a",
+      "DATE": "2014-02-10",
+      "DISCNUMBER": "1",
+      "TRACKTOTAL": "2",
+      "MUSICBRAINZ_RELEASETRACKID": "8c8adb82-8a30-4fd0-a032-9f412866f8ef",
+      "ALBUMARTISTSORT": "Overlook",
+      "ORIGINALDATE": "2014-02-10",
+      "SCRIPT": "Latn",
+      "MUSICBRAINZ_ALBUMID": "b8f74ebc-da61-489a-a41f-fa00347d2f7d",
+      "RELEASESTATUS": "official",
+      "ALBUMARTIST": "Overlook",
+      "CATALOGNUMBER": "NARRATIVES007",
+      "ALBUM": "False / Everything Counts",
+      "MUSICBRAINZ_ARTISTID": "b311f974-4961-4e1d-8065-451d2762497a",
+      "MEDIA": "Digital Media",
+      "RELEASETYPE": "single",
+      "ORIGINALYEAR": "2014",
+      "ARTIST": "Overlook",
+      "DISCTOTAL": "1",
+      "MUSICBRAINZ_RELEASEGROUPID": "344369ca-ffd8-4f79-ad5e-6254fc058d49",
+      "MUSICBRAINZ_TRACKID": "0887eedb-ff79-4d60-bbf0-3e2ab616c515",
+      "ARTISTSORT": "Overlook",
+      "ARTISTS": "Overlook",
+      "GENRE": "Drum'n'Bass",
+      "TRACKNUMBER": "2",
+      "bytesToFirstFrame": 8282
+    },
+    "stats": {
+      "dev": 16777221,
+      "mode": 33188,
+      "nlink": 1,
+      "uid": 501,
+      "gid": 20,
+      "rdev": 0,
+      "blksize": 4096,
+      "ino": 37881732,
+      "size": 33476216,
+      "blocks": 65384,
+      "atime": "2015-03-16T02:53:38.000Z",
+      "mtime": "2015-03-11T03:36:43.000Z",
+      "ctime": "2015-03-11T03:52:57.000Z",
+      "birthtime": "2015-03-10T21:19:46.000Z"
+    },
+    "flacTrack": {
+      "artist": "Overlook",
+      "album": "False / Everything Counts",
+      "name": "Everything Counts",
+      "path": "/Users/ogd/Downloads/flac2/Overlook/[2014] False  Everything Counts/Overlook - False  Everything Counts - 02 - Everything Counts.flac",
+      "size": 33476216,
+      "blockSize": 4096,
+      "blocks": 65384,
+      "albumArtist": "Overlook",
+      "index": 2,
+      "disc": 1,
+      "date": "2014-02-10",
+      "duration": 366.832947845805,
+      "ext": ".flac"
+    }
+  }
+]
+```
+
+Read the metadata out of one or more audio tracks and dump in a raw, but machine-readable, format all of the metadata generated from that file while `packard` runs. There's a lot of irrelevant detail in here, so it's probable that a more condensed version of this command will come along at some point.
 
 ### generate a list of artists
 
