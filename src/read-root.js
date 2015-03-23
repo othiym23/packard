@@ -17,8 +17,10 @@ const Singletrack = require('./models/album-single.js')
 const Track = require('./models/track.js')
 
 const cruft = [
-  '.DS_Store', // OS X metadata is very cluttery
-  'Thumbs.db'  // yes, I do run Windows sometimes
+  '.DS_Store',    // OS X metadata is very cluttery
+  '.AppleDouble', // see above
+  'Thumbs.db',    // yes, I do run Windows sometimes
+  '.Parent'       // I have no idea
 ]
 
 function visit (root) {
