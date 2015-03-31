@@ -4,7 +4,7 @@ const promisify = Promise.promisify
 
 const {createHash} = require('crypto')
 const {createWriteStream} = require('fs')
-const {join, basename} = require('path')
+const {join, basename, dirname} = require('path')
 
 const log = require('npmlog')
 const mkdirp = promisify(require('mkdirp'))
@@ -35,7 +35,10 @@ function unpack (sourceArchive, groups, directory) {
           return
         }
 
-        groups.set(entry.fileName, group.newGroup('extract: ' + entry.fileName))
+        groups.set(
+          basename(entry.fileName),
+          group.newGroup('extract: ' + entry.fileName)
+        )
         entries.push(entry)
       })
       zf.on('end', () => {
@@ -43,7 +46,7 @@ function unpack (sourceArchive, groups, directory) {
           log.silly('unpack', 'zipData', zipData)
 
           const fullPath = join(path, zipData.fileName)
-          const writeTracker = groups.get(zipData.fileName).newStream(
+          const writeTracker = groups.get(basename(zipData.fileName)).newStream(
             'writing: ' + zipData.fileName,
             zipData.uncompressedSize,
             3
@@ -55,15 +58,18 @@ function unpack (sourceArchive, groups, directory) {
               return reject(err)
             }
 
-            log.verbose('unpack', 'writing', fullPath, zipData.uncompressedSize)
-            zipstream
-              .pipe(writeTracker)
-              .pipe(createWriteStream(fullPath))
-              .on('error', reject)
-              .on('finish', () => {
-                log.verbose('unpack', 'finished writing', fullPath)
-                resolve({ sourceArchive, zipData, path: fullPath })
-              })
+            log.verbose('unpack', 'creating directory', dirname(fullPath))
+            mkdirp(dirname(fullPath)).then(() => {
+              log.verbose('unpack', 'writing', fullPath, zipData.uncompressedSize)
+              zipstream
+                .pipe(writeTracker)
+                .pipe(createWriteStream(fullPath))
+                .on('error', reject)
+                .on('finish', () => {
+                  log.verbose('unpack', 'finished writing', fullPath)
+                  resolve({ sourceArchive, zipData, path: fullPath })
+                })
+            })
           })
         }), {concurrency: 1}).then(paths => {
           log.silly('unpack', 'unpacked', sourceArchive, 'to', paths)
