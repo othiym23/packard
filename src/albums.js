@@ -31,12 +31,15 @@ function scanAlbums (roots, groups) {
         ).then(bundles => {
           const trackSets = flac.bundlesIntoTrackSets(bundles)
           const albums = flac.trackSetsIntoAlbums([...trackSets.values()])
-          const sorted = [...albums.values()]
-          sorted.sort(byDate)
-          log.silly('scanAlbums', 'sorted', sorted.map(a => '[' + a.date + '] ' + a.name))
 
-          return [root, sorted]
+          return albums
         })
+    }).then(albums => {
+      const sorted = albums.reduce((all, list) => all.concat([...list]), [])
+      sorted.sort(byDate)
+      log.silly('scanAlbums', 'sorted', sorted.map(a => '[' + a.date + '] ' + a.name))
+
+      return sorted
     })
 }
 

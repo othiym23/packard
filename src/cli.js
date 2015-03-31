@@ -209,20 +209,17 @@ switch (yargs.argv._[0]) {
     log.silly('pls', 'argv', argv)
 
     log.enableProgress()
-    scanAlbums(roots, groups).then(roots => {
+    scanAlbums(roots, groups).then(sorted => {
       log.disableProgress()
       let index = 0
       const playlist = {}
-      for (let [root, sorted] of roots) {
-        log.info('pls', 'Processing', root)
-        for (let album of sorted) {
-          log.verbose('pls', 'album', album.name, 'has date', album.date)
-          for (let track of album.tracks) {
-            index++
-            playlist['File' + index] = track.path
-            playlist['Title' + index] = track.name
-            playlist['Length' + index] = Math.ceil(track.duration)
-          }
+      for (let album of sorted) {
+        log.verbose('pls', 'album', album.name, 'has date', album.date)
+        for (let track of album.tracks) {
+          index++
+          playlist['File' + index] = track.path
+          playlist['Title' + index] = track.name
+          playlist['Length' + index] = Math.ceil(track.duration)
         }
       }
       playlist['NumberOfEntries'] = index

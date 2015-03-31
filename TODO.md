@@ -44,7 +44,7 @@ packard.todo
 	- top-level command to put archive files where they go, as well as audited 'final' files
 
 * pls
-	- flatten multiple roots and sort the whole thing
+	- flatten multiple roots and sort the whole thing @done(2015-03-25)
 	- get album artist from flacTrack when possible
 
 * audit
