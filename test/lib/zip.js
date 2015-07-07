@@ -1,6 +1,6 @@
-/*eslint-disable no-undef*/ // oh eslint
+/* eslint-disable no-undef */ // oh eslint
 var Promise = require('bluebird')
-/*eslint-enable no-undef*/
+/* eslint-enable no-undef */
 
 var createWriteStream = require('fs').createWriteStream
 var path = require('path')
