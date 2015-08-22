@@ -1,24 +1,19 @@
-const sprintf = require('sprintf')
+import sprintf from 'sprintf'
 
-export default class Track {
-  constructor (artist, album, name, path, stats, albumArtist = artist) {
+import File from './file.js'
+
+export default class Track extends File {
+  constructor (artist, album, name, path, stats, optional = {}) {
+    super(path, stats, optional.ext || '.unknown')
+
     this.artist = artist
     this.album = album
     this.name = name
-    this.path = path
-    this.size = stats.size
-    this.blockSize = stats.blksize
-    this.blocks = stats.blocks
-    this.albumArtist = albumArtist
-    this.index = 0
-    this.disc = 0
-    this.date = null
-    this.duration = 0
-    this.ext = '.unknown'
-  }
-
-  getSize (bs = 1) {
-    return Math.ceil(this.size / bs)
+    this.albumArtist = optional.albumArtist || artist
+    this.index = optional.index || 0
+    this.disc = optional.disc || 0
+    this.date = optional.date
+    this.duration = optional.duration
   }
 
   fullName () {
@@ -28,25 +23,22 @@ export default class Track {
     if (this.index) base += sprintf('%02d', this.index) + ' - '
     return base + this.name + this.ext
   }
-
-  safeName () {
-    return this.fullName().replace(/[^ ()\]\[A-Za-z0-9.-]/g, '')
-  }
 }
 
 Track.fromFLAC = (md, path, stats) => {
-  const track = new Track(
+  const optional = { ext: '.flac' }
+
+  if (md.duration) optional.duration = parseFloat(md.duration)
+  if (md.TRACKNUMBER) optional.index = parseInt(md.TRACKNUMBER, 10)
+  if (md.DISCNUMBER) optional.disc = parseInt(md.DISCNUMBER, 10)
+  if (md.DATE) optional.date = md.DATE
+
+  return new Track(
     md.ARTIST,
     md.ALBUM,
     md.TITLE,
     path,
-    stats
+    stats,
+    optional
   )
-  track.ext = '.flac'
-  if (md.duration) track.duration = parseFloat(md.duration)
-  if (md.TRACKNUMBER) track.index = parseInt(md.TRACKNUMBER, 10)
-  if (md.DISCNUMBER) track.disc = parseInt(md.DISCNUMBER, 10)
-  if (md.DATE) track.date = md.DATE
-
-  return track
 }
