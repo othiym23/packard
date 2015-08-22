@@ -1,15 +1,11 @@
-const extname = require('path').extname
+import { extname } from 'path'
 
-export default class Cover {
+import File from './file.js'
+
+export default class Cover extends File {
   constructor (path, stats) {
-    this.path = path
-    this.format = extname(path).slice(1)
-    this.size = stats.size
-    this.blockSize = stats.blksize
-    this.blocks = stats.blocks
-  }
-
-  getSize (bs = 1) {
-    return Math.ceil(this.size / bs)
+    const extension = extname(path)
+    super(path, stats, extension)
+    this.format = extension.slice(1)
   }
 }
