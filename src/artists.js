@@ -2,7 +2,8 @@ const log = require('npmlog')
 const Promise = require('bluebird')
 
 const flac = require('./metadata/flac.js')
-const readRootFlat = require('./read-root.js').readRootFlat
+const readTree = require('./read-tree.js')
+const flatten = require('./flatten-tracks.js')
 const Artist = require('./models/artist.js')
 
 function bySizeReverse (a, b) {
@@ -16,7 +17,7 @@ function safe (string) {
 function scanArtists (roots, groups) {
   return Promise.map(
       roots,
-      root => readRootFlat(root).then(entities => [root, entities])
+      root => readTree(root).then(artists => [root, flatten(artists)])
     ).map(([root, entities]) => {
       log.verbose('scanArtists', 'processing', root)
       return Promise.map(

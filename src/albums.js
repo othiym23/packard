@@ -3,7 +3,8 @@ const moment = require('moment')
 const Promise = require('bluebird')
 
 const flac = require('./metadata/flac.js')
-const readRootFlat = require('./read-root.js').readRootFlat
+const readTree = require('./read-tree.js')
+const flatten = require('./flatten-tracks.js')
 
 function byDate (a, b) {
   let am = moment(a.date)
@@ -21,7 +22,7 @@ function byDate (a, b) {
 function scanAlbums (roots, groups) {
   return Promise.map(
       roots,
-      root => readRootFlat(root).then(entities => [root, entities])
+      root => readTree(root).then(artists => [root, flatten(artists)])
     ).map(([root, entities]) => {
       log.verbose('scanAlbums', 'processing', root)
       return Promise.map(
