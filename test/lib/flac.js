@@ -1,6 +1,4 @@
-/*eslint-disable no-undef*/ // oh eslint
 var Promise = require('bluebird')
-/*eslint-enable no-undef*/
 var promisify = Promise.promisify
 
 var createReadStream = require('fs').createReadStream
