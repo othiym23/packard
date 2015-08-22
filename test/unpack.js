@@ -37,8 +37,8 @@ test('unpacking a single-artist album', function (t) {
   }).then(function (zipfile) {
     return unpack([zipfile], staging)
              .catch(function (e) {
-               t.ifError(e, 'unpacking zipfile succeeded')
-             })
+                t.ifError(e, 'unpacking zipfile succeeded')
+              })
   }).then(function (albums) {
     t.equal(albums.size, 1, 'got 1 album back')
     var album = albums.values().next().value
