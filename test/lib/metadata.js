@@ -12,7 +12,7 @@ var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.flac')
 
 function makeAlbum (root, date, artistName, albumName, trackNames) {
   return stat(EMPTY_TRACK).then(function (stats) {
-    return trackNames.map(function (trackName, index) {
+    return flac.makeAlbum(root, trackNames.map(function (trackName, index) {
       var track = new Track(
         artistName,
         albumName,
@@ -24,9 +24,7 @@ function makeAlbum (root, date, artistName, albumName, trackNames) {
       track.ext = '.flac'
       track.index = index + 1
       return track
-    })
-  }).then(function (tracks) {
-    return flac.makeAlbum(root, tracks)
+    }))
   })
 }
 
