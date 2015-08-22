@@ -12,16 +12,16 @@ var r = relative(process.cwd(), p)
 var lines = function () {/*
 
 Commands:
-  artists    generate a list of artists from roots
-  inspect    dump all the metadata from a track or album
-  pls        print a list of albums as a .pls file, sorted by date
-  unpack     unpack a set of zipped files into a staging directory
+  artists  generate a list of artists from roots
+  inspect  dump all the metadata from a track or album
+  pls      print a list of albums as a .pls file, sorted by date
+  unpack   unpack a set of zipped files into a staging directory
 
 Options:
-  -S, --save-config  save this run's configuration to ~/.packardrc  [default: false]
-  --loglevel         logging level                                  [default: "info"]
-  -h, --help         Show help
-  --version          Show version number
+  -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]
+  --loglevel         logging level  [default: "info"]
+  -h, --help         Show help  [boolean]
+  --version          Show version number  [boolean]
 
 Not enough non-option arguments: got 0, need at least 1
 */}.toString().split('\n').slice(1, -1)

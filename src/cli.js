@@ -11,6 +11,7 @@ const log = require('npmlog')
 const untildify = require('untildify')
 
 const flac = require('./metadata/flac.js')
+const makePlaylist = require('./utils/make-playlist.js')
 const scanAlbums = require('./albums.js')
 const scanArtists = require('./artists.js')
 const unpack = require('./unpack.js')
@@ -27,7 +28,8 @@ const config = require('rc')(
       'enabled-by-default': false,
       'glob-pattern': undefined,
       'root': undefined
-    }
+    },
+    playlist: undefined
   },
   [] // don't want rc interpreting argv
 )
@@ -105,6 +107,10 @@ const options = {
   archiveRoot: {
     describe: "where to archive zip files once they've been unpacked",
     default: config.archive.root
+  },
+  playlist: {
+    describe: 'create a playlist containing all of the unpacked albums',
+    string: true
   }
 }
 
@@ -209,24 +215,7 @@ switch (yargs.argv._[0]) {
     log.silly('pls', 'argv', argv)
 
     log.enableProgress()
-    scanAlbums(roots, groups).then(sorted => {
-      log.disableProgress()
-      let index = 0
-      const playlist = {}
-      for (let album of sorted) {
-        log.verbose('pls', 'album', album.name, 'has date', album.date)
-        for (let track of album.tracks) {
-          index++
-          playlist['File' + index] = track.path
-          playlist['Title' + index] = track.name
-          playlist['Length' + index] = Math.ceil(track.duration)
-        }
-      }
-      playlist['NumberOfEntries'] = index
-      playlist['Version'] = 2
-      console.log(inify(playlist, {section: 'playlist'}))
-      log.info('pls', 'playlist generated with', index, 'entries')
-    })
+    scanAlbums(roots, groups).then(sorted => console.log(makePlaylist(sorted)))
     break
   case 'unpack':
     options.R.describe = 'root directory containing zipped files'
@@ -237,7 +226,8 @@ switch (yargs.argv._[0]) {
                   R: options.R,
                   P: options.P,
                   'archive': options.archive,
-                  'archive-root': options.archiveRoot
+                  'archive-root': options.archiveRoot,
+                  playlist: options.playlist
                 })
                 .check(argv => {
                   if (argv._.length > 1 || argv.R.length && argv.P) return true
@@ -255,6 +245,11 @@ switch (yargs.argv._[0]) {
       argv.R[0], argv.P,
       argv.archive, argv.archiveRoot
     )
+    if (argv.playlist) {
+      finish = finish.then(albums => {
+        return writeFile(untildify(argv.playlist), makePlaylist(albums), 'utf-8')
+      })
+    }
     if (argv.saveConfig) finish = finish.then(() => saveConfig(argv))
     finish.catch(e => log.error('unpack', e.stack))
     break

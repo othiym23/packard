@@ -12,11 +12,12 @@ var r = relative(process.cwd(), p)
 var lines = function () {/*
 
 Options:
-  -s, --staging   where to create the tree for unpacked artists          [required]  [default: ""]
-  -R, --root      root directory containing zipped files                 [required]  [default: ""]
-  -P, --pattern   bash glob pattern used to match files under root       [default: ""]
-  --archive       after other operations, archive original files         [default: false]
+  -s, --staging   where to create the tree for unpacked artists  [required] [default: ""]
+  -R, --root      root directory containing zipped files  [array] [required] [default: ""]
+  -P, --pattern   bash glob pattern used to match files under root  [default: ""]
+  --archive       after other operations, archive original files  [boolean] [default: false]
   --archive-root  where to archive zip files once they've been unpacked  [default: ""]
+  --playlist      create a playlist containing all of the unpacked albums  [string]
 
 must pass either 1 or more zipfiles or root and glob pattern
 */}.toString().split('\n').slice(1, -1)
@@ -42,6 +43,7 @@ test('packard unpack', function (t) {
     .env('packard_archive__root', '')
     .env('packard_archive__enabled-by-default', '')
     .env('packard_archive__glob-pattern', '')
+    .env('packard_playlist', '')
     .run('node ' + p + ' unpack')
     .expect(function (r) {
       var trimmed = r.stderr
