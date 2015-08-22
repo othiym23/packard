@@ -15,3 +15,16 @@ export default class SingletrackAlbum extends Album {
     return Math.ceil(this.size / bs)
   }
 }
+
+SingletrackAlbum.fromTrack = (track) => {
+  return new SingletrackAlbum(
+    track.name,
+    track.album,
+    track.path,
+    {
+      size: track.size,
+      blockSize: track.blockSize,
+      blocks: track.blocks
+    }
+  )
+}
