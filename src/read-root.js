@@ -26,28 +26,7 @@ const cruft = [
 function visit (root) {
   return readdir(root)
            .filter(e => cruft.indexOf(e) === -1)
-           .map(e => stat(resolve(root, e))
-                       .then(stats => { return {path: e, stats} }))
-}
-
-function readRoot (root) {
-  return visit(root).map(({path, stats}) => {
-    if (stats.isDirectory()) return readArtist(root, path)
-
-    log.warn('unexpected thing', path, 'in root', root)
-  })
-}
-
-function flatten (root) {
-  return readRoot(root).then(artists => {
-    const tracks = new Set()
-    for (let artist of artists)
-      for (let album of artist.albums)
-        for (let track of album.tracks)
-          tracks.add({artist, album, track, stats: track.stats})
-
-    return tracks
-  })
+           .map(e => stat(resolve(root, e)).then(stats => { return {path: e, stats} }))
 }
 
 function readArtist (root, directory) {
@@ -85,6 +64,8 @@ function readArtist (root, directory) {
   })
   .filter(Boolean)
   .then(albums => {
+    if (!albums.length) return log.warn('no albums found for artist', directory)
+
     for (let a of albums) {
       const p = a.path
       const ext = extname(p)
@@ -131,6 +112,10 @@ function readAlbum (root, artist, album) {
     var tracks = files.filter(f => f instanceof Track)
     var covers = files.filter(f => f instanceof Cover)
 
+    if (!(tracks.length || covers.length)) {
+      return log.warn('no tracks or images found for album', albumPath)
+    }
+
     const a = new Multitrack(album, artist, albumPath, tracks)
     if (covers.length) a.pictures = covers
 
@@ -138,7 +123,11 @@ function readAlbum (root, artist, album) {
   })
 }
 
-readRoot.readRootFlat = flatten
+export default function readRoot (root) {
+  return visit(root).map(({path, stats}) => {
+    if (stats.isDirectory()) return readArtist(root, path)
 
-module.exports = readRoot
-// export default readRoot
+    log.warn('unexpected thing', path, 'in root', root)
+  })
+  .filter(Boolean)
+}
