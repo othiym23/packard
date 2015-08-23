@@ -27,13 +27,12 @@ test('read empty root', function (t) {
   readRoot(basedir).then(
     function (artists) {
       t.same(artists, [], 'no artists found in empty directory')
-      t.end()
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
-      t.end()
     }
   )
+  .finally(function () { t. end() })
 })
 
 test('read root with one empty artist directory', function (t) {
@@ -42,13 +41,12 @@ test('read root with one empty artist directory', function (t) {
   readRoot(basedir).then(
     function (artists) {
       t.same(artists, [], 'no albums found in empty directory')
-      t.end()
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
-      t.end()
     }
   )
+  .finally(function () { t. end() })
 })
 
 test('read root with one empty album directory', function (t) {
@@ -57,13 +55,12 @@ test('read root with one empty album directory', function (t) {
   readRoot(basedir).then(
     function (artists) {
       t.same(artists, [], 'no tracks found in empty directory')
-      t.end()
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
-      t.end()
     }
   )
+  .finally(function () { t. end() })
 })
 
 test('read root with one one-track directory, no cue sheet', function (t) {
@@ -87,13 +84,12 @@ test('read root with one one-track directory, no cue sheet', function (t) {
       var track = album.tracks[0]
       t.equal(track.name, 'Savage Beatings for All', 'track name normalized')
       t.equal(track.index, 1, 'track index parsed from filename')
-      t.end()
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
-      t.end()
     }
   )
+  .finally(function () { t. end() })
 })
 
 test('read root with one one-track directory, with cue sheet', function (t) {
@@ -117,13 +113,12 @@ test('read root with one one-track directory, with cue sheet', function (t) {
       t.equal(album.name, 'Skiffle_Rumble', "name didn't change")
 
       t.equal(album.cuesheet, cuesheet, 'found cue sheet')
-      t.end()
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
-      t.end()
     }
   )
+  .finally(function () { t. end() })
 })
 
 test('cleanup', function (t) {
