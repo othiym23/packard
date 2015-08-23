@@ -2,10 +2,17 @@ import sprintf from 'sprintf'
 
 import File from './file.js'
 
-export default class Track extends File {
-  constructor (artist, album, name, path, stats, optional = {}) {
-    super(path, stats, optional.ext || '.unknown')
-
+export default class Track {
+  constructor (artist, album, name, optional = {}) {
+    if (optional.path && optional.stats) {
+      this.file = new File(
+        optional.path,
+        optional.stats,
+        optional.ext || '.unknown'
+      )
+    } else {
+      this.file = null
+    }
     this.artist = artist
     this.album = album
     this.name = name
@@ -16,17 +23,31 @@ export default class Track extends File {
     this.duration = optional.duration
   }
 
+  getSize (bs) {
+    return this.file && this.file.getSize(bs) || 0
+  }
+
+  safeName () {
+    return this.fullName().replace(/[^ ()\]\[A-Za-z0-9.-]/g, '')
+  }
+
   fullName () {
-    let base = ''
-    if (this.artist) base += this.artist + ' - '
-    if (this.album) base += this.album + ' - '
-    if (this.index) base += sprintf('%02d', this.index) + ' - '
-    return base + this.name + this.ext
+    let name = ''
+    if (this.artist) name += this.artist + ' - '
+    if (this.album) name += this.album + ' - '
+    if (this.index) name += sprintf('%02d', this.index) + ' - '
+    name += this.name
+    if (this.file && this.file.ext) name += this.file.ext
+    return name
   }
 }
 
 Track.fromFLAC = (md, path, stats) => {
-  const optional = { ext: '.flac' }
+  const optional = {
+    path: path,
+    stats: stats,
+    ext: '.flac'
+  }
 
   if (md.duration) optional.duration = parseFloat(md.duration)
   if (md.TRACKNUMBER) optional.index = parseInt(md.TRACKNUMBER, 10)
@@ -37,8 +58,6 @@ Track.fromFLAC = (md, path, stats) => {
     md.ARTIST,
     md.ALBUM,
     md.TITLE,
-    path,
-    stats,
     optional
   )
 }

@@ -23,8 +23,8 @@ function makeAlbum (root, tracks) {
       return new Promise(function (resolve, reject) {
         var processor = new FLACProcessor()
         var source = createReadStream(EMPTY_TRACK)
-        track.path = path.join(root, track.safeName())
-        var sink = createWriteStream(track.path)
+        track.file.path = path.join(root, track.safeName())
+        var sink = createWriteStream(track.file.path)
 
         var comments = [
           'ARTIST=' + track.artist,
@@ -47,7 +47,7 @@ function makeAlbum (root, tracks) {
           .pipe(sink)
           .on('error', reject)
           .on('close', function () {
-            resolve(track.path)
+            resolve(track.file.path)
           })
       })
     }, {concurrency: 1})

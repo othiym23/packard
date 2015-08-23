@@ -105,7 +105,8 @@ function albumsFromTracks (metadata, covers) {
 }
 
 function fsEntitiesIntoBundles ({artist, album, track}, groups) {
-  groups.set(track.name, log.newGroup('read: ' + track.path))
+  const name = basename(track.file.path)
+  groups.set(name, log.newGroup('read: ' + name))
 
   return scan(track, groups)
     .then(b => {

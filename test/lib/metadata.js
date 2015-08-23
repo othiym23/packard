@@ -17,11 +17,13 @@ function makeAlbum (root, date, artistName, albumName, trackNames) {
         artistName,
         albumName,
         trackName,
-        '-', // path is irrelevant, since we're generating it
-        stats
+        {
+          path: EMPTY_TRACK, // path is irrelevant, since we're generating it
+          stats,
+          ext: '.flac'
+        }
       )
       track.date = date
-      track.ext = '.flac'
       track.index = index + 1
       return track
     }))

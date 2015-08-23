@@ -48,7 +48,7 @@ export default function readAlbums (root) {
         remaining.delete(thing)
         simplify(thing)
       } else if (thing instanceof Track) {
-        const base = basename(thing.path, extname(thing.path))
+        const base = basename(thing.file.path, extname(thing.file.path))
         if (cues.get(base) || covers.get(base)) {
           remaining.delete(thing)
           const mix = Singletrack.fromTrack(thing)

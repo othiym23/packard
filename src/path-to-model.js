@@ -21,9 +21,7 @@ export default function toModel (path, stats) {
         basename(dirname(directory)),
         basename(directory),
         filename,
-        path,
-        stats,
-        { ext: extension }
+        { path, stats, ext: extension }
       )
       parseName(track)
       return track

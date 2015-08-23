@@ -47,13 +47,15 @@ test('multitrack album with tracks', function (t) {
       'Gerry & The Pacemakers',
       'Skiffle Bloodbath',
       "Everybody Let's Booze Up and Riot",
-      undefined,
       {
-        size: 1,
-        blockSize: 512,
-        blocks: 1
-      },
-      'The Beatles'
+        path: '-',
+        stats: {
+          size: 1,
+          blockSize: 512,
+          blocks: 1
+        },
+        albumArtist: 'The Beatles'
+      }
     )]
   )
   t.equal(album.getSize(), 1, 'only tracks adding size to new album')
