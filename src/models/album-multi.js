@@ -1,9 +1,10 @@
 require('es6-shim')
-const {join, basename} = require('path')
 
-const log = require('npmlog')
+import { join, basename } from 'path'
 
-const Album = require('./album-base.js')
+import log from 'npmlog'
+
+import Album from './album-base.js'
 
 export default class MultitrackAlbum extends Album {
   constructor (name, artist, path, tracks = []) {

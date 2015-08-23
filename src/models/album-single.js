@@ -1,18 +1,29 @@
-var Album = require('./album-base.js')
+import { extname } from 'path'
+
+import Album from './album-base.js'
+import File from './file.js'
 
 export default class SingletrackAlbum extends Album {
-  constructor (name, artist, path, stats) {
-    super(name, artist, path)
+  constructor (name, artist, optional = {}) {
+    super(name, artist, optional.path)
 
-    this.cuesheet = null
+    this.cuesheet = optional.cuesheet || null
 
-    this.size = stats.size
-    this.blockSize = stats.blksize
-    this.blocks = stats.blocks
+    if (optional.file) {
+      this.file = optional.file
+    } else if (optional.path && optional.stats) {
+      this.file = new File(
+        optional.path,
+        optional.stats,
+        extname(optional.path)
+      )
+    } else {
+      this.file = null
+    }
   }
 
-  getSize (bs = 1) {
-    return Math.ceil(this.size / bs)
+  getSize (bs) {
+    return this.file && this.file.getSize() || 0
   }
 }
 
@@ -20,11 +31,6 @@ SingletrackAlbum.fromTrack = (track) => {
   return new SingletrackAlbum(
     track.name,
     track.album,
-    track.path,
-    {
-      size: track.size,
-      blockSize: track.blockSize,
-      blocks: track.blocks
-    }
+    { file: track.file }
   )
 }
