@@ -1,4 +1,4 @@
-require('es6-shim')
+require('babel/polyfill')
 
 var inspect = require('util').inspect
 
@@ -75,21 +75,21 @@ test('basic albumsFromTracks', function (t) {
 
   t.doesNotThrow(
     function () {
-      t.same(albumsFromTracks([]), [], 'got out what we put in')
+      t.equal(albumsFromTracks([]).size, 0, 'got out what we put in')
     },
     'albumsFromTracks does not error when given an array'
   )
 
   t.doesNotThrow(
     function () {
-      t.same(albumsFromTracks(new Set()), [], 'got out what we put in')
+      t.equal(albumsFromTracks(new Set()).size, 0, 'got out what we put in')
     },
     'albumsFromTracks does not error when given a Set'
   )
 
   t.doesNotThrow(
     function () {
-      t.same(albumsFromTracks(new Map().values()), [], 'got out what we put in')
+      t.equal(albumsFromTracks(new Map().values()).size, 0, 'got out what we put in')
     },
     'albumsFromTracks does not error when given an iterator'
   )
