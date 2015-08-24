@@ -33,7 +33,7 @@ export default function scanAlbums (roots, trackers) {
           {concurrency: 4}
         ).then(tracks => albumsFromFLACTracks(tracks))
     }).then(albums => {
-      const sorted = albums.reduce((all, list) => all.concat([...list]), [])
+      const sorted = albums.reduce((all, list) => all.concat(...list), [])
       sorted.sort(byDate)
       log.silly('scanAlbums', 'sorted', sorted.map(a => '[' + a.date + '] ' + a.name))
 

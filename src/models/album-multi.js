@@ -10,9 +10,17 @@ export default class MultitrackAlbum extends Album {
   constructor (name, artist, path, tracks = []) {
     super(name, artist, path)
 
-    this.tracks = tracks
+    this._tracks = tracks
     this.sourceArchive = null
     this.destArchive = null
+  }
+
+  get tracks () {
+    return this._tracks.sort((a, b) => (a.index || 0) - (b.index || 0))
+  }
+
+  set tracks (tracks) {
+    this._tracks = tracks
   }
 
   getSize (bs = 1) {
