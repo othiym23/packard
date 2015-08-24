@@ -1,16 +1,20 @@
 // SEE YOU IN 2017
 
-const Promise = require('bluebird')
-const promisify = Promise.promisify
+import fs from 'fs'
 
-const {join, resolve, basename} = require('path')
+import { join, resolve, basename } from 'path'
 
-const log = require('npmlog')
-const mkdirp = promisify(require('mkdirp'))
-const mv = promisify(require('mv'))
-const stat = promisify(require('fs').stat)
+import log from 'npmlog'
+import mkdirpCB from 'mkdirp'
+import mvCB from 'mv'
+import { promisify } from 'bluebird'
+import Promise from 'bluebird'
 
-function place (albums, newRoot, groups) {
+const mkdirp = promisify(mkdirpCB)
+const mv = promisify(mvCB)
+const stat = promisify(fs.stat)
+
+export function place (albums, newRoot, groups) {
   return Promise.all(
     [...albums].map(album => {
       const albumPath = join(newRoot, album.toPath())
@@ -74,7 +78,7 @@ function place (albums, newRoot, groups) {
   ).then(() => albums)
 }
 
-function moveToArchive (albums, root, groups) {
+export function moveToArchive (albums, root, groups) {
   return mkdirp(root).then(() => Promise.all(
     [...albums].map(album => {
       const archive = album.sourceArchive
@@ -100,5 +104,3 @@ function moveToArchive (albums, root, groups) {
     })
   ))
 }
-
-module.exports = { place, moveToArchive }
