@@ -101,7 +101,7 @@ export function albumsFromMetadata (metadata, covers = new Map()) {
       artists.add(track.flacTags.ALBUMARTIST || track.flacTags.ARTIST)
       dirs.add(dirname(track.file.path))
       dates.add(track.date)
-      archives.set(track.sourceArchive.path, track.sourceArchive)
+      if (track.sourceArchive) archives.set(track.sourceArchive.path, track.sourceArchive)
       tracks.add(track)
     }
 
@@ -168,59 +168,4 @@ export function albumsFromMetadata (metadata, covers = new Map()) {
 
   log.verbose('albumsFromMetadata', 'processed', finished.size, 'albums')
   return finished
-}
-
-export function albumsFromFS (tracks) {
-  assert(tracks, 'must pass tracks')
-
-  const albums = new Set()
-
-  // 1: map heuristic ID to sets of tracks that are probably albums
-  const maybeAlbums = new Map()
-  for (let track of tracks) {
-    const id = getID(track)
-    if (!maybeAlbums.get(id)) {
-      log.verbose('albumsFromFS', 'creating set for tracks on:', id)
-      maybeAlbums.set(id, new Set())
-    }
-    maybeAlbums.get(id).add(track)
-  }
-
-  // 2: take educated guesses at what the album-level metadata is
-  for (let trackSet of maybeAlbums.values()) {
-    const sorted = [...trackSet].sort((a, b) => a.index - b.index)
-
-    const albumArtists = sorted.reduce((s, t) => s.add(t.fsAlbum.artist), new Set())
-    if (albumArtists.size > 1) {
-      log.warn('albumsFromFS', 'many artists found', [...albumArtists])
-    }
-
-    const dates = sorted.reduce((s, t) => s.add(t.date), new Set())
-    if (dates.size > 1) {
-      log.warn('albumsFromFS', 'many dates found', [...dates])
-    }
-
-    const names = sorted.reduce((s, t) => s.add(t.album.name), new Set())
-    if (dates.size > 1) {
-      log.warn('albumsFromFS', 'many album names found', [...names])
-    }
-
-    const archives = sorted.reduce(
-      (m, t) => {
-        if (t.sourceArchive) m.set(t.sourceArchive.path, t.sourceArchive)
-        return m
-      },
-      new Map()
-    )
-    if (archives.size > 1) {
-      log.warn('albumsFromFS', 'many source archives found', [...archives])
-    }
-
-    const album = new Album([...names][0], [...albumArtists][0], '-', sorted)
-    album.date = [...dates][0]
-    album.sourceArchive = [...archives.values()][0]
-    albums.add(album)
-  }
-
-  return albums
 }

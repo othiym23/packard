@@ -28,7 +28,7 @@ function scanArtists (roots, trackers) {
           { concurrency: 4 }
         ).then(tracks => {
           // 1. convert tracks into albums
-          const albums = flac.albumsFromFS(tracks)
+          const albums = flac.albumsFromMetadata(tracks)
 
           // 2. find artist tracks that aren't on single-artist albums
           const artistTracks = albumsIntoArtistTracks(albums)
@@ -53,7 +53,7 @@ function albumsIntoArtistTracks (albums) {
       if (saved !== album.artist) {
         log.silly('albumsIntoArtistTracks', 'track artist', saved, '!==', album.artist)
         if (!artistTracks.get(track.artist.name)) {
-          log.verbose('albumsIntoArtistTracks', 'creating artist track set for', track.artist)
+          log.verbose('albumsIntoArtistTracks', 'creating artist track set for', track.artist.name)
           artistTracks.set(track.artist.name, new Set())
         }
         artistTracks.get(track.artist.name).add(track)

@@ -4,7 +4,6 @@ var inspect = require('util').inspect
 
 var test = require('tap').test
 
-var albumsFromFS = require('../lib/metadata/flac.js').albumsFromFS
 var albumsFromMetadata = require('../lib/metadata/flac.js').albumsFromMetadata
 
 var Album = require('../lib/models/album-multi.js')
@@ -67,46 +66,6 @@ function idealAlbum () {
   return album
 }
 
-test('basic albumsFromFS', function (t) {
-  t.throws(
-    function () { albumsFromFS() },
-    { name: 'AssertionError', message: 'must pass tracks' },
-    'albumsFromFS requires an iterable of tracks'
-  )
-
-  t.doesNotThrow(
-    function () {
-      t.same(albumsFromFS([]), [], 'got out what we put in')
-    },
-    'albumsFromFS does not error when given an array'
-  )
-
-  t.doesNotThrow(
-    function () {
-      t.same(albumsFromFS(new Set()), [], 'got out what we put in')
-    },
-    'albumsFromFS does not error when given a Set'
-  )
-
-  t.doesNotThrow(
-    function () {
-      t.same(albumsFromFS(new Map().values()), [], 'got out what we put in')
-    },
-    'albumsFromFS does not error when given an iterator'
-  )
-
-  t.doesNotThrow(
-    function () {
-      var out = albumsFromFS([makeTrack()]).values().next().value
-      var ideal = idealAlbum()
-      t.equal(inspect(out), inspect(ideal), 'basic metadata is equal')
-      t.equal(inspect(out.tracks[0]), inspect(ideal.tracks[0]), 'track metadata is equal')
-    },
-    'albumsFromFS does not error when given an array'
-  )
-  t.end()
-})
-
 test('basic albumsFromMetadata', function (t) {
   t.throws(
     function () { albumsFromMetadata() },
@@ -145,16 +104,4 @@ test('basic albumsFromMetadata', function (t) {
     'albumsFromMetadata does not error when given an array with one track'
   )
   t.end()
-})
-
-test('albumsFromFS converges with albumsFromMetadata', function (t) {
-  var track = makeTrack()
-  var fsOut = albumsFromFS([track]).values().next().value
-  var mdOut = albumsFromMetadata([track]).values().next().value
-  t.equal(inspect(fsOut), inspect(mdOut), 'output is compatible')
-  t.equal(
-    inspect(fsOut.tracks[0]),
-    inspect(mdOut.tracks[0]),
-    'track output is compatible'
-  )
 })
