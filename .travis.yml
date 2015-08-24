@@ -4,6 +4,6 @@ node_js:
   - "0.12"
   - "iojs"
 sudo: false
-script: npm run-script coveralls
+script: npm run-script coverage
 before_install:
   - npm install -g npm@latest
