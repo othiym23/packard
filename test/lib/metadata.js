@@ -23,7 +23,7 @@ function makeAlbum (root, date, artistName, albumName, trackNames) {
         trackName,
         {
           path: EMPTY_TRACK, // path is irrelevant, since we're generating it
-          stats,
+          stats: stats,
           ext: '.flac'
         }
       )
