@@ -1,16 +1,14 @@
 import readAlbums from './read-fs-albums.js'
 
-import Artist from './models/artist.js'
-
 export default function toArtists (root) {
   return readAlbums(root).then(albums => {
     const artists = new Map()
 
     for (let album of albums) {
-      let artist = artists.get(album.artist)
+      let artist = artists.get(album.artist.name)
       if (!artist) {
-        artist = new Artist(album.artist)
-        artists.set(album.artist, artist)
+        artist = album.artist
+        artists.set(album.artist.name, artist)
       }
 
       artist.albums.push(album)

@@ -13,6 +13,7 @@ import FLACReader from 'flac-parser'
 import log from 'npmlog'
 
 import Album from '../models/album-multi.js'
+import Artist from '../models/artist.js'
 import AudioFile from '../models/audio-file.js'
 import Track from '../models/track.js'
 
@@ -56,75 +57,112 @@ export function scan (path, trackers, extras = {}) {
         if (flacTags.DISCNUMBER) extras.disc = parseInt(flacTags.DISCNUMBER, 10)
         if (flacTags.DATE) extras.date = flacTags.DATE
 
-        resolve(new Track(flacTags.ARTIST, flacTags.ALBUM, flacTags.TITLE, extras))
+        const artist = new Artist(flacTags.ARTIST)
+        const album = new Album(flacTags.ALBUM, artist)
+        resolve(new Track(artist, album, flacTags.TITLE, extras))
       })
   }))
 }
 
-function albumsFromMetadata (metadata, covers) {
+// heuristic as all get-out
+function getID ({ fsAlbum, flacTags, album }) {
+  if (flacTags && flacTags.ALBUMARTIST && flacTags.ALBUM) {
+    return flacTags.ALBUMARTIST + ' - ' + flacTags.ALBUM
+  } else if (fsAlbum && fsAlbum.artist && fsAlbum.artist.name && album) {
+    return fsAlbum.artist.name + ' - ' + album.name
+  } else {
+    return album && album.name
+  }
+}
+
+export function albumsFromMetadata (metadata, covers = new Map()) {
+  assert(metadata, 'must pass metadata')
+
   const albums = new Map()
   const tracks = [].concat(...metadata)
   for (let track of tracks) {
-    const tags = track.flacTags
-    if (!albums.get(tags.ALBUM)) albums.set(tags.ALBUM, [])
-    albums.get(tags.ALBUM).push(track)
+    const id = getID(track)
+    if (!albums.get(id)) albums.set(id, [])
+    albums.get(id).push(track)
   }
 
   const finished = new Set()
   for (let album of albums.keys()) {
+    let names = new Set()
     let artists = new Set()
     let tracks = new Set()
     let dirs = new Set()
-    let archives = new Set()
+    let dates = new Set()
+    let archives = new Map()
 
     for (let track of albums.get(album)) {
       log.silly('albumsFromMetadata', 'track', track)
-      artists.add(track.flacTags.ARTIST)
-      dirs.add(dirname(track.path))
-      archives.add(track.sourceArchive.path)
+      names.add(track.flacTags.ALBUM)
+      artists.add(track.flacTags.ALBUMARTIST || track.flacTags.ARTIST)
+      dirs.add(dirname(track.file.path))
+      dates.add(track.date)
+      archives.set(track.sourceArchive.path, track.sourceArchive)
       tracks.add(track)
     }
 
-    const minDirs = [...dirs]
-    if (minDirs.length === 0) log.warn('albumsFromMetadata', 'minDirs too small', minDirs)
-    if (minDirs.length > 1) log.warn('albumsFromMetadata', 'minDirs too big', minDirs)
+    const minNames = [...names]
+    if (minNames.length === 0) log.error('albumsFromMetadata', 'album has no name?', minNames)
+    if (minNames.length > 1) {
+      log.error('albumsFromMetadata', 'album has more than one name', minNames)
+    }
 
-    const minArchism = [...archives]
+    const minDirs = [...dirs]
+    if (minDirs.length === 0) log.warn('albumsFromMetadata', 'album has no path?', minDirs)
+    if (minDirs.length > 1) {
+      log.warn('albumsFromMetadata', 'album in more than one directory', minDirs)
+    }
+
+    const minDates = [...dates.keys()]
+    if (minDates.length > 1) {
+      log.warn('albumsFromMetadata', 'more than one date', minDates)
+    }
+
+    const minArchism = [...archives.keys()]
     if (minArchism.length > 1) {
       log.warn('albumsFromMetadata', 'more than one source archive', minArchism)
       log.warn('albumsFromMetadata', '--archive may not work as expected')
     }
 
-    let artist
+    let artistName
     const minArtists = [...artists]
     switch (minArtists.length) {
       case 1:
-        artist = minArtists[0]
+        artistName = minArtists[0]
         break
       case 2:
         let [first, second] = minArtists
         if (first.indexOf(second) !== -1) {
-          artist = first
+          artistName = first
         } else if (second.indexOf(first) !== -1) {
-          artist = second
+          artistName = second
         } else {
           const sorted = [...tracks].sort((a, b) => (a.index || 0) - (b.index || 0))
-          if (sorted[0].artist === first) {
-            artist = first + ' / ' + second
+          if (sorted[0].artistName === first) {
+            artistName = first + ' / ' + second
           } else {
-            artist = second + ' / ' + first
+            artistName = second + ' / ' + first
           }
         }
-        log.warn('albumsFromMetadata', '2 artists found; assuming split', artist)
+        log.warn('albumsFromMetadata', '2 artists found; assuming split', artistName)
         break
       default:
         log.warn('albumsFromMetadata', 'many artists found; assuming compilation', minArtists)
-        artist = 'Various Artists'
+        artistName = 'Various Artists'
     }
-    const a = new Album(album, artist, minDirs[0], [...tracks])
-    a.sourceArchive = minArchism[0]
+    const artist = new Artist(artistName)
+    const a = new Album(minNames[0], artist, minDirs[0], [...tracks])
+    a.sourceArchive = archives.get(minArchism[0])
+    a.date = minDates[0]
     log.verbose('albumsFromMetadata', 'looking up cover for', a.path, minDirs)
     if (covers.get(a.path)) a.pictures = covers.get(a.path)
+    for (let track of tracks) {
+      track.album = a
+    }
     finished.add(a)
   }
 
@@ -132,13 +170,15 @@ function albumsFromMetadata (metadata, covers) {
   return finished
 }
 
-function albumsFromFS (tracks) {
+export function albumsFromFS (tracks) {
+  assert(tracks, 'must pass tracks')
+
   const albums = new Set()
 
   // 1: map heuristic ID to sets of tracks that are probably albums
   const maybeAlbums = new Map()
   for (let track of tracks) {
-    const id = track.fsAlbum.artist + ' - ' + track.album
+    const id = getID(track)
     if (!maybeAlbums.get(id)) {
       log.verbose('albumsFromFS', 'creating set for tracks on:', id)
       maybeAlbums.set(id, new Set())
@@ -160,21 +200,27 @@ function albumsFromFS (tracks) {
       log.warn('albumsFromFS', 'many dates found', [...dates])
     }
 
-    const names = sorted.reduce((s, t) => s.add(t.album), new Set())
+    const names = sorted.reduce((s, t) => s.add(t.album.name), new Set())
     if (dates.size > 1) {
       log.warn('albumsFromFS', 'many album names found', [...names])
     }
 
+    const archives = sorted.reduce(
+      (m, t) => {
+        if (t.sourceArchive) m.set(t.sourceArchive.path, t.sourceArchive)
+        return m
+      },
+      new Map()
+    )
+    if (archives.size > 1) {
+      log.warn('albumsFromFS', 'many source archives found', [...archives])
+    }
+
     const album = new Album([...names][0], [...albumArtists][0], '-', sorted)
     album.date = [...dates][0]
+    album.sourceArchive = [...archives.values()][0]
     albums.add(album)
   }
 
   return albums
-}
-
-module.exports = {
-  scan,
-  albumsFromMetadata,
-  albumsFromFS
 }

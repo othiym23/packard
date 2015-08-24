@@ -29,7 +29,7 @@ export default class MultitrackAlbum extends Album {
     if (dates.size > 0) name += '[' + [...dates][0] + '] '
     name += this.name
     return join(
-      safe(this.artist),
+      safe(this.artist.name),
       safe(name)
     )
   }

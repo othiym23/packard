@@ -2,6 +2,7 @@ const { basename, dirname, extname } = require('path')
 
 import readTracks from './read-fs-tracks.js'
 
+import Artist from './models/artist.js'
 import Cover from './models/cover.js'
 import Cuesheet from './models/cuesheet.js'
 import Multitrack from './models/album-multi.js'
@@ -89,8 +90,8 @@ export default function readAlbums (root) {
       }
 
       tracks.delete(track)
-      artistNames.add(track.artist)
-      albumNames.add(track.album)
+      artistNames.add(track.artist.name)
+      albumNames.add(track.album.name)
       tracklisting.push(track)
     }
 
@@ -107,7 +108,8 @@ export default function readAlbums (root) {
       }
       const albumName = [...albumNames][0]
       const directory = dirname(tracklisting[0].path)
-      const album = new Multitrack(albumName, artistName, directory, tracklisting)
+      const artist = new Artist(artistName)
+      const album = new Multitrack(albumName, artist, directory, tracklisting)
       album.pictures = album.pictures.concat([...pictures])
       albums.add(album)
     }

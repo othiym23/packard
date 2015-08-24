@@ -49,14 +49,14 @@ function albumsIntoArtistTracks (albums) {
   const artistTracks = new Map()
   for (let album of albums)
     for (let track of album.tracks) {
-      let saved = safe(track.artist)
+      let saved = safe(track.artist.name)
       if (saved !== album.artist) {
         log.silly('albumsIntoArtistTracks', 'track artist', saved, '!==', album.artist)
-        if (!artistTracks.get(track.artist)) {
+        if (!artistTracks.get(track.artist.name)) {
           log.verbose('albumsIntoArtistTracks', 'creating artist track set for', track.artist)
-          artistTracks.set(track.artist, new Set())
+          artistTracks.set(track.artist.name, new Set())
         }
-        artistTracks.get(track.artist).add(track)
+        artistTracks.get(track.artist.name).add(track)
       }
     }
 
@@ -73,19 +73,19 @@ function albumsIntoArtistTracks (albums) {
 function albumsAndTracksToArtists (albums, artistTracks) {
   const artists = new Map()
   for (let album of albums) {
-    if (!artists.get(album.artist)) {
-      log.verbose('albumsAndTracksToArtists', 'creating artist for', album.artist)
-      artists.set(album.artist, new Artist(album.artist))
+    if (!artists.get(album.artist.name)) {
+      log.verbose('albumsAndTracksToArtists', 'creating artist for', album.artist.name)
+      artists.set(album.artist.name, album.artist)
     }
-    artists.get(album.artist).albums.push(album)
+    artists.get(album.artist.name).albums.push(album)
   }
 
-  for (let [artist, tracks] of [...artistTracks.entries()]) {
-    if (!artists.get(artist)) {
-      log.verbose('albumsAndTracksToArtists', 'creating artist for', artist)
-      artists.set(artist, new Artist(artist))
+  for (let [artistName, tracks] of [...artistTracks.entries()]) {
+    if (!artists.get(artistName)) {
+      log.verbose('albumsAndTracksToArtists', 'creating artist for', artistName)
+      artists.set(artistName, new Artist(artistName))
     }
-    artists.get(artist).addOtherTracks([...tracks.values()])
+    artists.get(artistName).addOtherTracks([...tracks.values()])
   }
 
   return artists

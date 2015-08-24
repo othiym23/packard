@@ -14,7 +14,7 @@ function place (albums, newRoot, groups) {
   return Promise.all(
     [...albums].map(album => {
       const albumPath = join(newRoot, album.toPath())
-      const trackerGroup = groups.get(album.sourceArchive)
+      const trackerGroup = groups.get(album.sourceArchive.path)
       return mkdirp(albumPath).then(() => {
         log.silly('place', 'created', albumPath)
         const tracker = trackerGroup.newItem(

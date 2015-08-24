@@ -27,9 +27,9 @@ function makeAlbum (root, tracks) {
         var sink = createWriteStream(track.file.path)
 
         var comments = [
-          'ARTIST=' + track.artist,
+          'ARTIST=' + track.artist.name,
           'TITLE=' + track.name,
-          'ALBUM=' + track.album,
+          'ALBUM=' + track.album.name,
           'TRACKNUMBER=' + track.index,
           'DATE=' + track.date
         ]

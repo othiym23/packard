@@ -1,6 +1,7 @@
 import { extname } from 'path'
 
 import Album from './album-base.js'
+import Artist from './artist.js'
 import File from './file.js'
 
 export default class SingletrackAlbum extends Album {
@@ -30,7 +31,7 @@ export default class SingletrackAlbum extends Album {
 SingletrackAlbum.fromTrack = (track) => {
   return new SingletrackAlbum(
     track.name,
-    track.album,
+    new Artist(track.album.name),
     { file: track.file }
   )
 }

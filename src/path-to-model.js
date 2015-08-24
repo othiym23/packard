@@ -1,5 +1,7 @@
 const { basename, dirname, extname } = require('path')
 
+import Album from './models/album-multi.js'
+import Artist from './models/artist.js'
 import Cover from './models/cover.js'
 import Cuesheet from './models/cuesheet.js'
 import File from './models/file.js'
@@ -17,9 +19,11 @@ export default function toModel (path, stats) {
     case '.aac':
     case '.wav':
     case '.aif':
+      const artist = new Artist(basename(dirname(directory)))
+      const album = new Album(basename(directory), artist, directory)
       const track = new Track(
-        basename(dirname(directory)),
-        basename(directory),
+        artist,
+        album,
         filename,
         { path, stats, ext: extension }
       )

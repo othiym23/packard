@@ -1,9 +1,19 @@
 import sprintf from 'sprintf'
 
+import Album from './album-base.js'
+import Artist from './artist.js'
 import AudioFile from './audio-file.js'
 
+const DEFAULT_ARTIST = new Artist('[unknown]')
+const DEFAULT_ALBUM = new Album('[untitled]', DEFAULT_ARTIST)
+
 export default class Track {
-  constructor (artist = '[unknown]', album = '[untitled]', name = '[untitled]', optional = {}) {
+  constructor (
+    artist = DEFAULT_ARTIST,
+    album = DEFAULT_ALBUM,
+    name = '[untitled]',
+    optional = {}
+  ) {
     this.artist = artist
     this.album = album
     this.name = name
@@ -20,7 +30,6 @@ export default class Track {
       this.file = null
     }
 
-    this.albumArtist = optional.albumArtist || artist
     this.index = optional.index || 0
     this.disc = optional.disc || 0
     this.date = optional.date
@@ -54,8 +63,8 @@ export default class Track {
 
   fullName () {
     let name = ''
-    if (this.artist) name += this.artist + ' - '
-    if (this.album) name += this.album + ' - '
+    if (this.artist) name += this.artist.name + ' - '
+    if (this.album) name += this.album.name + ' - '
     if (this.index) name += sprintf('%02d', this.index) + ' - '
     name += this.name
     if (this.file && this.file.ext) name += this.file.ext

@@ -1,5 +1,6 @@
 var test = require('tap').test
 
+var Artist = require('../lib/models/artist.js')
 var BaseAlbum = require('../lib/models/album-base.js')
 var Cover = require('../lib/models/cover.js')
 var MultitrackAlbum = require('../lib/models/album-multi.js')
@@ -22,7 +23,8 @@ test('base album missing information', function (t) {
 })
 
 test('multitrack album base case', function (t) {
-  var album = new MultitrackAlbum('Skiffle Bloodbath', 'Gerry & The Pacemakers')
+  var artist = new Artist('Gerry & The Pacemakers')
+  var album = new MultitrackAlbum('Skiffle Bloodbath', artist)
   t.equal(album.getSize(), 0, 'nothing to a new album')
   t.equal(
     album.toPath(),
@@ -39,13 +41,17 @@ test('multitrack album base case', function (t) {
 })
 
 test('multitrack album with tracks', function (t) {
+  var artist = new Artist('Gerry & The Pacemakers')
   var album = new MultitrackAlbum(
     'Skiffle Bloodbath',
-    'Gerry & The Pacemakers',
+    artist,
     undefined,
     [new Track(
-      'Gerry & The Pacemakers',
-      'Skiffle Bloodbath',
+      artist,
+      new MultitrackAlbum(
+        'Skiffle Bloodbath',
+        new Artist('The Beatles')
+      ),
       "Everybody Let's Booze Up and Riot",
       {
         path: '-',
@@ -53,8 +59,7 @@ test('multitrack album with tracks', function (t) {
           size: 1,
           blockSize: 512,
           blocks: 1
-        },
-        albumArtist: 'The Beatles'
+        }
       }
     )]
   )
@@ -75,7 +80,8 @@ test('multitrack album with tracks', function (t) {
 })
 
 test('multitrack album with cover', function (t) {
-  var album = new MultitrackAlbum('Skiffle Bloodbath', 'Gerry & The Pacemakers')
+  var artist = new Artist('Gerry & The Pacemakers')
+  var album = new MultitrackAlbum('Skiffle Bloodbath', artist)
   album.pictures.push(new Cover('cover.jpg', {size: 513, blockSize: 512, blocks: 1}))
   t.equal(album.getSize(), 513, 'only cover size to new album')
   t.equal(

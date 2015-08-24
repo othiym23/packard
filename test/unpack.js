@@ -43,7 +43,7 @@ test('unpacking a single-artist album', function (t) {
     t.equal(albums.size, 1, 'got 1 album back')
     var album = albums.values().next().value
     t.ok(album, 'found album OK')
-    t.equal(album.artist, 'Gary Beck', 'got correct artist name')
+    t.equal(album.artist.name, 'Gary Beck', 'got correct artist name')
     t.equal(album.name, 'Feel It', 'got correct album name')
     t.equal(album.tracks.length, 3, 'album has its tracks')
   }).catch(function (e) {
