@@ -5,7 +5,7 @@ var mkdirp = require('mkdirp')
 var rimraf = require('rimraf')
 var test = require('tap').test
 
-var readRoot = require('../lib/read-tree.js')
+var readArtists = require('../lib/read-fs-artists.js')
 
 var basedir = join(__dirname, 'test-read-tree')
 
@@ -24,7 +24,7 @@ test('setup', function (t) {
 })
 
 test('read empty root', function (t) {
-  readRoot(basedir).then(
+  readArtists(basedir).then(
     function (artists) {
       t.same(artists, [], 'no artists found in empty directory')
     },
@@ -38,7 +38,7 @@ test('read empty root', function (t) {
 test('read root with one empty artist directory', function (t) {
   setup()
   mkdirp.sync(join(basedir, 'eMPTy'))
-  readRoot(basedir).then(
+  readArtists(basedir).then(
     function (artists) {
       t.same(artists, [], 'no albums found in empty directory')
     },
@@ -52,7 +52,7 @@ test('read root with one empty artist directory', function (t) {
 test('read root with one empty album directory', function (t) {
   setup()
   mkdirp.sync(join(basedir, 'eMPTy', 'nOTHINg'))
-  readRoot(basedir).then(
+  readArtists(basedir).then(
     function (artists) {
       t.same(artists, [], 'no tracks found in empty directory')
     },
@@ -70,7 +70,7 @@ test('read root with one one-track directory, no cue sheet', function (t) {
   mkdirp.sync(albumDir)
   writeFileSync(join(albumDir, '1-Savage_Beatings_for_All.flac'), 'lol')
 
-  readRoot(basedir).then(
+  readArtists(basedir).then(
     function (artists) {
       var artist = artists[0]
       t.ok(artist, 'found artist')
@@ -102,7 +102,7 @@ test('read root with one one-track directory, with cue sheet', function (t) {
   var cuesheet = join(artistDir, 'Skiffle_Rumble.cue')
   writeFileSync(cuesheet, 'rofl')
 
-  readRoot(basedir).then(
+  readArtists(basedir).then(
     function (artists) {
       var artist = artists[0]
       t.ok(artist, 'found artist')

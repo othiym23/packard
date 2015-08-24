@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import audit from './metadata/audit.js'
 import flatten from './flatten-tracks.js'
-import readTree from './read-tree.js'
+import readArtists from './read-fs-artists.js'
 import scanFLAC from './flac/scan.js'
 import Artist from './models/artist.js'
 
@@ -65,7 +65,7 @@ function albumsAndTracksToArtists (albums, artistTracks) {
 export default function scanArtists (roots, trackers) {
   return Promise.map(
       roots,
-      root => readTree(root).then(artists => [root, flatten(artists)])
+      root => readArtists(root).then(artists => [root, flatten(artists)])
     ).map(([root, entities]) => {
       log.verbose('scanArtists', 'processing', root)
       return Promise.map(
