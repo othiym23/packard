@@ -11,16 +11,6 @@ import Cover from '../models/cover.js'
 
 const stat = promisify(fs.stat)
 
-function extractRelease (zipfile, tmpdir, covers, trackers) {
-  log.verbose('extractReleaseMetadata', 'archive:', zipfile)
-
-  return unzip(zipfile, trackers, tmpdir)
-          .then(list => scan(list, trackers))
-          .then(list => populateImages(list, covers))
-          .then(list => list.filter(e => !(e instanceof Cover ||
-                                           e instanceof Error)))
-}
-
 function scan (unpackedFiles, trackers) {
   return Promise.map(
     unpackedFiles,
@@ -55,4 +45,12 @@ function populateImages (list, covers) {
   return list
 }
 
-module.exports = { extractRelease }
+export function extractRelease (zipfile, tmpdir, covers, trackers) {
+  log.verbose('extractReleaseMetadata', 'archive:', zipfile)
+
+  return unzip(zipfile, trackers, tmpdir)
+          .then(list => scan(list, trackers))
+          .then(list => populateImages(list, covers))
+          .then(list => list.filter(e => !(e instanceof Cover ||
+                                           e instanceof Error)))
+}

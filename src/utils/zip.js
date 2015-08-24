@@ -1,18 +1,21 @@
-const Promise = require('bluebird')
-const promisify = Promise.promisify
+import fs from 'fs'
+import { createHash } from 'crypto'
+import { createWriteStream } from 'graceful-fs'
+import { join, basename, dirname } from 'path'
 
-const { createHash } = require('crypto')
-const { createWriteStream } = require('graceful-fs')
-const { join, basename, dirname } = require('path')
-const stat = promisify(require('graceful-fs').stat)
-
-const log = require('npmlog')
-const mkdirp = promisify(require('mkdirp'))
-const openZip = promisify(require('yauzl').open)
+import log from 'npmlog'
+import mkdirpCB from 'mkdirp'
+import { open as openZipCB } from 'yauzl'
+import { promisify } from 'bluebird'
+import Promise from 'bluebird'
 
 import Archive from '../models/archive.js'
 
-function unpack (archivePath, groups, directory) {
+const stat = promisify(fs.stat)
+const mkdirp = promisify(mkdirpCB)
+const openZip = promisify(openZipCB)
+
+export function unpack (archivePath, groups, directory) {
   log.silly('unpack', 'unpacking', archivePath)
   const path = join(directory, createHash('sha1').update(archivePath).digest('hex'))
   const group = groups.get(archivePath)
@@ -82,5 +85,3 @@ function unpack (archivePath, groups, directory) {
     }).catch(reject)
   }))
 }
-
-module.exports = { unpack }

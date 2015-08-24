@@ -1,4 +1,4 @@
-require('es6-shim')
+import 'es6-shim'
 
 import { join, basename } from 'path'
 

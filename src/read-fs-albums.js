@@ -1,4 +1,4 @@
-const { basename, dirname, extname } = require('path')
+import { basename, dirname, extname } from 'path'
 
 import readTracks from './read-fs-tracks.js'
 

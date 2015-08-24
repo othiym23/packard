@@ -1,4 +1,4 @@
-const { basename, dirname, extname } = require('path')
+import { basename, dirname, extname } from 'path'
 
 import Album from './models/album-multi.js'
 import Artist from './models/artist.js'

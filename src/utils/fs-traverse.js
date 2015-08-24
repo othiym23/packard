@@ -1,9 +1,10 @@
-const promisify = require('bluebird').promisify
-
-const readdir = promisify(require('graceful-fs').readdir)
-const stat = promisify(require('graceful-fs').stat)
-
+import fs from 'graceful-fs'
 import { resolve } from 'path'
+
+import { promisify } from 'bluebird'
+
+const readdir = promisify(fs.readdir)
+const stat = promisify(fs.stat)
 
 const cruft = [
   '.DS_Store',    // OS X metadata is very cluttery
