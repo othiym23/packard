@@ -176,19 +176,16 @@ switch (yargs.argv._[0]) {
     log.enableProgress()
     Promise.map(things, f => {
       groups.set(basename(f), log.newGroup(f))
-      const track = flac.scan(f, groups)
-      log.silly('track', track)
-      return track
+      return flac.scan(f, groups)
     })
-    .then(bs => {
+    .then(track => {
       log.disableProgress()
-      console.log(JSON.stringify(bs, null, 2))
+      console.log(JSON.stringify(track, null, 2))
     })
     .catch(e => {
       log.disableProgress()
       log.error('inspect', e.stack)
     })
-    .then(() => log.disableProgress())
 
     break
   case 'pls':

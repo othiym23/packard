@@ -50,7 +50,7 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
       {concurrency: 2}
     )
   }).then(m => {
-    return place(flac.albumsFromTracks(m, covers), staging, groups)
+    return place(flac.albumsFromMetadata(m, covers), staging, groups)
   }).then(placed => {
     if (!archive) return Promise.resolve(placed)
     return moveToArchive(placed, archiveRoot, groups).then(() => placed)

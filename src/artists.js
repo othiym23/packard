@@ -27,20 +27,17 @@ function scanArtists (roots, trackers) {
           entity => flac.scan(entity.path, trackers, entity).then(audit),
           { concurrency: 4 }
         ).then(tracks => {
-          // 1. bundle the tracks into sets
-          const trackSets = flac.tracksIntoSets(tracks)
+          // 1. convert tracks into albums
+          const albums = flac.albumsFromFS(tracks)
 
-          // 2. convert the sets into albums
-          const albums = flac.trackSetsIntoAlbums([...trackSets.values()])
-
-          // 3. find artist tracks that aren't on single-artist albums
+          // 2. find artist tracks that aren't on single-artist albums
           const artistTracks = albumsIntoArtistTracks(albums)
 
-          // 4. roll up albums to artists
-          // 5. add loose tracks to artists
+          // 3. roll up albums to artists
+          // 4. add loose tracks to artists
           const artists = albumsAndTracksToArtists(albums, artistTracks)
 
-          // 6. compile list per-artist
+          // 5. compile list per-artist
           const sorted = [...artists.values()].sort(bySizeReverse)
 
           return [root, sorted]

@@ -31,12 +31,7 @@ function scanAlbums (roots, trackers) {
           [...entities],
           entity => flac.scan(entity.path, trackers, entity).then(audit),
           {concurrency: 4}
-        ).then(tracks => {
-          const trackSets = flac.tracksIntoSets(tracks)
-          const albums = flac.trackSetsIntoAlbums([...trackSets.values()])
-
-          return albums
-        })
+        ).then(tracks => flac.albumsFromFS(tracks))
     }).then(albums => {
       const sorted = albums.reduce((all, list) => all.concat([...list]), [])
       sorted.sort(byDate)
