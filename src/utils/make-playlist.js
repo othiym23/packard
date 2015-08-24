@@ -1,14 +1,14 @@
-const inify = require('ini').stringify
-const log = require('npmlog')
+import { stringify as inify } from 'ini'
+import log from 'npmlog'
 
-function makePlaylist (albums) {
+export default function makePlaylist (albums) {
   let index = 0
   const playlist = {}
   for (let album of albums) {
     log.verbose('makePlaylist', 'album', album.name, 'has date', album.date)
     for (let track of album.tracks) {
       index++
-      playlist['File' + index] = track.path
+      playlist['File' + index] = track.file.path
       playlist['Title' + index] = track.name
       playlist['Length' + index] = Math.ceil(track.duration)
     }
@@ -18,5 +18,3 @@ function makePlaylist (albums) {
   log.info('makePlaylist', 'playlist generated with', index, 'entries')
   return inify(playlist, {section: 'playlist'})
 }
-
-module.exports = makePlaylist
