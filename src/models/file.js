@@ -1,13 +1,13 @@
-import { basename } from 'path'
+import { basename, extname } from 'path'
 
 export default class File {
-  constructor (path, stats, ext) {
+  constructor (path, stats, ext = extname(path)) {
     this.path = path
-    this.size = stats.size
-    this.blockSize = stats.blksize
-    this.blocks = stats.blocks
-    this.name = basename(path, ext)
+    this.stats = stats
     this.ext = ext
+
+    // derived properties
+    this.name = basename(path, this.ext)
   }
 
   fullName () {
@@ -19,6 +19,6 @@ export default class File {
   }
 
   getSize (bs = 1) {
-    return Math.ceil(this.size / bs)
+    return Math.ceil(this.stats.size / bs)
   }
 }

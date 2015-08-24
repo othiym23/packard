@@ -10,29 +10,49 @@ const stat = promisify(require('fs').stat)
 const FLAC = require('flac-parser')
 const log = require('npmlog')
 
-const audit = require('./audit.js')
-const Album = require('../models/album-multi.js')
-const Track = require('../models/track.js')
+import Album from '../models/album-multi.js'
+import AudioFile from '../models/audio-file.js'
+import Track from '../models/track.js'
 
-function scan (bundle, groups) {
-  const path = bundle.path
+function scan (path, trackers, extras = {}) {
   log.verbose('flac.scan', 'scanning', path)
 
-  const metadata = {}
-  bundle.metadata = metadata
-
   return stat(path).then(stats => new Promise((resolve, reject) => {
-    bundle.stats = stats
-    const tracker = groups.get(basename(path)).newStream(
-      'FLAC scan: ' + basename(path),
-      stats.size
-    )
+    const name = basename(path)
+    let tracker = trackers.get(name)
+    if (!tracker) {
+      tracker = log.newGroup(name)
+      trackers.set(name, tracker)
+    }
+
+    const streamData = {}
+    const flacTags = extras.flacTags = {}
+    const musicbrainzTags = extras.musicbrainzTags = {}
+
     createReadStream(path)
-      .pipe(tracker)
+      .pipe(tracker.newStream('FLAC scan: ' + name, stats.size))
       .pipe(new FLAC())
-      .on('data', d => metadata[d.type] = d.value)
+      .on('data', d => {
+        if (d.type.match(/^MUSICBRAINZ_/)) {
+          musicbrainzTags[d.type] = d.value
+        } else if (d.type.match(/[a-z]/)) {
+          streamData[d.type] = d.value
+        } else {
+          flacTags[d.type] = d.value
+        }
+      })
       .on('error', reject)
-      .on('finish', () => resolve(bundle))
+      .on('finish', () => {
+        extras.file = new AudioFile(path, stats, streamData)
+
+        if (streamData.duration) extras.duration = parseFloat(streamData.duration)
+
+        if (flacTags.TRACKNUMBER) extras.index = parseInt(flacTags.TRACKNUMBER, 10)
+        if (flacTags.DISCNUMBER) extras.disc = parseInt(flacTags.DISCNUMBER, 10)
+        if (flacTags.DATE) extras.date = flacTags.DATE
+
+        resolve(new Track(flacTags.ARTIST, flacTags.ALBUM, flacTags.TITLE, extras))
+      })
   }))
 }
 
@@ -40,8 +60,9 @@ function albumsFromTracks (metadata, covers) {
   const albums = new Map()
   const tracks = [].concat(...metadata)
   for (let track of tracks) {
-    if (!albums.get(track.metadata.ALBUM)) albums.set(track.metadata.ALBUM, [])
-    albums.get(track.metadata.ALBUM).push(track)
+    const tags = track.flacTags
+    if (!albums.get(tags.ALBUM)) albums.set(tags.ALBUM, [])
+    albums.get(tags.ALBUM).push(track)
   }
 
   const finished = new Set()
@@ -52,10 +73,10 @@ function albumsFromTracks (metadata, covers) {
     let archives = new Set()
     for (let track of albums.get(album)) {
       log.silly('albumsFromTracks', 'track', track)
-      artists.add(track.metadata.ARTIST)
+      artists.add(track.flacTags.ARTIST)
       dirs.add(dirname(track.path))
-      archives.add(track.sourceArchive)
-      tracks.add(Track.fromFLAC(track.metadata, track.path, track.stats))
+      archives.add(track.sourceArchive.path)
+      tracks.add(track)
     }
 
     const minArtists = [...artists]
@@ -104,39 +125,20 @@ function albumsFromTracks (metadata, covers) {
   return finished
 }
 
-function fsEntitiesIntoBundles ({artist, album, track}, groups) {
-  const name = basename(track.file.path)
-  groups.set(name, log.newGroup('read: ' + name))
-
-  return scan(track, groups)
-    .then(b => {
-      b.fsArtist = artist
-      b.fsAlbum = album
-      b.fsTrack = track
-      b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)
-
-      log.silly('fsEntitiesIntoBundles', 'bundle', b)
-      return b
-    })
-    .then(audit)
-}
-
-function bundlesIntoTrackSets (bundles) {
+function tracksIntoSets (tracks) {
   const trackSets = new Map()
 
   // 1. bundle the tracks into sets
-  for (let bundle of bundles) {
+  for (let track of tracks) {
     let key
 
-    const albumArtist = bundle.fsAlbum.artist
-    key = albumArtist + ' - ' + bundle.flacTrack.album
+    const albumArtist = track.fsAlbum.artist
+    key = albumArtist + ' - ' + track.album
     if (!trackSets.get(key)) {
       log.verbose('artists', 'creating set for tracks on:', key)
       trackSets.set(key, new Set())
     }
-    const trackSet = trackSets.get(key)
-    bundle.trackSet = trackSet
-    trackSet.add(bundle)
+    trackSets.get(key).add(track)
   }
 
   return trackSets
@@ -146,7 +148,7 @@ function trackSetsIntoAlbums (trackSets) {
   const albums = new Set()
 
   for (let trackSet of trackSets) {
-    const tracks = [...trackSet].map(t => t.flacTrack)
+    const tracks = [...trackSet]
     const sorted = tracks.sort((a, b) => a.index - b.index)
 
     const albumArtists = [...trackSet].reduce((s, b) => s.add(b.fsAlbum.artist), new Set())
@@ -175,7 +177,6 @@ function trackSetsIntoAlbums (trackSets) {
 module.exports = {
   scan,
   albumsFromTracks,
-  bundlesIntoTrackSets,
-  fsEntitiesIntoBundles,
+  tracksIntoSets,
   trackSetsIntoAlbums
 }

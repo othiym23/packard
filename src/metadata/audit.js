@@ -2,6 +2,7 @@ const log = require('npmlog')
 
 const genres = new Set([
   'Disco',
+  'Drum\'n\'Bass',
   'Dubstep',
   'Electronic',
   'House',
@@ -11,18 +12,18 @@ const genres = new Set([
 ])
 const datePattern = /^(([0-9]{4,4})(-([0-9]{2,2}))?(-([0-9]{2,2}))?)/
 
-function audit (bundle) {
-  const path = bundle.path
+function audit (track) {
+  const path = track.file.path
   log.info('audit', 'auditing', path)
-  if (!bundle.metadata) {
+  if (!track.flacTags) {
     log.warn('audit', path, 'has no raw metadata')
   } else {
-    if (bundle.metadata.GENRE && !genres.has(bundle.metadata.GENRE)) {
-      log.warn('audit', path, 'has unknown genre', bundle.metadata.GENRE)
+    if (track.flacTags.GENRE && !genres.has(track.flacTags.GENRE)) {
+      log.warn('audit', path, 'has unknown genre', track.flacTags.GENRE)
     }
   }
 
-  const date = bundle.flacTrack && bundle.flacTrack.date
+  const date = track.date
   if (!date) {
     log.warn('audit', path, 'is undated')
   } else {
@@ -41,10 +42,11 @@ function audit (bundle) {
     }
   }
 
-  if (!bundle.fsTrack) log.warn('audit', path, 'has no filesystem-based track metadata')
-  if (!bundle.fsAlbum) log.warn('audit', path, 'has no filesystem-based album metadata')
-  if (!bundle.fsArtist) log.warn('audit', path, 'has no filesystem-based artist metadata')
-  return bundle
+  if (!track.fsTrack) log.warn('audit', path, 'has no filesystem-based track metadata')
+  if (!track.fsAlbum) log.warn('audit', path, 'has no filesystem-based album metadata')
+  if (!track.fsArtist) log.warn('audit', path, 'has no filesystem-based artist metadata')
+
+  return track
 }
 
 module.exports = audit

@@ -10,31 +10,31 @@ const Cover = require('../models/cover.js')
 const flac = require('./flac.js')
 const unzip = require('../utils/zip.js').unpack
 
-function extractRelease (zipfile, tmpdir, covers, groups) {
+function extractRelease (zipfile, tmpdir, covers, trackers) {
   log.verbose('extractReleaseMetadata', 'archive:', zipfile)
 
-  return unzip(zipfile, groups, tmpdir)
-          .then(list => scan(list, groups))
+  return unzip(zipfile, trackers, tmpdir)
+          .then(list => scan(list, trackers))
           .then(list => populateImages(list, covers))
           .then(list => list.filter(e => !(e instanceof Cover ||
                                            e instanceof Error)))
 }
 
-function scan (bundles, groups) {
+function scan (bundles, trackers) {
   return Promise.map(
     [].concat(...bundles),
     bundle => {
       const e = bundle.path
       switch (extname(e)) {
         case '.flac':
-          return flac.scan(bundle, groups)
+          return flac.scan(bundle.path, trackers, bundle)
         case '.jpg':
         case '.pdf':
         case '.png':
           return stat(e).then(stats => new Cover(e, stats))
         default:
           log.error('scan', "don't recognize type of", e)
-          return Promise.reject(new Error("don't recognize type of " + e))
+          throw new Error("don't recognize type of " + e)
       }
     }
   )

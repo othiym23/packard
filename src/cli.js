@@ -15,7 +15,6 @@ const makePlaylist = require('./utils/make-playlist.js')
 const scanAlbums = require('./albums.js')
 const scanArtists = require('./artists.js')
 const unpack = require('./unpack.js')
-const Track = require('./models/track.js')
 
 const configPath = untildify('~/.packardrc')
 const config = require('rc')(
@@ -177,16 +176,9 @@ switch (yargs.argv._[0]) {
     log.enableProgress()
     Promise.map(things, f => {
       groups.set(basename(f), log.newGroup(f))
-      return flac.scan({path: f}, groups)
-    })
-    .map(b => {
-      b.flacTrack = Track.fromFLAC(b.metadata, b.path, b.stats)
-      return b
-    })
-    .each(b => {
-      log.verbose('bundle', b)
-      const tagnames = Object.keys(b.metadata).filter(n => n.match(/^[A-Z_]+$/)).sort()
-      log.verbose('tag names', tagnames)
+      const track = flac.scan(f, groups)
+      log.silly('track', track)
+      return track
     })
     .then(bs => {
       log.disableProgress()

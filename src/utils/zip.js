@@ -1,27 +1,29 @@
 const Promise = require('bluebird')
-
 const promisify = Promise.promisify
 
-const {createHash} = require('crypto')
-const {createWriteStream} = require('fs')
-const {join, basename, dirname} = require('path')
+const { createHash } = require('crypto')
+const { createWriteStream } = require('graceful-fs')
+const { join, basename, dirname } = require('path')
+const stat = promisify(require('graceful-fs').stat)
 
 const log = require('npmlog')
 const mkdirp = promisify(require('mkdirp'))
 const openZip = promisify(require('yauzl').open)
 
-function unpack (sourceArchive, groups, directory) {
-  log.silly('unpack', 'unpacking', sourceArchive)
-  const path = join(directory, createHash('sha1').update(sourceArchive).digest('hex'))
-  const group = groups.get(sourceArchive)
-  return mkdirp(path).then(() => new Promise((resolve, reject) => {
+import Archive from '../models/archive.js'
+
+function unpack (archivePath, groups, directory) {
+  log.silly('unpack', 'unpacking', archivePath)
+  const path = join(directory, createHash('sha1').update(archivePath).digest('hex'))
+  const group = groups.get(archivePath)
+  return mkdirp(path).then(() => stat(path)).then(stats => new Promise((resolve, reject) => {
     log.verbose('unpack', 'made', path)
-    openZip(sourceArchive, {autoClose: false}).then(zf => {
+    openZip(archivePath, {autoClose: false}).then(zf => {
       log.verbose('unpack', 'unpacking up to', zf.entryCount, 'entries')
       const entries = []
 
       const tracker = group.newItem(
-        'scanning: ' + basename(sourceArchive),
+        'scanning: ' + basename(archivePath),
         zf.entryCount,
         1
       )
@@ -44,6 +46,7 @@ function unpack (sourceArchive, groups, directory) {
       zf.on('end', () => {
         Promise.map(entries, zipData => new Promise((resolve, reject) => {
           log.silly('unpack', 'zipData', zipData)
+          const sourceArchive = new Archive(archivePath, stats, zipData)
 
           const fullPath = join(path, zipData.fileName)
           const writeTracker = groups.get(basename(zipData.fileName)).newStream(
@@ -67,12 +70,12 @@ function unpack (sourceArchive, groups, directory) {
                 .on('error', reject)
                 .on('finish', () => {
                   log.verbose('unpack', 'finished writing', fullPath)
-                  resolve({ sourceArchive, zipData, path: fullPath })
+                  resolve({ sourceArchive, path: fullPath })
                 })
             })
           })
         }), {concurrency: 1}).then(paths => {
-          log.silly('unpack', 'unpacked', sourceArchive, 'to', paths)
+          log.silly('unpack', 'unpacked', archivePath, 'to', paths)
           resolve(paths)
         })
       })

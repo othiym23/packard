@@ -6,6 +6,8 @@ const readTree = require('./read-tree.js')
 const flatten = require('./flatten-tracks.js')
 const Artist = require('./models/artist.js')
 
+import audit from './metadata/audit.js'
+
 function bySizeReverse (a, b) {
   return b.getSize() - a.getSize()
 }
@@ -14,7 +16,7 @@ function safe (string) {
   return string.replace(/[^ \]\[A-Za-z0-9-]/g, '')
 }
 
-function scanArtists (roots, groups) {
+function scanArtists (roots, trackers) {
   return Promise.map(
       roots,
       root => readTree(root).then(artists => [root, flatten(artists)])
@@ -22,11 +24,11 @@ function scanArtists (roots, groups) {
       log.verbose('scanArtists', 'processing', root)
       return Promise.map(
           [...entities],
-          entity => flac.fsEntitiesIntoBundles(entity, groups),
-          {concurrency: 4}
-        ).then(bundles => {
+          entity => flac.scan(entity.path, trackers, entity).then(audit),
+          { concurrency: 4 }
+        ).then(tracks => {
           // 1. bundle the tracks into sets
-          const trackSets = flac.bundlesIntoTrackSets(bundles)
+          const trackSets = flac.tracksIntoSets(tracks)
 
           // 2. convert the sets into albums
           const albums = flac.trackSetsIntoAlbums([...trackSets.values()])

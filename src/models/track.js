@@ -1,26 +1,47 @@
 import sprintf from 'sprintf'
 
-import File from './file.js'
+import AudioFile from './audio-file.js'
 
 export default class Track {
-  constructor (artist, album, name, optional = {}) {
-    if (optional.path && optional.stats) {
-      this.file = new File(
-        optional.path,
-        optional.stats,
-        optional.ext || '.unknown'
-      )
-    } else {
-      this.file = null
-    }
+  constructor (artist = '[unknown]', album = '[untitled]', name = '[untitled]', optional = {}) {
     this.artist = artist
     this.album = album
     this.name = name
+
+    if (optional.file) {
+      this.file = optional.file
+    } else if (optional.path && optional.stats) {
+      this.file = new AudioFile(
+        optional.path,
+        optional.stats
+      )
+      this.file.ext = optional.ext || '.unknown'
+    } else {
+      this.file = null
+    }
+
     this.albumArtist = optional.albumArtist || artist
     this.index = optional.index || 0
     this.disc = optional.disc || 0
     this.date = optional.date
     this.duration = optional.duration
+
+    if (Object.keys(optional.flacTags || {}).length > 0) {
+      this.flacTags = optional.flacTags
+    } else {
+      this.flacTags = null
+    }
+
+    if (Object.keys(optional.musicbrainzTags || {}).length > 0) {
+      this.musicbrainzTags = optional.musicbrainzTags
+    } else {
+      this.musicbrainzTags = null
+    }
+
+    this.sourceArchive = optional.sourceArchive || null
+    this.fsTrack = optional.fsTrack || null
+    this.fsAlbum = optional.fsAlbum || null
+    this.fsArtist = optional.fsArtist || null
   }
 
   getSize (bs) {
@@ -40,24 +61,4 @@ export default class Track {
     if (this.file && this.file.ext) name += this.file.ext
     return name
   }
-}
-
-Track.fromFLAC = (md, path, stats) => {
-  const optional = {
-    path: path,
-    stats: stats,
-    ext: '.flac'
-  }
-
-  if (md.duration) optional.duration = parseFloat(md.duration)
-  if (md.TRACKNUMBER) optional.index = parseInt(md.TRACKNUMBER, 10)
-  if (md.DISCNUMBER) optional.disc = parseInt(md.DISCNUMBER, 10)
-  if (md.DATE) optional.date = md.DATE
-
-  return new Track(
-    md.ARTIST,
-    md.ALBUM,
-    md.TITLE,
-    optional
-  )
 }

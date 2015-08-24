@@ -6,6 +6,8 @@ const flac = require('./metadata/flac.js')
 const readTree = require('./read-tree.js')
 const flatten = require('./flatten-tracks.js')
 
+import audit from './metadata/audit.js'
+
 function byDate (a, b) {
   let am = moment(a.date)
   let bm = moment(b.date)
@@ -19,7 +21,7 @@ function byDate (a, b) {
   }
 }
 
-function scanAlbums (roots, groups) {
+function scanAlbums (roots, trackers) {
   return Promise.map(
       roots,
       root => readTree(root).then(artists => [root, flatten(artists)])
@@ -27,10 +29,10 @@ function scanAlbums (roots, groups) {
       log.verbose('scanAlbums', 'processing', root)
       return Promise.map(
           [...entities],
-          entity => flac.fsEntitiesIntoBundles(entity, groups),
+          entity => flac.scan(entity.path, trackers, entity).then(audit),
           {concurrency: 4}
-        ).then(bundles => {
-          const trackSets = flac.bundlesIntoTrackSets(bundles)
+        ).then(tracks => {
+          const trackSets = flac.tracksIntoSets(tracks)
           const albums = flac.trackSetsIntoAlbums([...trackSets.values()])
 
           return albums
