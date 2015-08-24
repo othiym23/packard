@@ -1,5 +1,5 @@
 // oh iterables
-import 'es6-shim'
+import 'babel/polyfill'
 
 import assert from 'assert'
 import { dirname } from 'path'

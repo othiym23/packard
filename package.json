@@ -36,7 +36,6 @@
   "dependencies": {
     "babel": "^5.8.21",
     "bluebird": "^2.9.34",
-    "es6-shim": "^0.33.1",
     "flac-parser": "^0.3.1",
     "glob": "^5.0.14",
     "graceful-fs": "^4.1.2",

@@ -1,4 +1,5 @@
-import 'es6-shim'
+// oh iterables
+import 'babel/polyfill'
 
 import { join, basename } from 'path'
 
