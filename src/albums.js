@@ -1,12 +1,12 @@
-const log = require('npmlog')
-const moment = require('moment')
-const Promise = require('bluebird')
+import log from 'npmlog'
+import moment from 'moment'
+import Promise from 'bluebird'
 
-const flac = require('./metadata/flac.js')
-const readTree = require('./read-tree.js')
-const flatten = require('./flatten-tracks.js')
-
+import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import audit from './metadata/audit.js'
+import flatten from './flatten-tracks.js'
+import readTree from './read-tree.js'
+import scanFLAC from './flac/scan.js'
 
 function byDate (a, b) {
   let am = moment(a.date)
@@ -21,7 +21,7 @@ function byDate (a, b) {
   }
 }
 
-function scanAlbums (roots, trackers) {
+export default function scanAlbums (roots, trackers) {
   return Promise.map(
       roots,
       root => readTree(root).then(artists => [root, flatten(artists)])
@@ -29,9 +29,9 @@ function scanAlbums (roots, trackers) {
       log.verbose('scanAlbums', 'processing', root)
       return Promise.map(
           [...entities],
-          entity => flac.scan(entity.path, trackers, entity).then(audit),
+          entity => scanFLAC(entity.path, trackers, entity).then(audit),
           {concurrency: 4}
-        ).then(tracks => flac.albumsFromMetadata(tracks))
+        ).then(tracks => albumsFromFLACTracks(tracks))
     }).then(albums => {
       const sorted = albums.reduce((all, list) => all.concat([...list]), [])
       sorted.sort(byDate)
@@ -40,5 +40,3 @@ function scanAlbums (roots, trackers) {
       return sorted
     })
 }
-
-module.exports = scanAlbums

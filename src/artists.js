@@ -1,12 +1,12 @@
-const log = require('npmlog')
-const Promise = require('bluebird')
+import log from 'npmlog'
+import Promise from 'bluebird'
 
-const flac = require('./metadata/flac.js')
-const readTree = require('./read-tree.js')
-const flatten = require('./flatten-tracks.js')
-const Artist = require('./models/artist.js')
-
+import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import audit from './metadata/audit.js'
+import flatten from './flatten-tracks.js'
+import readTree from './read-tree.js'
+import scanFLAC from './flac/scan.js'
+import Artist from './models/artist.js'
 
 function bySizeReverse (a, b) {
   return b.getSize() - a.getSize()
@@ -14,35 +14,6 @@ function bySizeReverse (a, b) {
 
 function safe (string) {
   return string.replace(/[^ \]\[A-Za-z0-9-]/g, '')
-}
-
-function scanArtists (roots, trackers) {
-  return Promise.map(
-      roots,
-      root => readTree(root).then(artists => [root, flatten(artists)])
-    ).map(([root, entities]) => {
-      log.verbose('scanArtists', 'processing', root)
-      return Promise.map(
-          [...entities],
-          entity => flac.scan(entity.path, trackers, entity).then(audit),
-          { concurrency: 4 }
-        ).then(tracks => {
-          // 1. convert tracks into albums
-          const albums = flac.albumsFromMetadata(tracks)
-
-          // 2. find artist tracks that aren't on single-artist albums
-          const artistTracks = albumsIntoArtistTracks(albums)
-
-          // 3. roll up albums to artists
-          // 4. add loose tracks to artists
-          const artists = albumsAndTracksToArtists(albums, artistTracks)
-
-          // 5. compile list per-artist
-          const sorted = [...artists.values()].sort(bySizeReverse)
-
-          return [root, sorted]
-        })
-    })
 }
 
 function albumsIntoArtistTracks (albums) {
@@ -91,5 +62,31 @@ function albumsAndTracksToArtists (albums, artistTracks) {
   return artists
 }
 
-// export default scanArtists
-module.exports = scanArtists
+export default function scanArtists (roots, trackers) {
+  return Promise.map(
+      roots,
+      root => readTree(root).then(artists => [root, flatten(artists)])
+    ).map(([root, entities]) => {
+      log.verbose('scanArtists', 'processing', root)
+      return Promise.map(
+          [...entities],
+          entity => scanFLAC(entity.path, trackers, entity).then(audit),
+          { concurrency: 4 }
+        ).then(tracks => {
+          // 1. convert tracks into albums
+          const albums = albumsFromFLACTracks(tracks)
+
+          // 2. find artist tracks that aren't on single-artist albums
+          const artistTracks = albumsIntoArtistTracks(albums)
+
+          // 3. roll up albums to artists
+          // 4. add loose tracks to artists
+          const artists = albumsAndTracksToArtists(albums, artistTracks)
+
+          // 5. compile list per-artist
+          const sorted = [...artists.values()].sort(bySizeReverse)
+
+          return [root, sorted]
+        })
+    })
+}

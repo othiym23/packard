@@ -4,7 +4,7 @@ var inspect = require('util').inspect
 
 var test = require('tap').test
 
-var albumsFromMetadata = require('../lib/metadata/flac.js').albumsFromMetadata
+var albumsFromTracks = require('../lib/flac/albums-from-tracks.js')
 
 var Album = require('../lib/models/album-multi.js')
 var Archive = require('../lib/models/archive.js')
@@ -66,42 +66,42 @@ function idealAlbum () {
   return album
 }
 
-test('basic albumsFromMetadata', function (t) {
+test('basic albumsFromTracks', function (t) {
   t.throws(
-    function () { albumsFromMetadata() },
+    function () { albumsFromTracks() },
     { name: 'AssertionError', message: 'must pass metadata' },
-    'albumsFromMetadata requires an array of arrays of tracks'
+    'albumsFromTracks requires an array of arrays of tracks'
   )
 
   t.doesNotThrow(
     function () {
-      t.same(albumsFromMetadata([]), [], 'got out what we put in')
+      t.same(albumsFromTracks([]), [], 'got out what we put in')
     },
-    'albumsFromMetadata does not error when given an array'
+    'albumsFromTracks does not error when given an array'
   )
 
   t.doesNotThrow(
     function () {
-      t.same(albumsFromMetadata(new Set()), [], 'got out what we put in')
+      t.same(albumsFromTracks(new Set()), [], 'got out what we put in')
     },
-    'albumsFromMetadata does not error when given a Set'
+    'albumsFromTracks does not error when given a Set'
   )
 
   t.doesNotThrow(
     function () {
-      t.same(albumsFromMetadata(new Map().values()), [], 'got out what we put in')
+      t.same(albumsFromTracks(new Map().values()), [], 'got out what we put in')
     },
-    'albumsFromMetadata does not error when given an iterator'
+    'albumsFromTracks does not error when given an iterator'
   )
 
   t.doesNotThrow(
     function () {
-      var out = albumsFromMetadata([makeTrack()]).values().next().value
+      var out = albumsFromTracks([makeTrack()]).values().next().value
       var ideal = idealAlbum()
       t.equal(inspect(out), inspect(ideal), 'basic metadata is equal')
       t.equal(inspect(out.tracks[0]), inspect(ideal.tracks[0]), 'track metadata is equal')
     },
-    'albumsFromMetadata does not error when given an array with one track'
+    'albumsFromTracks does not error when given an array with one track'
   )
   t.end()
 })

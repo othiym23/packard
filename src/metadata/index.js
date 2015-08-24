@@ -1,13 +1,13 @@
 import { dirname, extname } from 'path'
-import fs from 'fs'
+import fs from 'graceful-fs'
 
 import log from 'npmlog'
-import Promise from 'bluebird'
 import { promisify } from 'bluebird'
+import Promise from 'bluebird'
 
-import Cover from '../models/cover.js'
-import { scan as scanFLAC } from './flac.js'
+import scanFLAC from '../flac/scan.js'
 import { unpack as unzip } from '../utils/zip.js'
+import Cover from '../models/cover.js'
 
 const stat = promisify(fs.stat)
 

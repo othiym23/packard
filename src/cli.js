@@ -1,23 +1,25 @@
 #!/usr/bin/env node
 
-const Promise = require('bluebird')
-const promisify = Promise.promisify
+import fs from 'graceful-fs'
+import { basename } from 'path'
 
-const basename = require('path').basename
-const writeFile = promisify(require('fs').writeFile)
+import log from 'npmlog'
+import rc from 'rc'
+import untildify from 'untildify'
+import { promisify } from 'bluebird'
+import { stringify as inify } from 'ini'
+import Promise from 'bluebird'
 
-const inify = require('ini').stringify
-const log = require('npmlog')
-const untildify = require('untildify')
+import makePlaylist from './utils/make-playlist.js'
+import scanAlbums from './albums.js'
+import scanArtists from './artists.js'
+import scanFLAC from './flac/scan.js'
+import unpack from './unpack.js'
 
-const flac = require('./metadata/flac.js')
-const makePlaylist = require('./utils/make-playlist.js')
-const scanAlbums = require('./albums.js')
-const scanArtists = require('./artists.js')
-const unpack = require('./unpack.js')
+const writeFile = promisify(fs.writeFile)
 
 const configPath = untildify('~/.packardrc')
-const config = require('rc')(
+const config = rc(
   'packard',
   {
     loglevel: 'info',
@@ -176,7 +178,7 @@ switch (yargs.argv._[0]) {
     log.enableProgress()
     Promise.map(things, f => {
       groups.set(basename(f), log.newGroup(f))
-      return flac.scan(f, groups)
+      return scanFLAC(f, groups)
     })
     .then(track => {
       log.disableProgress()

@@ -1,17 +1,17 @@
 import { join, resolve } from 'path'
-import { tmpdir } from 'os'
 import { randomBytes } from 'crypto'
+import { tmpdir } from 'os'
 
 import globCB from 'glob'
 import log from 'npmlog'
 import rimrafCB from 'rimraf'
 import untildify from 'untildify'
-import Promise from 'bluebird'
 import { promisify } from 'bluebird'
+import Promise from 'bluebird'
 
+import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import { place, moveToArchive } from './mover.js'
 import { extractRelease } from './metadata/index.js'
-import { albumsFromMetadata } from './metadata/flac.js'
 
 const glob = promisify(globCB)
 const rimraf = promisify(rimrafCB)
@@ -52,7 +52,7 @@ export default function unpack (files, staging, root, pattern, archive, archiveR
       {concurrency: 2}
     )
   }).then(m => {
-    return place(albumsFromMetadata(m, covers), staging, groups)
+    return place(albumsFromFLACTracks(m, covers), staging, groups)
   }).then(placed => {
     if (!archive) return Promise.resolve(placed)
     return moveToArchive(placed, archiveRoot, groups).then(() => placed)
