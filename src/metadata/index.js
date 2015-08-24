@@ -1,14 +1,15 @@
-const Promise = require('bluebird')
-const promisify = Promise.promisify
+import { dirname, extname } from 'path'
+import fs from 'fs'
 
-const {dirname, extname} = require('path')
-const stat = promisify(require('fs').stat)
+import log from 'npmlog'
+import Promise from 'bluebird'
+import { promisify } from 'bluebird'
 
-const log = require('npmlog')
+import Cover from '../models/cover.js'
+import { scan as scanFLAC } from './flac.js'
+import { unpack as unzip } from '../utils/zip.js'
 
-const Cover = require('../models/cover.js')
-const flac = require('./flac.js')
-const unzip = require('../utils/zip.js').unpack
+const stat = promisify(fs.stat)
 
 function extractRelease (zipfile, tmpdir, covers, trackers) {
   log.verbose('extractReleaseMetadata', 'archive:', zipfile)
@@ -20,21 +21,20 @@ function extractRelease (zipfile, tmpdir, covers, trackers) {
                                            e instanceof Error)))
 }
 
-function scan (bundles, trackers) {
+function scan (unpackedFiles, trackers) {
   return Promise.map(
-    [].concat(...bundles),
-    bundle => {
-      const e = bundle.path
-      switch (extname(e)) {
+    unpackedFiles,
+    ({ path, sourceArchive }) => {
+      switch (extname(path)) {
         case '.flac':
-          return flac.scan(bundle.path, trackers, bundle)
+          return scanFLAC(path, trackers, { sourceArchive })
         case '.jpg':
         case '.pdf':
         case '.png':
-          return stat(e).then(stats => new Cover(e, stats))
+          return stat(path).then(stats => new Cover(path, stats))
         default:
-          log.error('scan', "don't recognize type of", e)
-          throw new Error("don't recognize type of " + e)
+          log.error('scan', "don't recognize type of", path)
+          throw new Error("don't recognize type of " + path)
       }
     }
   )

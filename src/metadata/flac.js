@@ -1,20 +1,24 @@
-require('es6-shim')
+// oh iterables
+import 'es6-shim'
 
-const Promise = require('bluebird')
-const promisify = Promise.promisify
+import fs from 'graceful-fs'
+import assert from 'assert'
+import { basename, dirname } from 'path'
+import { createReadStream } from 'graceful-fs'
 
-const {basename, dirname} = require('path')
-const createReadStream = require('fs').createReadStream
-const stat = promisify(require('fs').stat)
+import Promise from 'bluebird'
+import { promisify } from 'bluebird'
 
-const FLAC = require('flac-parser')
-const log = require('npmlog')
+import FLACReader from 'flac-parser'
+import log from 'npmlog'
 
 import Album from '../models/album-multi.js'
 import AudioFile from '../models/audio-file.js'
 import Track from '../models/track.js'
 
-function scan (path, trackers, extras = {}) {
+const stat = promisify(fs.stat)
+
+export function scan (path, trackers, extras = {}) {
   log.verbose('flac.scan', 'scanning', path)
 
   return stat(path).then(stats => new Promise((resolve, reject) => {
@@ -31,7 +35,7 @@ function scan (path, trackers, extras = {}) {
 
     createReadStream(path)
       .pipe(tracker.newStream('FLAC scan: ' + name, stats.size))
-      .pipe(new FLAC())
+      .pipe(new FLACReader())
       .on('data', d => {
         if (d.type.match(/^MUSICBRAINZ_/)) {
           musicbrainzTags[d.type] = d.value

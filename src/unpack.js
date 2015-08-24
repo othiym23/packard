@@ -1,23 +1,25 @@
-const Promise = require('bluebird')
-const promisify = Promise.promisify
+import { join, resolve } from 'path'
+import { tmpdir } from 'os'
+import { randomBytes } from 'crypto'
 
-const {join, resolve} = require('path')
-const os = require('os')
-const randomBytes = require('crypto').randomBytes
+import globCB from 'glob'
+import log from 'npmlog'
+import rimrafCB from 'rimraf'
+import untildify from 'untildify'
+import Promise from 'bluebird'
+import { promisify } from 'bluebird'
 
-const glob = promisify(require('glob'))
-const log = require('npmlog')
-const rimraf = promisify(require('rimraf'))
-const untildify = require('untildify')
+import { place, moveToArchive } from './mover.js'
+import { extractRelease } from './metadata/index.js'
+import { albumsFromMetadata } from './metadata/flac.js'
 
-const {place, moveToArchive} = require('./mover.js')
-const extractRelease = require('./metadata/index.js').extractRelease
-const flac = require('./metadata/flac.js')
+const glob = promisify(globCB)
+const rimraf = promisify(rimrafCB)
 
 const covers = new Map()
-const tmpdir = join(os.tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
+const tmp = join(tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 
-function unpack (files, staging, root, pattern, archive, archiveRoot) {
+export default function unpack (files, staging, root, pattern, archive, archiveRoot) {
   log.enableProgress()
   let locate = Promise.resolve(files)
   if (root && pattern) {
@@ -46,11 +48,11 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
     files.forEach(f => groups.set(f, log.newGroup('process: ' + f)))
     return Promise.map(
       files,
-      f => extractRelease(f, tmpdir, covers, groups),
+      f => extractRelease(f, tmp, covers, groups),
       {concurrency: 2}
     )
   }).then(m => {
-    return place(flac.albumsFromMetadata(m, covers), staging, groups)
+    return place(albumsFromMetadata(m, covers), staging, groups)
   }).then(placed => {
     if (!archive) return Promise.resolve(placed)
     return moveToArchive(placed, archiveRoot, groups).then(() => placed)
@@ -59,12 +61,12 @@ function unpack (files, staging, root, pattern, archive, archiveRoot) {
     report(albums, staging)
     if (archive) reportArchived(albums)
     log.silly('unpack', 'tracker debugging', log.tracker.debug())
-    log.verbose('removing', tmpdir)
-    return rimraf(tmpdir).then(() => albums)
+    log.verbose('removing', tmp)
+    return rimraf(tmp).then(() => albums)
   }).catch(error => {
     log.disableProgress()
     log.error('unpack', error.stack)
-    log.verbose('not removing', tmpdir)
+    log.verbose('not removing', tmp)
     throw error
   })
 }
@@ -93,5 +95,3 @@ function reportArchived (albums) {
     console.log(album.sourceArchive, '\n  ->', album.destArchive)
   }
 }
-
-module.exports = unpack
