@@ -1,7 +1,5 @@
 require('babel/polyfill')
 
-var inspect = require('util').inspect
-
 var test = require('tap').test
 
 var albumsFromTracks = require('../lib/flac/albums-from-tracks.js')
@@ -98,8 +96,8 @@ test('basic albumsFromTracks', function (t) {
     function () {
       var out = albumsFromTracks([makeTrack()]).values().next().value
       var ideal = idealAlbum()
-      t.equal(inspect(out), inspect(ideal), 'basic metadata is equal')
-      t.equal(inspect(out.tracks[0]), inspect(ideal.tracks[0]), 'track metadata is equal')
+      t.same(out, ideal, 'basic metadata is equal')
+      t.same(out.tracks[0], ideal.tracks[0], 'track metadata is equal')
     },
     'albumsFromTracks does not error when given an array with one track'
   )
