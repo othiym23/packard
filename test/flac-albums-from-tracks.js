@@ -4,17 +4,18 @@ var test = require('tap').test
 
 var albumsFromTracks = require('../lib/flac/albums-from-tracks.js')
 
-var Album = require('../lib/models/album-multi.js')
-var Archive = require('../lib/models/archive.js')
-var Artist = require('../lib/models/artist.js')
-var AudioFile = require('../lib/models/audio-file.js')
-var Track = require('../lib/models/track.js')
+var model = require('@packard/model')
+var Album = model.MultitrackAlbum
+var Archive = model.Archive
+var Artist = model.Artist
+var AudioFile = model.AudioFile
+var Track = model.Track
 
 function makeTrack () {
   var sourceArchive = new Archive('/test/source.zip', { fakeStats: true })
   var audioFile = new AudioFile('/test/file.flac', { fakeStats: true })
   var fsArtist = new Artist('fartist')
-  var fsAlbum = new Album('falbum', fsArtist, '/album/path')
+  var fsAlbum = new Album('falbum', fsArtist, { path: '/album/path' })
   var flacTags = {
     ARTIST: 'FARTIST',
     ALBUMARTIST: 'FaRtIsT',
@@ -30,7 +31,7 @@ function makeTrack () {
   }
   var artist = new Artist('Fartist')
   var album = new Album('Falbum', artist)
-  return new Track(artist, album, 'Fame', extras)
+  return new Track('Fame', album, artist, extras)
 }
 
 function idealAlbum () {
@@ -38,7 +39,7 @@ function idealAlbum () {
   var audioFile = new AudioFile('/test/file.flac', { fakeStats: true })
 
   var fsArtist = new Artist('fartist')
-  var fsAlbum = new Album('falbum', fsArtist, '/album/path')
+  var fsAlbum = new Album('falbum', fsArtist, { path: '/album/path' })
 
   var flacTags = {
     ARTIST: 'FARTIST',
@@ -56,10 +57,10 @@ function idealAlbum () {
   }
 
   var artist = new Artist('FaRtIsT')
-  var album = new Album('FALBUM', artist, '/test')
+  var album = new Album('FALBUM', artist, { path: '/test' })
   album.date = '2007-08-28'
   album.sourceArchive = sourceArchive
-  album.tracks.push(new Track(new Artist('Fartist'), album, 'Fame', extras))
+  album.tracks = [new Track('Fame', album, new Artist('Fartist'), extras)]
 
   return album
 }

@@ -6,7 +6,7 @@ import audit from './metadata/audit.js'
 import flatten from './flatten-tracks.js'
 import readArtists from './read-fs-artists.js'
 import scanFLAC from './flac/scan.js'
-import Artist from './models/artist.js'
+import { Artist } from '@packard/model'
 
 function bySizeReverse (a, b) {
   return b.getSize() - a.getSize()

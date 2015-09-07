@@ -8,10 +8,7 @@ import { promisify } from 'bluebird'
 import FLACReader from 'flac-parser'
 import log from 'npmlog'
 
-import Album from '../models/album-multi.js'
-import Artist from '../models/artist.js'
-import AudioFile from '../models/audio-file.js'
-import Track from '../models/track.js'
+import { Album, Artist, AudioFile, Track } from '@packard/model'
 
 const stat = promisify(fs.stat)
 
@@ -55,7 +52,7 @@ export default function scan (path, trackers, extras = {}) {
 
         const artist = new Artist(flacTags.ARTIST)
         const album = new Album(flacTags.ALBUM, artist)
-        resolve(new Track(artist, album, flacTags.TITLE, extras))
+        resolve(new Track(flacTags.TITLE, album, artist, extras))
       })
   }))
 }

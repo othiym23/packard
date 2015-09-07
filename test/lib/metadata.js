@@ -4,9 +4,10 @@ var promisify = Promise.promisify
 var path = require('path')
 var stat = promisify(require('fs').stat)
 
-var Artist = require('../../lib/models/artist.js')
-var Album = require('../../lib/models/album-multi.js')
-var Track = require('../../lib/models/track.js')
+var model = require('@packard/model')
+var Artist = model.Artist
+var Album = model.MultitrackAlbum
+var Track = model.Track
 
 var flac = require('./flac.js')
 
@@ -18,9 +19,9 @@ function makeAlbum (root, date, artistName, albumName, trackNames) {
   return stat(EMPTY_TRACK).then(function (stats) {
     return flac.makeAlbum(root, trackNames.map(function (trackName, index) {
       var track = new Track(
-        artist,
-        album,
         trackName,
+        album,
+        artist,
         {
           path: EMPTY_TRACK, // path is irrelevant, since we're generating it
           stats: stats,

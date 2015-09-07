@@ -9,7 +9,7 @@ import { open as openZipCB } from 'yauzl'
 import { promisify } from 'bluebird'
 import Promise from 'bluebird'
 
-import Archive from '../models/archive.js'
+import { Archive } from '@packard/model'
 
 const stat = promisify(fs.stat)
 const mkdirp = promisify(mkdirpCB)
@@ -49,7 +49,7 @@ export function unpack (archivePath, groups, directory) {
       zf.on('end', () => {
         Promise.map(entries, zipData => new Promise((resolve, reject) => {
           log.silly('unpack', 'zipData', zipData)
-          const sourceArchive = new Archive(archivePath, stats, zipData)
+          const sourceArchive = new Archive(archivePath, stats, { info: zipData })
 
           const fullPath = join(path, zipData.fileName)
           const writeTracker = groups.get(basename(zipData.fileName)).newStream(

@@ -7,8 +7,7 @@ import Promise from 'bluebird'
 
 import scanFLAC from '../flac/scan.js'
 import { unpack as unzip } from '../utils/zip.js'
-import Cover from '../models/cover.js'
-import File from '../models/cover.js'
+import { Cover, File } from '@packard/model'
 
 const stat = promisify(fs.stat)
 

@@ -2,12 +2,14 @@ import { basename, dirname, extname } from 'path'
 
 import readTracks from './read-fs-tracks.js'
 
-import Artist from './models/artist.js'
-import Cover from './models/cover.js'
-import Cuesheet from './models/cuesheet.js'
-import Multitrack from './models/album-multi.js'
-import Singletrack from './models/album-single.js'
-import Track from './models/track.js'
+import {
+  Artist,
+  Cover,
+  Cuesheet,
+  MultitrackAlbum as Multitrack,
+  SingletrackAlbum as Singletrack,
+  Track
+} from '@packard/model'
 
 function extractTypeFromTree (type, tree, visit) {
   for (let e of tree) {
@@ -109,7 +111,14 @@ export default function readAlbums (root) {
       const albumName = [...albumNames][0]
       const directory = dirname(tracklisting[0].path)
       const artist = new Artist(artistName)
-      const album = new Multitrack(albumName, artist, directory, tracklisting)
+      const album = new Multitrack(
+        albumName,
+        artist,
+        {
+          path: directory,
+          tracks: tracklisting
+        }
+      )
       album.pictures = album.pictures.concat([...pictures])
       albums.add(album)
     }

@@ -17,7 +17,7 @@ const stat = promisify(fs.stat)
 export function place (albums, newRoot, groups) {
   return Promise.all(
     [...albums].map(album => {
-      const albumPath = join(newRoot, album.toPath())
+      const albumPath = join(newRoot, album.toSafePath())
       const trackerGroup = groups.get(album.sourceArchive.path)
       return mkdirp(albumPath).then(() => {
         log.silly('place', 'created', albumPath)
@@ -30,7 +30,7 @@ export function place (albums, newRoot, groups) {
           album.tracks.map(track => {
             const destination = resolve(
               newRoot,
-              album.toPath(),
+              album.toSafePath(),
               track.safeName()
             )
 
@@ -57,7 +57,7 @@ export function place (albums, newRoot, groups) {
           album.pictures.map(picture => {
             const destination = resolve(
               newRoot,
-              album.toPath(),
+              album.toSafePath(),
               basename(picture.path)
             )
 

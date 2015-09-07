@@ -76,11 +76,11 @@ function report (albums, root, archives, archiveRoot) {
     let result = first.getDate().localeCompare(second.getDate())
     if (result !== 0) return result
 
-    return first.toPath().toLowerCase().localeCompare(second.toPath().toLowerCase())
+    return first.toSafePath().toLowerCase().localeCompare(second.toSafePath().toLowerCase())
   })
 
   console.log('new albums from this run:\n')
-  for (let album of sorted) console.log(join(root, album.toPath()))
+  for (let album of sorted) console.log(join(root, album.toSafePath()))
 
   console.log('\nfull details:\n')
   for (let album of sorted) console.log(album.dump())

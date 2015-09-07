@@ -1,11 +1,6 @@
 import { basename, dirname, extname } from 'path'
 
-import Album from './models/album-multi.js'
-import Artist from './models/artist.js'
-import Cover from './models/cover.js'
-import Cuesheet from './models/cuesheet.js'
-import File from './models/file.js'
-import Track from './models/track.js'
+import { Album, Artist, Cover, Cuesheet, File, Track } from '@packard/model'
 
 export default function toModel (path, stats) {
   const directory = dirname(path)
@@ -20,11 +15,11 @@ export default function toModel (path, stats) {
     case '.wav':
     case '.aif':
       const artist = new Artist(basename(dirname(directory)))
-      const album = new Album(basename(directory), artist, directory)
+      const album = new Album(basename(directory), artist, { path: directory })
       const track = new Track(
-        artist,
-        album,
         filename,
+        album,
+        artist,
         { path, stats, ext: extension }
       )
       parseName(track)
