@@ -11,25 +11,27 @@ var Track = model.Track
 
 var flac = require('./flac.js')
 
-var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.flac')
+var EMPTY_TRACK = path.join(__dirname, '../fixtures/empty.flac')
 
-function makeAlbum (root, date, artistName, albumName, trackNames) {
+function makeAlbum (root, date, artistName, albumName, trackTemplates) {
   const artist = new Artist(artistName)
   const album = new Album(albumName, artist)
   return stat(EMPTY_TRACK).then(function (stats) {
-    return flac.makeAlbum(root, trackNames.map(function (trackName, index) {
+    return flac.makeAlbum(root, trackTemplates.map(function (template, index) {
       var track = new Track(
-        trackName,
+        template.name || '[untitled]',
         album,
         artist,
         {
-          path: EMPTY_TRACK, // path is irrelevant, since we're generating it
+          path: EMPTY_TRACK,
           stats: stats,
-          ext: '.flac'
+          ext: '.flac',
+          index: index + 1,
+          date: date
         }
       )
-      track.date = date
-      track.index = index + 1
+      track.file.path = path.join(root, template.path || track.safeName())
+
       return track
     }))
   })
