@@ -36,8 +36,8 @@ test('unpacking a single-artist album', function (t) {
   }).then(function (zipfile) {
     return unpack([zipfile], staging)
              .catch(function (e) {
-                t.ifError(e, 'unpacking zipfile succeeded')
-              })
+               t.ifError(e, 'unpacking zipfile succeeded')
+             })
   }).then(function (albums) {
     t.equal(albums.size, 1, 'got 1 album back')
     var album = albums.values().next().value
@@ -148,8 +148,8 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
 
     return unpack([zipfile], staging, null, null, true, archive)
              .catch(function (e) {
-                t.ifError(e, 'unpacking zipfile succeeded')
-              })
+               t.ifError(e, 'unpacking zipfile succeeded')
+             })
   }).then(function (albums) {
     t.throws(function () { statSync(zipfile) }, 'zipfile gone from old location')
     t.doesNotThrow(function () {

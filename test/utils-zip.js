@@ -39,8 +39,8 @@ test('unpacking a single-artist album', function (t) {
     groups.set(zipfile, log.newGroup('test'), staging)
     return zipUtils.unpack(zipfile, groups, staging)
              .catch(function (e) {
-                t.ifError(e, 'unzipping file succeeded')
-              })
+               t.ifError(e, 'unzipping file succeeded')
+             })
   }).catch(function (e) {
     t.ifError(e, 'creating album succeeded')
   }).finally(function () {
