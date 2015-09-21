@@ -40,6 +40,7 @@ export default function albumsFromTracks (metadata, covers = new Map()) {
     let archives = new Map()
 
     for (let track of albums.get(album)) {
+      if (!track.flacTags) continue
       log.silly('albumsFromTracks', 'track', track)
       names.add(track.flacTags.ALBUM)
       artists.add(track.flacTags.ALBUMARTIST || track.flacTags.ARTIST)
