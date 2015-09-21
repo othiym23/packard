@@ -27,9 +27,9 @@ test('unpacking a single-artist album', function (t) {
       'Gary Beck',
       'Feel It',
       [
-        'Feel It',
-        'Paid Out',
-        'Hillview'
+        { name: 'Feel It' },
+        { name: 'Paid Out' },
+        { name: 'Hillview' }
       ]
     )
   }).then(function (paths) {

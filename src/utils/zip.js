@@ -40,6 +40,11 @@ export function unpack (archivePath, groups, directory) {
           return
         }
 
+        if (/^\./.test(basename(entry.fileName))) {
+          log.verbose('unpack', 'skipping dotfile', entry.fileName)
+          return
+        }
+
         groups.set(
           basename(entry.fileName),
           group.newGroup('extract: ' + entry.fileName)

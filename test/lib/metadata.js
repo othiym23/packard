@@ -1,8 +1,11 @@
-var Promise = require('bluebird')
-var promisify = Promise.promisify
+var Bluebird = require('bluebird')
+var promisify = Bluebird.promisify
 
+var log = require('npmlog')
+var mkdirp = promisify(require('mkdirp'))
 var path = require('path')
-var stat = promisify(require('fs').stat)
+var stat = promisify(require('graceful-fs').stat)
+var writeFile = promisify(require('graceful-fs').writeFile)
 
 var model = require('@packard/model')
 var Artist = model.Artist
@@ -37,4 +40,18 @@ function makeAlbum (root, date, artistName, albumName, trackTemplates) {
   })
 }
 
-module.exports = { makeAlbum: makeAlbum }
+function makeStubFiles (root, oldPaths, newPaths) {
+  return Bluebird.map(newPaths, function (stub) {
+    var container = path.join(root, path.dirname(stub))
+    var target = path.join(root, stub)
+    log.silly('makeStubFiles', 'container', container)
+    return mkdirp(container).then(function () {
+      log.silly('makeStubFiles', 'writing', target)
+      return writeFile(path.join(root, stub), 'xoxo bb')
+    }).then(function () {
+      return target
+    })
+  }).then(function (paths) { return oldPaths.concat(paths) })
+}
+
+module.exports = { makeAlbum: makeAlbum, makeStubFiles: makeStubFiles }
