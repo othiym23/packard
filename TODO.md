@@ -19,13 +19,13 @@ packard.todo
 	- rename directories to match album metadata
 	- rename files to match metadata
 
-- models
-	- clean up album and artist to take optional metadata similarly to track
-	- split models out into separate package for use with `nothingness`
+- models @done(2015-09-07)
+	- clean up album and artist to take optional metadata similarly to track @done(2015-09-07)
+	- split models out into separate package for use with `nothingness` @done(2015-09-07)
 
 * artists
 	- add cue sheet handling
-	- single-track album handling
+	- single-track album handling @done(2015-09-07)
 	- fix progress
 	- tracks should be on albums, or in loose tracks, but not both for report
 
