@@ -1,10 +1,11 @@
-var Promise = require('bluebird')
-var promisify = Promise.promisify
+var Bluebird = require('bluebird')
+var promisify = Bluebird.promisify
 
 var createReadStream = require('fs').createReadStream
 var createWriteStream = require('fs').createWriteStream
 var path = require('path')
 
+var log = require('npmlog')
 var md = require('flac-metadata')
 var mkdirp = promisify(require('mkdirp'))
 var moment = require('moment')
@@ -18,26 +19,40 @@ var VENDOR = 'testing packard ' + version + ' ' + nowish
 var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.flac')
 
 function makeAlbum (root, tracks) {
-  return mkdirp(root).then(function () {
-    return Promise.resolve(tracks).map(function (track) {
-      return new Promise(function (resolve, reject) {
+  return Bluebird.map(tracks, function (track) {
+    return mkdirp(path.dirname(track.file.path)).then(function () {
+      return new Bluebird(function (resolve, reject) {
         var processor = new FLACProcessor()
         var source = createReadStream(EMPTY_TRACK)
-        track.file.path = path.join(root, track.safeName())
         var sink = createWriteStream(track.file.path)
 
-        var comments = [
-          'ARTIST=' + track.artist.name,
-          'TITLE=' + track.name,
-          'ALBUM=' + track.album.name,
-          'TRACKNUMBER=' + track.index,
-          'DATE=' + track.date
-        ]
-
+        var mdbVorbis
         processor.on('preprocess', function (mdb) {
           if (mdb.type === FLACProcessor.MDB_TYPE_VORBIS_COMMENT) {
+            log.silly('makeAlbum.preprocess', track.file.path, 'removing existing tags')
             mdb.remove()
-            var mdbVorbis = Comment.create(mdb.isLast, VENDOR, comments)
+          }
+
+          if (mdb.isLast) {
+            mdb.isLast = false
+            mdbVorbis = Comment.create(
+              true,
+              VENDOR,
+              [
+                'ARTIST=' + track.artist.name,
+                'TITLE=' + track.name,
+                'ALBUM=' + track.album.name,
+                'TRACKNUMBER=' + track.index,
+                'DATE=' + track.date
+              ]
+            )
+            log.silly('makeAlbum.preprocess', track.file.path, 'created', mdbVorbis)
+          }
+        })
+
+        processor.on('postprocess', function () {
+          if (mdbVorbis) {
+            log.silly('makeAlbum.postprocess', track.file.path, 'publishing tags')
             this.push(mdbVorbis.publish())
           }
         })
@@ -50,8 +65,8 @@ function makeAlbum (root, tracks) {
             resolve(track.file.path)
           })
       })
-    }, {concurrency: 1})
-  })
+    })
+  }, { concurrency: 1 }) // FLAC writer gets confused without this
 }
 
 module.exports = { makeAlbum: makeAlbum }
