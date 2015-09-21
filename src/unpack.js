@@ -92,6 +92,6 @@ function reportArchived (albums) {
 
   console.log('now archived:\n')
   for (let album of archived) {
-    console.log(album.sourceArchive, '\n  ->', album.destArchive)
+    console.log(album.sourceArchive.path, '\n  ->', album.destArchive.path)
   }
 }

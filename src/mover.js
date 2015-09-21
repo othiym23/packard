@@ -8,15 +8,17 @@ import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
 import mvCB from 'mv'
 import { promisify } from 'bluebird'
-import Promise from 'bluebird'
+import { Archive } from '@packard/model'
+import Bluebird from 'bluebird'
 
 const mkdirp = promisify(mkdirpCB)
 const mv = promisify(mvCB)
 const stat = promisify(fs.stat)
 
 export function place (albums, newRoot, groups) {
-  return Promise.all(
-    [...albums].map(album => {
+  return Bluebird.map(
+    [...albums],
+    album => {
       const albumPath = join(newRoot, album.toSafePath())
       const trackerGroup = groups.get(album.sourceArchive.path)
       return mkdirp(albumPath).then(() => {
@@ -26,13 +28,10 @@ export function place (albums, newRoot, groups) {
           album.tracks.length
         )
 
-        return Promise.all(
-          album.tracks.map(track => {
-            const destination = resolve(
-              newRoot,
-              album.toSafePath(),
-              track.safeName()
-            )
+        return Bluebird.map(
+          album.tracks,
+          track => {
+            const destination = resolve(newRoot, album.toSafePath(), track.safeName())
 
             return stat(destination).then(() => {
               log.warn('place', destination, 'already exists; not overwriting')
@@ -45,7 +44,7 @@ export function place (albums, newRoot, groups) {
                 tracker.completeWork(1)
               })
             })
-          })
+          }
         )
       }).then(() => {
         const tracker = trackerGroup.newItem(
@@ -53,8 +52,9 @@ export function place (albums, newRoot, groups) {
           album.pictures.length
         )
 
-        return Promise.all(
-          album.pictures.map(picture => {
+        return Bluebird.map(
+          album.pictures,
+          picture => {
             const destination = resolve(
               newRoot,
               album.toSafePath(),
@@ -71,36 +71,42 @@ export function place (albums, newRoot, groups) {
                 tracker.completeWork(1)
               })
             })
-          })
+          }
         )
       })
-    })
+    }
   ).then(() => albums)
 }
 
 export function moveToArchive (albums, root, groups) {
-  return mkdirp(root).then(() => Promise.all(
-    [...albums].map(album => {
-      const archive = album.sourceArchive
+  return mkdirp(root).then(() => Bluebird.map(
+    [...albums],
+    album => {
+      const archive = album.sourceArchive && album.sourceArchive.path
+      if (!archive) {
+        throw new Error(album.name + ' must have source archive path set.')
+      }
+      log.verbose('moveToArchive', 'finding progress bar for', archive)
       const trackerGroup = groups.get(archive)
       const tracker = trackerGroup.newItem('archiving: ' + archive, albums.size)
       const destination = join(root, basename(archive))
-      if (!archive) {
-        return Promise.reject(
-          new Error(album.name + ' must have source archive path set.')
-        )
-      }
       log.verbose('moveToArchive', 'moving', archive, 'to', destination)
       return stat(destination).then(() => {
         log.warn('moveToArchive', destination, 'already exists; not overwriting')
         tracker.completeWork(1)
       }).catch((er) => {
         if (er.code !== 'ENOENT') throw er
-        return mv(archive, destination).then(() => {
-          album.destArchive = destination
-          tracker.completeWork(1)
-        })
+        return mv(archive, destination)
+          .then(() => stat(destination))
+          .then((stats) => {
+            album.destArchive = new Archive(
+              destination,
+              stats,
+              { info: album.sourceArchive.info }
+            )
+            tracker.completeWork(1)
+          })
       })
-    })
+    }
   ))
 }
