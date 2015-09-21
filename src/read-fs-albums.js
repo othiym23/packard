@@ -1,5 +1,7 @@
 import { basename, dirname, extname } from 'path'
 
+import log from 'npmlog'
+
 import readTracks from './read-fs-tracks.js'
 
 import {
@@ -97,7 +99,12 @@ export default function readAlbums (root) {
       tracklisting.push(track)
     }
 
-    if (tracks.size > 0) throw new Error(tracks.size + ' leftover tracks!')
+    if (tracks.size > 0) {
+      log.warn(
+        'makeAlbum',
+        tracks.size + ' leftover tracks after assembling album!'
+      )
+    }
 
     if (tracklisting.length > 0) {
       if (albumNames.size > 1) throw new Error('too many album names!')
