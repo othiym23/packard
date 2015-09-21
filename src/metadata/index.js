@@ -25,8 +25,8 @@ function scan (unpackedFiles, trackers) {
         case '.avi':
           return stat(path).then(stats => new File(path, stats))
         default:
-          log.error('scan', "don't recognize type of", path)
-          return new Error("don't recognize type of " + path)
+          log.warn('scan', "don't recognize type of", path)
+          return stat(path).then(stats => new File(path, stats))
       }
     }
   )
