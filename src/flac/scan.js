@@ -44,8 +44,10 @@ export default function scan (path, trackers, extras = {}) {
         tracker.verbose('flac.scan', 'finished scanning', path)
         extras.file = new AudioFile(path, stats, streamData)
 
+        tracker.silly('flac.scan', path, 'streamData', streamData)
         if (streamData.duration) extras.duration = parseFloat(streamData.duration)
 
+        tracker.silly('flac.scan', path, 'flacTags', flacTags)
         if (flacTags.TRACKNUMBER) extras.index = parseInt(flacTags.TRACKNUMBER, 10)
         if (flacTags.DISCNUMBER) extras.disc = parseInt(flacTags.DISCNUMBER, 10)
         if (flacTags.DATE) extras.date = flacTags.DATE
