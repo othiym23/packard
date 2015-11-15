@@ -53,7 +53,8 @@ export default function scan (path, trackers, extras = {}) {
         if (flacTags.DATE) extras.date = flacTags.DATE
 
         const artist = new Artist(flacTags.ARTIST)
-        const album = new Album(flacTags.ALBUM, artist)
+        const albumArtist = flacTags.ALBUMARTIST ? new Artist(flacTags.ALBUMARTIST) : artist
+        const album = new Album(flacTags.ALBUM, albumArtist)
         resolve(new Track(flacTags.TITLE, album, artist, extras))
       })
   }))

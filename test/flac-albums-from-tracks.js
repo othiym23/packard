@@ -56,8 +56,8 @@ function idealAlbum () {
     date: '2007-08-28'
   }
 
-  var artist = new Artist('FaRtIsT')
-  var album = new Album('FALBUM', artist, { path: '/test' })
+  var artist = new Artist('Fartist')
+  var album = new Album('Falbum', artist, { path: '/test' })
   album.date = '2007-08-28'
   album.sourceArchive = sourceArchive
   album.tracks = [new Track('Fame', album, new Artist('Fartist'), extras)]
