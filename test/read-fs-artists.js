@@ -5,7 +5,7 @@ var mkdirp = require('mkdirp')
 var rimraf = require('rimraf')
 var test = require('tap').test
 
-var readArtists = require('../lib/read-fs-artists.js')
+var readArtists = require('../lib/read-fs-artists.js').default
 
 var basedir = join(__dirname, 'test-read-tree')
 

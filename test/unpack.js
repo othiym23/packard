@@ -6,7 +6,7 @@ var promisify = Bluebird.promisify
 var rimraf = promisify(require('rimraf'))
 var test = require('tap').test
 
-var unpack = require('../lib/unpack.js')
+var unpack = require('../lib/unpack.js').default
 
 var metadata = require('./lib/metadata.js')
 var zip = require('./lib/zip.js')
