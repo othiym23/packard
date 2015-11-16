@@ -183,6 +183,7 @@ switch (yargs.argv._[0]) {
     .then(track => {
       log.disableProgress()
       console.log(JSON.stringify(track, null, 2))
+      log.silly('inspect', 'tracker debugging', log.tracker.debug())
     })
     .catch(e => {
       log.disableProgress()
