@@ -12,8 +12,6 @@ import { MultitrackAlbum as Album, Artist } from '@packard/model'
 function getID ({ fsAlbum, flacTags, album }) {
   if (flacTags && flacTags.ALBUMARTIST && flacTags.ALBUM) {
     return flacTags.ALBUMARTIST + ' - ' + flacTags.ALBUM
-  } if (flacTags && flacTags.ARTIST && flacTags.ALBUM) {
-    return flacTags.ARTIST + ' - ' + flacTags.ALBUM
   } else if (fsAlbum && fsAlbum.artist && fsAlbum.artist.name && album) {
     return fsAlbum.artist.name + ' - ' + album.name
   } else {
