@@ -44,6 +44,8 @@ export function place (albums, newRoot, groups) {
           }
         )
       }).then(() => {
+        if (!album.pictures.length) return
+
         const tracker = trackerGroup.newItem(
           'covers to ' + albumPath,
           album.pictures.length
