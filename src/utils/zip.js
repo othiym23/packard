@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'graceful-fs'
 import { createHash } from 'crypto'
 import { createWriteStream } from 'graceful-fs'
 import { join, basename, dirname, extname } from 'path'
