@@ -7,7 +7,7 @@ import log from 'npmlog'
 import rimrafCB from 'rimraf'
 import untildify from 'untildify'
 import { promisify } from 'bluebird'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 
 import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import { place, moveToArchive } from './mover.js'
@@ -21,7 +21,7 @@ const tmp = join(tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 
 export default function unpack (files, staging, root, pattern, archive, archiveRoot) {
   log.enableProgress()
-  let locate = Promise.resolve(files)
+  let locate = Bluebird.resolve(files)
   if (root && pattern) {
     locate = locate.then(files => {
       log.verbose('unpack', 'initial files', files)
@@ -46,7 +46,7 @@ export default function unpack (files, staging, root, pattern, archive, archiveR
 
     log.verbose('unpack', 'processing', files)
     files.forEach(f => groups.set(f, log.newGroup('process: ' + f)))
-    return Promise.map(
+    return Bluebird.map(
       files,
       f => extractRelease(f, tmp, covers, groups),
       {concurrency: 2}
@@ -54,7 +54,7 @@ export default function unpack (files, staging, root, pattern, archive, archiveR
   }).then(m => {
     return place(albumsFromFLACTracks(m, covers), staging, groups)
   }).then(placed => {
-    if (!archive) return Promise.resolve(placed)
+    if (!archive) return Bluebird.resolve(placed)
     return moveToArchive(placed, archiveRoot, groups).then(() => placed)
   }).then(albums => {
     log.disableProgress()

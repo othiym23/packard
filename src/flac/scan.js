@@ -2,7 +2,7 @@ import fs from 'graceful-fs'
 import { basename } from 'path'
 import { createReadStream } from 'graceful-fs'
 
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import { promisify } from 'bluebird'
 
 import FLACReader from 'flac-parser'
@@ -15,7 +15,7 @@ const stat = promisify(fs.stat)
 export default function scan (path, trackers, extras = {}) {
   log.verbose('flac.scan', 'scanning', path)
 
-  return stat(path).then(stats => new Promise((resolve, reject) => {
+  return stat(path).then(stats => new Bluebird((resolve, reject) => {
     const name = basename(path)
     let tracker = trackers.get(name)
     if (!tracker) {

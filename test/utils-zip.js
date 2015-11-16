@@ -1,5 +1,5 @@
-var Promise = require('bluebird')
-var promisify = Promise.promisify
+var Bluebird = require('bluebird')
+var promisify = Bluebird.promisify
 
 var join = require('path').join
 

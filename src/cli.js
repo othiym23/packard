@@ -8,7 +8,7 @@ import rc from 'rc'
 import untildify from 'untildify'
 import { promisify } from 'bluebird'
 import { stringify as inify } from 'ini'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 
 import makePlaylist from './utils/make-playlist.js'
 import scanAlbums from './albums.js'
@@ -176,7 +176,7 @@ switch (yargs.argv._[0]) {
     log.silly('inspect', 'things', things)
 
     log.enableProgress()
-    Promise.map(things, f => {
+    Bluebird.map(things, f => {
       groups.set(basename(f), log.newGroup(f))
       return scanFLAC(f, groups)
     })

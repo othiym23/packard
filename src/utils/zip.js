@@ -7,7 +7,7 @@ import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
 import { open as openZipCB } from 'yauzl'
 import { promisify } from 'bluebird'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 
 import { Archive } from '@packard/model'
 
@@ -19,7 +19,7 @@ export function unpack (archivePath, groups, directory) {
   log.silly('unpack', 'unpacking', archivePath)
   const path = join(directory, createHash('sha1').update(archivePath).digest('hex'))
   const group = groups.get(archivePath)
-  return mkdirp(path).then(() => stat(path)).then(stats => new Promise((resolve, reject) => {
+  return mkdirp(path).then(() => stat(path)).then(stats => new Bluebird((resolve, reject) => {
     log.verbose('unpack', 'made', path)
     openZip(archivePath, {autoClose: false}).then(zf => {
       log.verbose('unpack', 'unpacking up to', zf.entryCount, 'entries')
@@ -52,7 +52,7 @@ export function unpack (archivePath, groups, directory) {
         entries.push(entry)
       })
       zf.on('end', () => {
-        Promise.map(entries, zipData => new Promise((resolve, reject) => {
+        Bluebird.map(entries, zipData => new Bluebird((resolve, reject) => {
           log.silly('unpack', 'zipData', zipData)
           const sourceArchive = new Archive(archivePath, stats, { info: zipData })
 

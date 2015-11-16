@@ -3,7 +3,7 @@ import fs from 'graceful-fs'
 
 import log from 'npmlog'
 import { promisify } from 'bluebird'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 
 import scanFLAC from '../flac/scan.js'
 import { unpack as unzip } from '../utils/zip.js'
@@ -12,7 +12,7 @@ import { Cover, File } from '@packard/model'
 const stat = promisify(fs.stat)
 
 function scan (unpackedFiles, trackers) {
-  return Promise.map(
+  return Bluebird.map(
     unpackedFiles,
     ({ path, sourceArchive }) => {
       switch (extname(path)) {

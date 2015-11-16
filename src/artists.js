@@ -1,5 +1,5 @@
 import log from 'npmlog'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 
 import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import audit from './metadata/audit.js'
@@ -63,12 +63,12 @@ function albumsAndTracksToArtists (albums, artistTracks) {
 }
 
 export default function scanArtists (roots, trackers) {
-  return Promise.map(
+  return Bluebird.map(
       roots,
       root => readArtists(root).then(artists => [root, flatten(artists)])
     ).map(([root, entities]) => {
       log.verbose('scanArtists', 'processing', root)
-      return Promise.map(
+      return Bluebird.map(
           [...entities],
           entity => scanFLAC(entity.path, trackers, entity).then(audit),
           { concurrency: 4 }

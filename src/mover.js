@@ -1,19 +1,16 @@
-// SEE YOU IN 2017
-
-import fs from 'fs'
+import fs from 'graceful-fs'
 
 import { join, resolve, basename } from 'path'
 
 import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
 import mvCB from 'mv'
-import { promisify } from 'bluebird'
 import { Archive } from '@packard/model'
 import Bluebird from 'bluebird'
 
-const mkdirp = promisify(mkdirpCB)
-const mv = promisify(mvCB)
-const stat = promisify(fs.stat)
+const mkdirp = Bluebird.promisify(mkdirpCB)
+const mv = Bluebird.promisify(mvCB)
+const stat = Bluebird.promisify(fs.stat)
 
 export function place (albums, newRoot, groups) {
   return Bluebird.map(
