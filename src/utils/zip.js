@@ -1,19 +1,19 @@
 import fs from 'fs'
 import { createHash } from 'crypto'
 import { createWriteStream } from 'graceful-fs'
-import { join, basename, dirname } from 'path'
+import { join, basename, dirname, extname } from 'path'
 
 import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
 import { open as openZipCB } from 'yauzl'
-import { promisify } from 'bluebird'
 import Bluebird from 'bluebird'
 
 import { Archive } from '@packard/model'
+import { reader as flacReader } from '../flac/scan.js'
 
-const stat = promisify(fs.stat)
-const mkdirp = promisify(mkdirpCB)
-const openZip = promisify(openZipCB)
+const stat = Bluebird.promisify(fs.stat)
+const mkdirp = Bluebird.promisify(mkdirpCB)
+const openZip = Bluebird.promisify(openZipCB)
 
 export function unpack (archivePath, groups, directory) {
   log.silly('unpack', 'unpacking', archivePath)
@@ -63,6 +63,19 @@ export function unpack (archivePath, groups, directory) {
             3
           )
 
+          const scanned = {}
+          const notFlac = {}
+          function both (metadata) {
+            if (metadata.track) scanned.flacTrack = metadata.track
+            if (metadata.sourceArchive) scanned.sourceArchive = metadata.sourceArchive
+            if (metadata.path) scanned.path = metadata.path
+
+            if (scanned.flacTrack && scanned.sourceArchive && scanned.path) {
+              if (scanned.flacTrack === notFlac) delete scanned.flacTrack
+              resolve(scanned)
+            }
+          }
+
           zf.openReadStream(zipData, function (err, zipstream) {
             if (err) {
               log.error('unpack', 'reading stream', err.stack)
@@ -78,8 +91,29 @@ export function unpack (archivePath, groups, directory) {
                 .on('error', reject)
                 .on('finish', () => {
                   log.verbose('unpack', 'finished writing', fullPath)
-                  resolve({ sourceArchive, path: fullPath })
+                  both({ sourceArchive, path: fullPath })
                 })
+
+              if (extname(fullPath) === '.flac') {
+                const flacStats = {
+                  size: zipData.uncompressedSize,
+                  atime: zipData.getLastModDate(),
+                  mtime: zipData.getLastModDate(),
+                  ctime: zipData.getLastModDate(),
+                  birthtime: zipData.getLastModDate(),
+                  uid: process.getuid(),
+                  gid: process.getgid()
+                }
+                zipstream.pipe(flacReader(
+                  fullPath,
+                  groups,
+                  { stats: flacStats },
+                  both,
+                  reject
+                ))
+              } else {
+                both({ track: notFlac })
+              }
             })
           })
         }), {concurrency: 1}).then(paths => {

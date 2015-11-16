@@ -14,10 +14,16 @@ const stat = promisify(fs.stat)
 function scan (unpackedFiles, trackers) {
   return Bluebird.map(
     unpackedFiles,
-    ({ path, sourceArchive }) => {
+    ({ path, sourceArchive, flacTrack }) => {
       switch (extname(path)) {
         case '.flac':
-          return scanFLAC(path, trackers, { sourceArchive })
+          if (flacTrack) {
+            if (sourceArchive) flacTrack.sourceArchive = sourceArchive
+            return Bluebird.resolve(flacTrack)
+          } else {
+            return scanFLAC(path, trackers, { sourceArchive })
+          }
+          break
         case '.jpg':
         case '.pdf':
         case '.png':
