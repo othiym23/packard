@@ -15,6 +15,7 @@ import makePlaylist from './utils/make-playlist.js'
 import scanAlbums from './albums.js'
 import scanArtists from './artists.js'
 import scanFLAC from './flac/scan.js'
+import showAlbums from './show-albums.js'
 import unpack from './unpack.js'
 
 const writeFile = promisify(fs.writeFile)
@@ -57,6 +58,7 @@ function saveConfig (argv) {
 
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
+                .command('albums', 'print a list of albums in human-readable format')
                 .command('artists', 'generate a list of artists from roots')
                 .command('audit', 'check metadata for inconsistencies')
                 .command('inspect', 'dump all the metadata from a track or album')
@@ -144,6 +146,22 @@ log.verbose('config', config)
 let argv, roots
 const groups = new Map()
 switch (yargs.argv._[0]) {
+  case 'albums':
+    argv = yargs.reset()
+                .usage('Usage: $0 [options] albums [-R dir [file...]]')
+                .options({
+                  R: options.R
+                })
+                .check(argv => {
+                  if (argv._.length > 1 || (argv.R && argv.R.length)) return true
+
+                  return 'Must pass 1 or more audio files or directory trees.'
+                })
+                .argv
+
+    log.silly('albums argv', argv)
+    showAlbums(argv._.slice(1), argv.R, groups)
+    break
   case 'artists':
     options.R.required = '- Must have at least one tree to scan.'
     argv = yargs.reset()
@@ -182,19 +200,19 @@ switch (yargs.argv._[0]) {
 
     log.enableProgress()
     scanAlbums(files, groups)
-    .then(albums => {
-      log.disableProgress()
-      log.silly('audit', 'albums', albums)
-      for (let album of albums) {
-        const id = album.artist.name + ': ' + album.name + ' /'
-        for (let warning of audit(album)) log.warn('audit', id, warning)
-      }
-      log.silly('audit', 'tracker debugging', log.tracker.debug())
-    })
-    .catch(e => {
-      log.disableProgress()
-      log.error('audit', e.stack)
-    })
+      .then(albums => {
+        log.disableProgress()
+        log.silly('audit', 'albums', albums)
+        for (let album of albums) {
+          const id = album.artist.name + ': ' + album.name + ' /'
+          for (let warning of audit(album)) log.warn('audit', id, warning)
+        }
+        log.silly('audit', 'tracker debugging', log.tracker.debug())
+      })
+      .catch(e => {
+        log.disableProgress()
+        log.error('audit', e.stack)
+      })
 
     break
   case 'inspect':
@@ -256,8 +274,8 @@ switch (yargs.argv._[0]) {
                 })
                 .argv
 
-    const zipfiles = argv._.slice(1)
     log.silly('unpack argv', argv)
+    const zipfiles = argv._.slice(1)
 
     let finish = unpack(
       zipfiles,

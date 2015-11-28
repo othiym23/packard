@@ -12,6 +12,7 @@ var r = relative(process.cwd(), p)
 var lines = function () {/*
 
 Commands:
+  albums   print a list of albums in human-readable format
   artists  generate a list of artists from roots
   audit    check metadata for inconsistencies
   inspect  dump all the metadata from a track or album
