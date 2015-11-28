@@ -3,7 +3,6 @@ import moment from 'moment'
 import Bluebird from 'bluebird'
 
 import albumsFromFLACTracks from './flac/albums-from-tracks.js'
-import audit from './metadata/audit.js'
 import flatten from './flatten-tracks.js'
 import readArtists from './read-fs-artists.js'
 import scanFLAC from './flac/scan.js'
@@ -34,17 +33,18 @@ function byDate (a, b) {
 export default function scanAlbums (roots, trackers) {
   return Bluebird.map(
       roots,
-      root => readArtists(root).then(artists => [root, flatten(artists)])
-    ).map(([root, entities]) => {
-      log.verbose('scanAlbums', 'processing', root)
-      return Bluebird.map(
-          [...entities],
-          entity => scanFLAC(entity.path, trackers, entity).then(audit),
-          {concurrency: 4}
-        ).then(tracks => albumsFromFLACTracks(tracks))
-    }).then(albums => {
-      const sorted = albums.reduce((all, list) => all.concat(...list), [])
-      sorted.sort(byDate)
+      root => {
+        log.verbose('scanAlbums', 'processing', root)
+        return readArtists(root)
+                 .then(flatten)
+                 .map(track => scanFLAC(track.path, trackers, track), { concurrency: 2 })
+      },
+      { concurrency: 2 }
+    )
+    .then(tracks => albumsFromFLACTracks(tracks))
+    .then(albums => {
+      log.silly('scanAlbums', 'albums', albums)
+      const sorted = [...albums].sort(byDate)
       log.silly('scanAlbums', 'sorted', sorted.map(a => '[' + a.date + '] ' + a.name))
 
       return sorted
