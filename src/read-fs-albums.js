@@ -28,6 +28,7 @@ export default function readAlbums (root) {
   return readTracks(root).then(postprocess)
 
   function postprocess (tree) {
+    if (!Array.isArray(tree)) tree = [tree]
     log.silly('readAlbums', 'tree', tree)
     extractTypeFromTree(
       Cover,

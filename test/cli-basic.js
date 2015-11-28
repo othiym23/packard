@@ -13,6 +13,7 @@ var lines = function () {/*
 
 Commands:
   artists  generate a list of artists from roots
+  audit    check metadata for inconsistencies
   inspect  dump all the metadata from a track or album
   pls      print a list of albums as a .pls file, sorted by date
   unpack   unpack a set of zipped files into a staging directory

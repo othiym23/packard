@@ -10,6 +10,7 @@ import { promisify } from 'bluebird'
 import { stringify as inify } from 'ini'
 import Bluebird from 'bluebird'
 
+import audit from './metadata/audit.js'
 import makePlaylist from './utils/make-playlist.js'
 import scanAlbums from './albums.js'
 import scanArtists from './artists.js'
@@ -57,6 +58,7 @@ function saveConfig (argv) {
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
                 .command('artists', 'generate a list of artists from roots')
+                .command('audit', 'check metadata for inconsistencies')
                 .command('inspect', 'dump all the metadata from a track or album')
                 .command(
                   'pls',
@@ -165,6 +167,37 @@ switch (yargs.argv._[0]) {
       }
     }).catch(error => log.error('artists', error.stack))
     break
+  case 'audit':
+    argv = yargs.reset()
+                .usage('Usage: $0 audit [file [file...]]')
+                .check(argv => {
+                  if (argv._.length > 1) return true
+
+                  return 'must pass either 1 or more files containing metadata'
+                })
+                .argv
+
+    const files = argv._.slice(1)
+    log.silly('audit', 'argv', argv)
+    log.silly('audit', 'files', files)
+
+    log.enableProgress()
+    scanAlbums(files, groups)
+    .then(albums => {
+      log.disableProgress()
+      log.silly('audit', 'albums', albums)
+      for (let album of albums) {
+        const id = album.artist.name + ': ' + album.name + ' /'
+        for (let warning of audit(album)) log.warn('audit', id, warning)
+      }
+      log.silly('audit', 'tracker debugging', log.tracker.debug())
+    })
+    .catch(e => {
+      log.disableProgress()
+      log.error('audit', e.stack)
+    })
+
+    break
   case 'inspect':
     argv = yargs.reset()
                 .usage('Usage: $0 [options] inspect [file [dir...]]')
@@ -228,11 +261,11 @@ switch (yargs.argv._[0]) {
                 })
                 .argv
 
-    const files = argv._.slice(1)
+    const zipfiles = argv._.slice(1)
     log.silly('unpack argv', argv)
 
     let finish = unpack(
-      files,
+      zipfiles,
       argv.s,
       argv.R[0], argv.P,
       argv.archive, argv.archiveRoot

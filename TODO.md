@@ -52,14 +52,15 @@ packard.todo
 	- get album artist from flacTrack when possible @done(2015-08-24)
 
 * audit
-	- top-level command to audit files or albums
-	- audit for albums as well
+	- top-level command to audit files or albums @done(2015-11-27)
+	- audit for albums as well @done(2015-11-27)
+        - make audit pluggable and configurable
 	- flags:
 		- remixes with '()' instead of '[]'
 		- filenames that don't match metadata
 		- tracks missing MBID / MB artist ID / MB album ID
 		- MB metadata for non-"Digital Media" releases
-		- ALL CAPS / GENRE NAMES
+		- ALL CAPS / GENRE NAMES @done(2015-11-27)
 
 * logging
 	- fix log levels everywhere

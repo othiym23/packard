@@ -2,7 +2,6 @@ import log from 'npmlog'
 import Bluebird from 'bluebird'
 
 import albumsFromFLACTracks from './flac/albums-from-tracks.js'
-import audit from './metadata/audit.js'
 import flatten from './flatten-tracks.js'
 import readArtists from './read-fs-artists.js'
 import scanFLAC from './flac/scan.js'
@@ -70,7 +69,7 @@ export default function scanArtists (roots, trackers) {
       log.verbose('scanArtists', 'processing', root)
       return Bluebird.map(
           [...entities],
-          entity => scanFLAC(entity.path, trackers, entity).then(audit),
+          entity => scanFLAC(entity.path, trackers, entity),
           { concurrency: 4 }
         ).then(tracks => {
           // 1. convert tracks into albums

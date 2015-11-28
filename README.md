@@ -111,6 +111,41 @@ Options:
 * `--root`: The root of an `artist/album/tracks` directory tree. This option
   may be used multiple times.
 
+### audit files for inconsistent metadata
+
+```
+$ packard audit [file|dir [files|dirs...]]
+```
+
+example run:
+
+```
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Put Yourself in Los Angeles: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - This Is Me: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Voodoo: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Moorby: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Radio Void: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Just Like You: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Bust Stop: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Useless Information: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Moving Still: has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Manic Melody (Hairy Beary): has no release month in "1981"
+WARN audit Chris & Cosey: Heartbeat / Chris & Cosey - Heartbeat: has no release month in "1981"
+WARN audit Chris & Cosey: October (Love Song) / Chris & Cosey - October (Love Song): has no release month in "1982"
+WARN audit Chris & Cosey: October (Love Song) / Chris & Cosey - October (Love Song) [12" mix]: has no release month in "1982"
+WARN audit Chris & Cosey: October (Love Song) / Chris & Cosey - October (Love Song) [dance mix]: has no release month in "1982"
+WARN audit Chris & Cosey: October (Love Song) / Chris & Cosey - Little Houses: has no release month in "1982"
+```
+
+Inspect a set of files and / or directories and look for things that I commonly tag incorrectly (or forget to tag altogether):
+
+- dates that aren't in ISO YYYY-MM-DD format
+- missing genre tags
+- genre tags that aren't included in my personal taxonomy
+- Boomkat-style all-caps genre tags
+
+I'll add more validators until the code gets completely unwieldy, at which point I'll convert the validators into configurable plugins and let you choose which validators you want.
+
 ### inspect files and display metadata
 
 ```
