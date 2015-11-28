@@ -24,7 +24,7 @@ const config = rc(
   'packard',
   {
     loglevel: 'info',
-    roots: [],
+    roots: undefined,
     'staging-directory': undefined,
     archive: {
       'enabled-by-default': false,
@@ -87,35 +87,40 @@ const options = {
   R: {
     alias: 'root',
     array: true,
-    describe: 'directory root for an Artist/Album tree',
-    required: 'must have at least one tree to scan',
-    default: config.roots
+    describe: 'directory root for an Artist/Album tree'
   },
   P: {
     alias: 'pattern',
-    describe: 'bash glob pattern used to match files under root',
-    default: config.archive['glob-pattern']
+    describe: 'bash glob pattern used to match files under root'
   },
   s: {
     alias: 'staging',
     describe: 'where to create the tree for unpacked artists',
-    required: 'must have a place to put unpacked files',
-    default: config['staging-directory']
+    required: '- Must have a place to put unpacked files.'
   },
   archive: {
     describe: 'after other operations, archive original files',
-    boolean: true,
-    default: Boolean(config.archive['enabled-by-default'])
+    boolean: true
   },
   archiveRoot: {
-    describe: "where to archive zip files once they've been unpacked",
-    default: config.archive.root
+    describe: "where to archive zip files once they've been unpacked"
   },
   playlist: {
     describe: 'create a playlist containing all of the unpacked albums',
     string: true
   }
 }
+
+function sip (argument, value) {
+  log.silly('setIfPresent', 'argument', argument, 'value', value)
+  if (value) options[argument].default = value
+}
+
+sip('R', config.roots)
+sip('P', config.archive['glob-pattern'])
+sip('s', config['staging-directory'])
+sip('archive', Boolean(config.archive['enabled-by-default']))
+sip('archiveRoot', config.archive.root)
 
 log.level = yargs.argv.loglevel
 log.setGaugeTemplate([
@@ -140,16 +145,10 @@ let argv, roots
 const groups = new Map()
 switch (yargs.argv._[0]) {
   case 'artists':
-    options.R.describe = 'directory root for an Artist/Album tree'
+    options.R.required = '- Must have at least one tree to scan.'
     argv = yargs.reset()
-                .options({
-                  R: options.R
-                })
-                .check(argv => {
-                  if (argv.R.length) return true
-
-                  return 'must pass 1 or more root directories'
-                })
+                .usage('Usage: $0 artists [-R dir [-R dir...]]')
+                .options({ R: options.R })
                 .argv
     roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
@@ -225,15 +224,11 @@ switch (yargs.argv._[0]) {
 
     break
   case 'pls':
-    options.R.describe = 'directory root for an Artist/Album tree'
+    options.R.required = '- Must have at least one tree to scan.'
     argv = yargs.reset()
+                .usage('Usage: $0 [options] pls [-R dir [-R dir...]]')
                 .options({
                   R: options.R
-                })
-                .check(argv => {
-                  if (argv.R.length) return true
-
-                  return 'must pass 1 or more root directories'
                 })
                 .argv
     roots = argv.R.map(r => untildify(r))
@@ -255,9 +250,9 @@ switch (yargs.argv._[0]) {
                   playlist: options.playlist
                 })
                 .check(argv => {
-                  if (argv._.length > 1 || argv.R.length && argv.P) return true
+                  if (argv._.length > 1 || (argv.R && argv.R.length && argv.P)) return true
 
-                  return 'must pass either 1 or more zipfiles or root and glob pattern'
+                  return 'Must pass either 1 or more zipfiles, or root and glob pattern.'
                 })
                 .argv
 
@@ -267,7 +262,7 @@ switch (yargs.argv._[0]) {
     let finish = unpack(
       zipfiles,
       argv.s,
-      argv.R[0], argv.P,
+      (argv.R || [])[0], argv.P,
       argv.archive, argv.archiveRoot
     )
     if (argv.playlist) {

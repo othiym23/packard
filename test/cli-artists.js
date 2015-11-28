@@ -3,7 +3,6 @@ var join = require('path').join
 
 var Bluebird = require('bluebird')
 var promisify = Bluebird.promisify
-var glob = promisify(require('glob'))
 var mkdirp = promisify(require('mkdirp'))
 var rimraf = promisify(require('rimraf'))
 
@@ -17,12 +16,16 @@ var r = relative(process.cwd(), p)
 
 var lines = function () {/*
 
-must pass either 1 or more files containing metadata
+Options:
+  -R, --root  directory root for an Artist/Album tree  [array] [required]
+
+Missing required argument: R
+- Must have at least one tree to scan.
 */}.toString().split('\n').slice(1, -1)
 
-var prolog = 'Usage: ' + r + ' audit [file [file...]]'
+var prolog = 'Usage: ' + r + ' artists [-R dir [-R dir...]]'
 
-var root = join(__dirname, 'cli-audit')
+var root = join(__dirname, 'cli-artists')
 var flacRoot = join(root, 'flac')
 var albumRoot = join(flacRoot, 'Gary Beck', 'Feel It')
 
@@ -34,10 +37,10 @@ test('setup', function (t) {
   })
 })
 
-test('packard audit', function (t) {
+test('packard artists', function (t) {
   var expected = [prolog].concat(lines).join('\n')
   cli.pnixt()
-    .run('node ' + p + ' audit')
+    .run('node ' + p + ' artists')
     .expect(function (r) {
       var trimmed = r.stderr
                      .split('\n')
@@ -52,7 +55,7 @@ test('packard audit', function (t) {
     })
 })
 
-test('packard audit ' + root + '/**/*.flac', function (t) {
+test('packard artists -R ' + root, function (t) {
   rimraf(root).then(function () {
     return metadata.makeAlbum(
       albumRoot,
@@ -66,17 +69,12 @@ test('packard audit ' + root + '/**/*.flac', function (t) {
       ]
     )
   }).then(function () {
-    return glob(root + '/**/*.flac')
-  }).then(function (files) {
     cli.pnixt()
-      .run('node ' + p + ' audit ' + files.map(function (f) {
-        return '"' + f + '"'
-      }).join(' '))
+      .run('node ' + p + ' artists -R ' + root)
       .expect(function (r) {
-        t.match(r.stderr, 'Gary Beck: Feel It / Gary Beck - Feel It: has no genre set')
-        t.match(r.stderr, 'Gary Beck: Feel It / Gary Beck - Paid Out: has no genre set')
-        t.match(r.stderr, 'Gary Beck: Feel It / Gary Beck - Hillview: has no genre set')
-        t.equal(r.stdout, '')
+        t.equal(r.stderr, '', '"packard artists" ran without errors')
+        t.match(r.stdout, 'ROOT ' + root + ':')
+        t.match(r.stdout, /Gary Beck/)
       })
       .code(0)
       .end(function (e) {
