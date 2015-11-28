@@ -17,14 +17,15 @@ var flac = require('./flac.js')
 var EMPTY_TRACK = path.join(__dirname, '../fixtures/empty.flac')
 
 function makeAlbum (root, date, artistName, albumName, trackTemplates) {
-  const artist = new Artist(artistName)
-  const album = new Album(albumName, artist)
+  var artist = new Artist(artistName)
+  var album = new Album(albumName, artist)
   return stat(EMPTY_TRACK).then(function (stats) {
     return flac.makeAlbum(root, trackTemplates.map(function (template, index) {
+      var trackArtist = template.artist ? new Artist(template.artist) : artist
       var track = new Track(
         template.name || '[untitled]',
         album,
-        artist,
+        trackArtist,
         {
           path: EMPTY_TRACK,
           stats: stats,
@@ -34,6 +35,7 @@ function makeAlbum (root, date, artistName, albumName, trackTemplates) {
         }
       )
       track.file.path = path.join(root, template.path || track.safeName())
+      if (template.genre) track.flacTags = { GENRE: template.genre }
 
       return track
     }))

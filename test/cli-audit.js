@@ -56,13 +56,24 @@ test('packard audit ' + root + '/**/*.flac', function (t) {
   rimraf(root).then(function () {
     return metadata.makeAlbum(
       albumRoot,
-      '2012-01-20',
-      'Gary Beck',
-      'Feel It',
+      '2011-01-20',
+      'Gary Beck / Speedy J',
+      'Egoist',
       [
-        { name: 'Feel It' },
-        { name: 'Paid Out' },
-        { name: 'Hillview' }
+        { artist: 'Gary Beck', name: 'Egoist' },
+        { artist: 'Gary Beck feat. Speedy J', name: 'Egoist [Speedy J dub tool]' }
+      ]
+    )
+  }).then(function () {
+    return metadata.makeAlbum(
+      albumRoot,
+      '2015-09',
+      'Gary Beck',
+      'Scarlett',
+      [
+        { genre: 'Techno', name: 'Scarlett' },
+        { genre: 'Techno', name: 'Gaada Stack' },
+        { artist: 'BEK Audio', genre: 'Techno', name: 'Hot Packing Slip' }
       ]
     )
   }).then(function () {
@@ -73,9 +84,11 @@ test('packard audit ' + root + '/**/*.flac', function (t) {
         return '"' + f + '"'
       }).join(' '))
       .expect(function (r) {
-        t.match(r.stderr, 'Gary Beck: Feel It / Gary Beck - Feel It: has no genre set')
-        t.match(r.stderr, 'Gary Beck: Feel It / Gary Beck - Paid Out: has no genre set')
-        t.match(r.stderr, 'Gary Beck: Feel It / Gary Beck - Hillview: has no genre set')
+        t.match(r.stderr, 'Gary Beck - Egoist: has no genre set')
+        t.match(r.stderr, 'Speedy J - Egoist [Speedy J dub tool]: has no genre set')
+        t.match(r.stderr, 'Gary Beck - Scarlett: has no release day in "2015-09"')
+        t.match(r.stderr, 'Gary Beck - Gaada Stack: has no release day in "2015-09"')
+        t.match(r.stderr, 'BEK Audio - Hot Packing Slip: has no release day in "2015-09"')
         t.equal(r.stdout, '')
       })
       .code(0)

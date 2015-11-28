@@ -33,18 +33,23 @@ function makeAlbum (root, tracks) {
             mdb.remove()
           }
 
+          var tags = [
+            'ARTIST=' + track.artist.name,
+            'TITLE=' + track.name,
+            'ALBUM=' + track.album.name,
+            'TRACKNUMBER=' + track.index,
+            'DATE=' + track.date
+          ]
+          if (track.flacTags && track.flacTags.GENRE) {
+            tags.push('GENRE=' + track.flacTags.GENRE)
+          }
+
           if (mdb.isLast) {
             mdb.isLast = false
             mdbVorbis = Comment.create(
               true,
               VENDOR,
-              [
-                'ARTIST=' + track.artist.name,
-                'TITLE=' + track.name,
-                'ALBUM=' + track.album.name,
-                'TRACKNUMBER=' + track.index,
-                'DATE=' + track.date
-              ]
+              tags
             )
             log.silly('makeAlbum.preprocess', track.file.path, 'created', mdbVorbis)
           }

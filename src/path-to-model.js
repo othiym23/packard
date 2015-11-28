@@ -47,11 +47,11 @@ export default function toModel (path, stats) {
 
 const BOOMKAT_PATTERN = /^(\d+)-(.+)$/
 function parseName (track) {
-  let [, index, name] = track.name.match(BOOMKAT_PATTERN) || []
+  const parsed = track.name.match(BOOMKAT_PATTERN) || []
+  const index = parsed[1]
+  const name = parsed[2]
   if (index && name) {
     track.index = parseInt(index, 10)
-
-    name = name.replace(/_/g, ' ')
-    track.name = name
+    track.name = name.replace(/_/g, ' ')
   }
 }
