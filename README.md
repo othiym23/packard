@@ -81,6 +81,50 @@ Options:
 * `--archive-root`: Where to put zip files after extraction. Files in
   `archive-root` will not be unpacked or moved.
 
+### optimally pack a set of albums onto a storage device
+
+```
+$ packard [options] optimize -O blocks [-R dir [file...]]
+```
+
+example run:
+
+```
+$ packard optimize -R /Volumes/MUSIQUENONSTOP/latest-flac-3 -R /Volumes/MUSIQUENONSTOP/latest-flac-2 -O 123792896
+
+included:
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Various Artists/[2015] Bass and Superstructure Shifting Peaks 2010-2015 [3497796 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Various Artists/[2015] 20 20 Years of Planet Mu [2820457 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/RAMLEH/Circular Time [2711520 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Curve/[2010] Rare and Unreleased [2604261 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Thighpaulsandra/[2015] The Golden Communion [1316502 blocks]
+...
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Source Direct/[2015-07-13] Approach  Identify (Demdike Stare remix) [150746 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Paradox/A Certain Sound  Deep Sleep [150414 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Curve/[1992] Superblaster single [148914 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Musumeci/[2015] Harry Batasuna  Untitled An-I Edit [148622 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Fucked Up/[2014] Sun Glass [113248 blocks]
+TOTAL: 123784969 512-byte blocks (of 123792896 block capacity)
+
+left out:
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Chris  Cosey/[1990] Allotropy [451877 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/Blanck Mass feat Genesis Breyer P-Orridge/[2015-10-26] The Great Confuso EP [426177 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/Circuit Breaker/My Descent Into Capital [391869 blocks]
+...
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Fucked Up/[2014] Paper The House [99652 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Fracture/[2015] Luv Ta Luv Ya Fracture VIP [feat DJ Monita] [71639 blocks]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Chris  Cosey/[1991] Passion [56411 blocks]
+TOTAL: 9331920 512-byte blocks
+```
+
+Given a list of files and tree roots, assemble the tracks into albums and then calculate the optimal packing to fit a given volume size. Fill up your iPhone or memory cards!
+
+Options:
+
+* `--optimal-capacity`: The available blocks on the target device.
+* `--block-size`: The size of storage blocks, in bytes, on the target device.
+* `--root`: A filesystem root under which there are media files. Can be more than one.
+
 ### generate a .pls version 2 playlist, sorted by release date
 
 ```

@@ -12,6 +12,7 @@ import Bluebird from 'bluebird'
 
 import audit from './metadata/audit.js'
 import makePlaylist from './utils/make-playlist.js'
+import optimize from './command/optimize.js'
 import scanAlbums from './albums.js'
 import scanArtists from './artists.js'
 import scanFLAC from './flac/scan.js'
@@ -86,14 +87,24 @@ const yargs = require('yargs')
                 .demand(1)
 
 const options = {
+  O: {
+    alias: 'optimal-capacity',
+    describe: 'size of target volume, in blocks',
+    required: '- Must have a target to optimize towards.'
+  },
+  P: {
+    alias: 'pattern',
+    describe: 'bash glob pattern used to match files under root'
+  },
   R: {
     alias: 'root',
     array: true,
     describe: 'directory root for an Artist/Album tree'
   },
-  P: {
-    alias: 'pattern',
-    describe: 'bash glob pattern used to match files under root'
+  S: {
+    alias: 'block-size',
+    describe: 'size of blocks on target volume',
+    default: 512
   },
   s: {
     alias: 'staging',
@@ -240,6 +251,24 @@ switch (yargs.argv._[0]) {
       log.error('inspect', e.stack)
     })
 
+    break
+  case 'optimize':
+    argv = yargs.reset()
+                .usage('Usage: $0 [options] optimize -O blocks [-R dir [file...]]')
+                .options({
+                  O: options.O,
+                  R: options.R,
+                  S: options.S
+                })
+                .check(argv => {
+                  if (argv._.length > 1 || (argv.R && argv.R.length)) return true
+
+                  return 'Must pass 1 or more audio files or directory trees.'
+                })
+                .argv
+
+    log.silly('optimize argv', argv)
+    optimize(argv._.slice(1), argv.R, argv.S, argv.O, groups)
     break
   case 'pls':
     options.R.required = '- Must have at least one tree to scan.'

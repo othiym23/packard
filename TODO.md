@@ -33,6 +33,9 @@ packard.todo
 	- top-level command to generate list of albums in a set of roots @done(2015-11-28)
 	- take a list of artists and produce a list of albums from a root containing tracks by those artists
 
+* optimize
+       - top-level command to read a set of roots and optimize the set of albums for a given target size @done(2015-11-28)
+
 * pack
 	- top-level command to optimally pack a device with files for a prioritized list of artists, as whole albums
 
