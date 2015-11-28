@@ -28,16 +28,19 @@ export default function readAlbums (root) {
   return readTracks(root).then(postprocess)
 
   function postprocess (tree) {
+    log.silly('readAlbums', 'tree', tree)
     extractTypeFromTree(
       Cover,
       tree,
       e => covers.set(basename(e.path, extname(e.path)), e)
     )
+    log.silly('readAlbums', 'covers', covers)
     extractTypeFromTree(
       Cuesheet,
       tree,
       e => cues.set(basename(e.path, extname(e.path)), e)
     )
+    log.silly('readAlbums', 'cuesheets', cues)
 
     return simplify(tree)
   }
@@ -88,7 +91,7 @@ export default function readAlbums (root) {
           tracks.delete(track)
           pictures.add(track)
         } else {
-          console.error('whut', track)
+          log.warn('makeAlbum', 'unknown file found', track)
         }
         continue
       }
