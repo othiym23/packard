@@ -90,8 +90,8 @@ test('packard artists -R ' + root, function (t) {
       .run('node ' + p + ' albums -R ' + root)
       .expect(function (r) {
         t.equal(r.stderr, '', '"packard albums" ran without errors')
-        t.match(r.stdout, 'albums:')
         t.match(r.stdout, /Gary Beck/)
+        t.match(r.stdout, /TOTAL: \d+ 512-byte blocks/)
       })
       .code(0)
       .end(function (e) {

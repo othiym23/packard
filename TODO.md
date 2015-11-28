@@ -9,7 +9,7 @@ packard.todo
 * metadata
 	- ID3v2 reading
 	- m4a QT atom reading
-	- extract MusicBrainz info into a MB metadata object
+	- extract MusicBrainz info into a MB metadata object @done(2015-11-27)
 
 * place
 	- top-level command to move from staging to real root
@@ -30,7 +30,7 @@ packard.todo
 	- tracks should be on albums, or in loose tracks, but not both for report
 
 * albums
-	- top-level command to generate list of albums in a set of roots
+	- top-level command to generate list of albums in a set of roots @done(2015-11-28)
 	- take a list of artists and produce a list of albums from a root containing tracks by those artists
 
 * pack

@@ -14,6 +14,11 @@ export default function showAlbums (files = [], roots = [], trackerGroups) {
 }
 
 function report (albums) {
-  console.log('albums:\n')
-  for (let album of albums) console.log(album.dump())
+  const sorted = albums.sort((a, b) => b.getSize() - a.getSize())
+  let total = 0
+  for (let album of sorted) {
+    total += album.getSize(512)
+    console.log('%s [%sM]', album.path, album.getSize(1024 * 1024))
+  }
+  console.log('TOTAL: %s 512-byte blocks', total)
 }

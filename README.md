@@ -247,29 +247,29 @@ $ packard albums [-R root [file...]]
 example run:
 
 ```
-$ packard albums -R flac/Gary\ Beck
-Gary Beck/[2012] Algoreal 12 inch mix  Naptha
-  Gary Beck - Algoreal (12 inch mix)  Naptha - 01 - Algoreal (12 Mix).flac
-  Gary Beck - Algoreal (12 inch mix)  Naptha - 02 - Naptha.flac
-c: Gary Beck/[2012] Algoreal 12 inch mix  Naptha/cover.jpg
-(/var/folders/bf/1f70gl7x2_g0s1dchcrw97xm0000gn/T/packard-dd679433a5829b8d/8ae5e277a53e44df476304233270a88380aed5b6)
-
-Gary Beck/[2012] Bring A Friend
-  Gary Beck - Bring A Friend - 01 - I Read About You.flac
-  Gary Beck - Bring A Friend - 02 - Algoreal.flac
-  Gary Beck - Bring A Friend - 03 - D51.flac
-  Gary Beck - Bring A Friend - 04 - Before The Crash.flac
-  Gary Beck - Bring A Friend - 05 - Unaware.flac
-  Gary Beck - Bring A Friend - 06 - Skiver.flac
-  Gary Beck - Bring A Friend - 07 - Hopkin.flac
-  Gary Beck - Bring A Friend - 08 - Little Moon.flac
-  Gary Beck - Bring A Friend - 09 - Bring A Friend.flac
-  Gary Beck - Bring A Friend - 10 - Operation.flac
-c: Gary Beck/[2012] Bring A Friend/cover.jpg
-(/var/folders/bf/1f70gl7x2_g0s1dchcrw97xm0000gn/T/packard-dd679433a5829b8d/c181b236add99be0f715beb10ed2b565e52d323b)
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Various Artists/[2015] Bass and Superstructure Shifting Peaks 2010-2015 [1732M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Various Artists/[2015] 20 20 Years of Planet Mu [1400M]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/RAMLEH/Circular Time [1330M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Curve/[2010] Rare and Unreleased [1294M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Thighpaulsandra/[2015] The Golden Communion [647M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Radiohead/[2011] TKOL RMX 1234567 [631M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Fucked Up/[2011] David Comes To Life [593M]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/King Midas Sound  Fennesz/Edition 1 [591M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Kvelertak/[2010] Kvelertak [584M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Flying Saucer Attack/Instrumentals 2015 [560M]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/Synkro/[2015] Changes [548M]
+...
+/Volumes/MUSIQUENONSTOP/latest-flac-2/King Midas Sound/[2013] Aroo [54M]
+/Volumes/MUSIQUENONSTOP/latest-flac-3/Guy Andrews/[2015-11-13] In Autumn Arms [54M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Equinox/Paralyze Babylon [52M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Kerridge/[2015] Sonic Instruments of War [51M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Fucked Up/[2014] Paper The House [49M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Fracture/[2015] Luv Ta Luv Ya Fracture VIP [feat DJ Monita] [35M]
+/Volumes/MUSIQUENONSTOP/latest-flac-2/Chris  Cosey/[1991] Passion [28M]
+TOTAL: 133116889 512-byte blocks
 ```
 
-Read the metadata out of a separate files, assembling the files into logical releases based on their metadata.
+Summarize a set of files, assembling the files into logical releases based on their metadata.
 
 ### generate a list of artists
 
