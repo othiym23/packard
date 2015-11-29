@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import 'babel-polyfill'
+
 import fs from 'graceful-fs'
 import { basename } from 'path'
 
