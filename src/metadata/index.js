@@ -2,13 +2,13 @@ import { dirname, extname } from 'path'
 import fs from 'graceful-fs'
 
 import log from 'npmlog'
-import { promisify } from 'bluebird'
 import Bluebird from 'bluebird'
 
 import scanFLAC from '../flac/scan.js'
 import { unpack as unzip } from '../utils/zip.js'
 import { Cover, File } from '@packard/model'
 
+import { promisify } from 'bluebird'
 const stat = promisify(fs.stat)
 
 function scan (unpackedFiles, trackers) {
@@ -28,8 +28,6 @@ function scan (unpackedFiles, trackers) {
         case '.pdf':
         case '.png':
           return stat(path).then(stats => new Cover(path, stats))
-        case '.avi':
-          return stat(path).then(stats => new File(path, stats))
         default:
           log.warn('scan', "don't recognize type of", path)
           return stat(path).then(stats => new File(path, stats))
