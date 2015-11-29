@@ -6,10 +6,11 @@ import fs from 'graceful-fs'
 import { basename } from 'path'
 
 import log from 'npmlog'
-import rc from 'rc'
 import untildify from 'untildify'
 import { promisify } from 'bluebird'
 import Bluebird from 'bluebird'
+
+import options from './config/options.js'
 
 import audit from './metadata/audit.js'
 import makePlaylist from './utils/make-playlist.js'
@@ -23,99 +24,20 @@ import unpack from './unpack.js'
 
 const writeFile = promisify(fs.writeFile)
 
-const config = rc(
-  'packard',
-  {
-    loglevel: 'info',
-    roots: undefined,
-    'staging-directory': undefined,
-    archive: {
-      'enabled-by-default': false,
-      'glob-pattern': undefined,
-      'root': undefined
-    },
-    playlist: undefined
-  },
-  [] // don't want rc interpreting argv
-)
-
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
                 .command('albums', 'print a list of albums in human-readable format')
                 .command('artists', 'generate a list of artists from roots')
                 .command('audit', 'check metadata for inconsistencies')
                 .command('inspect', 'dump all the metadata from a track or album')
-                .command(
-                  'pls',
-                  'print a list of albums as a .pls file, sorted by date'
-                )
-                .command(
-                  'unpack',
-                  'unpack a set of zipped files into a staging directory'
-                )
-                .option('S', {
-                  alias: 'save-config',
-                  describe: "save this run's configuration to ~/.packardrc",
-                  boolean: true,
-                  default: false
-                })
-                .option('loglevel', {
-                  describe: 'logging level',
-                  default: config.loglevel
-                })
+                .command('pls', 'print a list of albums as a .pls file, sorted by date')
+                .command('unpack', 'unpack a set of zipped files into a staging directory')
+                .option('S', options.S)
+                .option('loglevel', options.loglevel)
                 .help('h')
                 .alias('h', 'help')
                 .version(() => require('../package').version)
                 .demand(1)
-
-const options = {
-  O: {
-    alias: 'optimal-capacity',
-    describe: 'size of target volume, in blocks',
-    required: '- Must have a target to optimize towards.'
-  },
-  P: {
-    alias: 'pattern',
-    describe: 'bash glob pattern used to match files under root'
-  },
-  R: {
-    alias: 'root',
-    array: true,
-    describe: 'directory root for an Artist/Album tree'
-  },
-  S: {
-    alias: 'block-size',
-    describe: 'size of blocks on target volume',
-    default: 512
-  },
-  s: {
-    alias: 'staging',
-    describe: 'where to create the tree for unpacked artists',
-    required: '- Must have a place to put unpacked files.'
-  },
-  archive: {
-    describe: 'after other operations, archive original files',
-    boolean: true
-  },
-  archiveRoot: {
-    describe: "where to archive zip files once they've been unpacked"
-  },
-  playlist: {
-    describe: 'create a playlist containing all of the unpacked albums',
-    string: true
-  }
-}
-
-function sip (argument, value) {
-  log.silly('setIfPresent', 'argument', argument, 'value', value)
-  if (value) options[argument].default = value
-}
-
-sip('R', config.roots)
-sip('P', config.archive['glob-pattern'])
-sip('s', config['staging-directory'])
-sip('archive', Boolean(config.archive['enabled-by-default']))
-sip('archiveRoot', config.archive.root)
 
 log.level = yargs.argv.loglevel
 log.setGaugeTemplate([
@@ -133,8 +55,6 @@ log.gauge.setTheme({
   spinner: '◴◷◶◵',
   subsection: '→'
 })
-
-log.verbose('config', config)
 
 let argv, roots
 const groups = new Map()
@@ -240,7 +160,7 @@ switch (yargs.argv._[0]) {
                 .options({
                   O: options.O,
                   R: options.R,
-                  S: options.S
+                  B: options.B
                 })
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
