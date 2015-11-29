@@ -1,3 +1,5 @@
+import 'babel-polyfill'
+
 const cruft = new Set([
   '.DS_Store',    // OS X metadata is very cluttery
   '.AppleDouble', // see above
