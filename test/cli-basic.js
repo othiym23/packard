@@ -12,12 +12,13 @@ var r = relative(process.cwd(), p)
 var lines = function () {/*
 
 Commands:
-  albums   print a list of albums in human-readable format
-  artists  generate a list of artists from roots
-  audit    check metadata for inconsistencies
-  inspect  dump all the metadata from a track or album
-  pls      print a list of albums as a .pls file, sorted by date
-  unpack   unpack a set of zipped files into a staging directory
+  albums    generate a list of albums from roots
+  artists   generate a list of artists from roots
+  audit     check metadata for inconsistencies
+  inspect   dump all the metadata from a track or album
+  optimize  find the best set of albums to pack a given capacity
+  pls       print a list of albums as a .pls file, sorted by date
+  unpack    unpack a set of zipped files into a staging directory
 
 Options:
   -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]

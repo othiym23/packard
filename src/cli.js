@@ -20,10 +20,11 @@ import unpack from './command/unpack.js'
 
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
-                .command('albums', 'print a list of albums in human-readable format')
+                .command('albums', 'generate a list of albums from roots')
                 .command('artists', 'generate a list of artists from roots')
                 .command('audit', 'check metadata for inconsistencies')
                 .command('inspect', 'dump all the metadata from a track or album')
+                .command('optimize', 'find the best set of albums to pack a given capacity')
                 .command('pls', 'print a list of albums as a .pls file, sorted by date')
                 .command('unpack', 'unpack a set of zipped files into a staging directory')
                 .options({

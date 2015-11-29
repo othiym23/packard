@@ -13,10 +13,12 @@ $ packard
 Usage: packard [options] <command>
 
 Commands:
-  artists    generate a list of artists from roots
-  inspect    dump all the metadata from a track or album
-  pls        print a list of albums as a .pls file, sorted by date
-  unpack     unpack a set of zipped files into a staging directory
+  albums    generate a list of albums from roots
+  artists   generate a list of artists from roots
+  inspect   dump all the metadata from a track or album
+  optimize  find the best set of albums to pack a given capacity
+  pls       print a list of albums as a .pls file, sorted by date
+  unpack    unpack a set of zipped files into a staging directory
 
 Options:
   -S, --save-config  save this run's configuration to ~/.packardrc [default: false]
