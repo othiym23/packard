@@ -6,7 +6,7 @@
   "main": "lib/packer.js",
   "bin": "lib/cli.js",
   "scripts": {
-    "transpile": "babel src -d lib",
+    "transpile": "rimraf lib && babel src -d lib",
     "prepublish": "npm run transpile",
     "test": "standard && npm run transpile && tap test/*.js",
     "coverage": "standard && npm run transpile && tap test/*.js --coverage",
