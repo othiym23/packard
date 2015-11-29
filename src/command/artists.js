@@ -1,10 +1,10 @@
 import log from 'npmlog'
 import Bluebird from 'bluebird'
 
-import albumsFromFLACTracks from './flac/albums-from-tracks.js'
-import flatten from './flatten-tracks.js'
-import readArtists from './read-fs-artists.js'
-import scanFLAC from './flac/scan.js'
+import albumsFromFLACTracks from '../flac/albums-from-tracks.js'
+import flatten from '../flatten-tracks.js'
+import readArtists from '../read-fs-artists.js'
+import scanFLAC from '../flac/scan.js'
 import { Artist } from '@packard/model'
 
 function bySizeReverse (a, b) {
@@ -87,5 +87,17 @@ export default function scanArtists (roots, trackers) {
 
           return [root, sorted]
         })
-    })
+    }).then(report)
+}
+
+function report (roots) {
+  log.disableProgress()
+  for (let [root, sorted] of roots) {
+    if (sorted.length) {
+      console.log('\nROOT %s:', root)
+      for (let a of sorted) {
+        console.log('%s [%sM]', a.name, a.getSize(1024 * 1024))
+      }
+    }
+  }
 }

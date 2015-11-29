@@ -15,12 +15,12 @@ import config from './config/default.js'
 import options from './config/options.js'
 
 import albums from './command/albums.js'
+import artists from './command/artists.js'
 import audit from './metadata/audit.js'
 import makePlaylist from './utils/make-playlist.js'
 import optimize from './command/optimize.js'
 import saveConfig from './config/save.js'
 import scanAlbums from './albums.js'
-import scanArtists from './artists.js'
 import scanFLAC from './flac/scan.js'
 import unpack from './unpack.js'
 
@@ -73,17 +73,7 @@ switch (yargs.argv._[0]) {
     log.silly('artists', 'argv', argv)
 
     log.enableProgress()
-    scanArtists(roots, groups).then(roots => {
-      log.disableProgress()
-      for (let [root, sorted] of roots) {
-        if (sorted.length) {
-          console.log('\nROOT %s:', root)
-          for (let a of sorted) {
-            console.log('%s [%sM]', a.name, a.getSize(1024 * 1024))
-          }
-        }
-      }
-    }).catch(error => log.error('artists', error.stack))
+    artists(roots, groups)
     break
   case 'audit':
     argv = yargs.reset()
