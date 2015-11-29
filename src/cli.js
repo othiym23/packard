@@ -111,10 +111,10 @@ switch (yargs.argv._[0]) {
                 })
                 .argv
     files = argv._.slice(1).map(f => untildify(f))
-    roots = argv.R.map(r => untildify(r))
+    roots = (argv.R || []).map(r => untildify(r))
     log.silly('optimize argv', argv)
 
-    command = optimize(files, roots, argv.S, argv.O, groups)
+    command = optimize(files, roots, argv.B, argv.O)
     break
   case 'pls':
     options.R.required = '- Must have at least one tree to scan.'
