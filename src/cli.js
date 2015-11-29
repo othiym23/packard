@@ -12,6 +12,7 @@ import Bluebird from 'bluebird'
 
 import options from './config/options.js'
 
+import albums from './command/albums.js'
 import audit from './metadata/audit.js'
 import makePlaylist from './utils/make-playlist.js'
 import optimize from './command/optimize.js'
@@ -19,7 +20,6 @@ import saveConfig from './config/save.js'
 import scanAlbums from './albums.js'
 import scanArtists from './artists.js'
 import scanFLAC from './flac/scan.js'
-import showAlbums from './show-albums.js'
 import unpack from './unpack.js'
 
 const writeFile = promisify(fs.writeFile)
@@ -73,7 +73,7 @@ switch (yargs.argv._[0]) {
                 .argv
 
     log.silly('albums argv', argv)
-    showAlbums(argv._.slice(1), argv.R, groups)
+    albums(argv._.slice(1), argv.R, groups)
     break
   case 'artists':
     options.R.required = '- Must have at least one tree to scan.'
