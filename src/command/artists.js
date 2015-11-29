@@ -62,6 +62,7 @@ function albumsAndTracksToArtists (albums, artistTracks) {
 }
 
 export default function scanArtists (roots, trackers) {
+  log.enableProgress()
   return Bluebird.map(
       roots,
       root => readArtists(root).then(artists => [root, flatten(artists)])

@@ -72,7 +72,6 @@ switch (yargs.argv._[0]) {
     roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
 
-    log.enableProgress()
     command = artists(roots, groups)
     break
   case 'audit':
