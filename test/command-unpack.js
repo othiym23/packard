@@ -6,7 +6,7 @@ var promisify = Bluebird.promisify
 var rimraf = promisify(require('rimraf'))
 var test = require('tap').test
 
-var unpack = require('../lib/unpack.js').default
+var unpack = require('../lib/command/unpack.js').default
 
 var metadata = require('./lib/metadata.js')
 var zip = require('./lib/zip.js')
@@ -34,7 +34,7 @@ test('unpacking a single-artist album', function (t) {
     t.equal(paths.length, 3, 'all three FLAC files written')
     return zip.pack(join(root, 'Feel It.zip'), paths)
   }).then(function (zipfile) {
-    return unpack([zipfile], staging)
+    return unpack({ files: [zipfile] }, staging)
              .catch(function (e) {
                t.ifError(e, 'unpacking zipfile succeeded')
              })
@@ -146,7 +146,7 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
       t.ok(statSync(zipfile), 'zipfile is where it should be')
     }, 'zipfile created')
 
-    return unpack([zipfile], staging, null, null, true, archive)
+    return unpack({ files: [zipfile] }, staging, archive)
              .catch(function (e) {
                t.ifError(e, 'unpacking zipfile succeeded')
              })

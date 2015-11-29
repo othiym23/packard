@@ -1,3 +1,4 @@
+import { writeFile as writeFileCB } from 'graceful-fs'
 import { join, resolve } from 'path'
 import { randomBytes } from 'crypto'
 import { tmpdir } from 'os'
@@ -9,23 +10,26 @@ import untildify from 'untildify'
 import { promisify } from 'bluebird'
 import Bluebird from 'bluebird'
 
-import albumsFromFLACTracks from './flac/albums-from-tracks.js'
-import { place, moveToArchive } from './mover.js'
-import { extractRelease } from './metadata/index.js'
+import albumsFromFLACTracks from '../flac/albums-from-tracks.js'
+import makePlaylist from '../utils/make-playlist.js'
+import { place, moveToArchive } from '../mover.js'
+import { extractRelease } from '../metadata/index.js'
 
 const glob = promisify(globCB)
 const rimraf = promisify(rimrafCB)
+const writeFile = promisify(writeFileCB)
 
 const covers = new Map()
 const tmp = join(tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 
-export default function unpack (files, staging, root, pattern, archive, archiveRoot) {
+export default function unpack (target, staging, archiveRoot, playlist) {
   log.enableProgress()
-  let locate = Bluebird.resolve(files)
-  if (root && pattern) {
+  const groups = new Map()
+  let locate = Bluebird.resolve(target.files)
+  if (target.roots && target.roots[0] && target.pattern) {
     locate = locate.then(files => {
       log.verbose('unpack', 'initial files', files)
-      return glob(join(untildify(root), pattern))
+      return glob(join(untildify(target.roots[0]), target.pattern))
         .then(globbed => {
           const full = files.concat(globbed)
           log.verbose('unpack', 'globbed files', full)
@@ -36,8 +40,7 @@ export default function unpack (files, staging, root, pattern, archive, archiveR
     })
   }
 
-  const groups = new Map()
-  return locate.then(files => {
+  locate = locate.then(files => {
     if (files.length === 0) {
       log.info('unpack', 'no archives to process! CU L8R SAILOR')
       log.disableProgress()
@@ -54,20 +57,23 @@ export default function unpack (files, staging, root, pattern, archive, archiveR
   }).then(m => {
     return place(albumsFromFLACTracks(m, covers), staging, groups)
   }).then(placed => {
-    if (!archive) return Bluebird.resolve(placed)
+    if (!archiveRoot) return Bluebird.resolve(placed)
     return moveToArchive(placed, archiveRoot, groups).then(() => placed)
   }).then(albums => {
     log.disableProgress()
     report(albums, staging)
-    if (archive) reportArchived(albums)
+    if (archiveRoot) reportArchived(albums)
     log.verbose('removing', tmp)
     return rimraf(tmp).then(() => albums)
-  }).catch(error => {
-    log.disableProgress()
-    log.error('unpack', error.stack)
-    log.verbose('not removing', tmp)
-    throw error
   })
+
+  if (playlist) {
+    locate = locate.then(albums => {
+      return writeFile(untildify(playlist), makePlaylist(albums), 'utf-8')
+    })
+  }
+
+  return locate
 }
 
 function report (albums, root, archives, archiveRoot) {

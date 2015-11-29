@@ -8,20 +8,15 @@ import untildify from 'untildify'
 // don't log the config until the log level is set
 import config from './config/default.js'
 import options from './config/options.js'
+import saveConfig from './config/save.js'
 
 import albums from './command/albums.js'
 import artists from './command/artists.js'
 import audit from './command/audit.js'
 import inspect from './command/inspect.js'
-import makePlaylist from './utils/make-playlist.js'
 import optimize from './command/optimize.js'
-import saveConfig from './config/save.js'
-import scanAlbums from './albums.js'
-import unpack from './unpack.js'
-
-import { promisify } from 'bluebird'
-import { writeFile as writeFileCB } from 'graceful-fs'
-const writeFile = promisify(writeFileCB)
+import pls from './command/pls.js'
+import unpack from './command/unpack.js'
 
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
@@ -132,8 +127,7 @@ switch (yargs.argv._[0]) {
     roots = argv.R.map(r => untildify(r))
     log.silly('pls', 'argv', argv)
 
-    log.enableProgress()
-    command = scanAlbums(roots, groups).then(sorted => console.log(makePlaylist(sorted)))
+    command = pls(roots, groups)
     break
   case 'unpack':
     options.R.describe = 'root directory containing zipped files'
@@ -158,16 +152,11 @@ switch (yargs.argv._[0]) {
     log.silly('unpack argv', argv)
 
     command = unpack(
-      files,
+      { files, roots, pattern: argv.P },
       argv.s,
-      roots[0], argv.P,
-      argv.archive, argv.archiveRoot
+      argv.archive && argv.archiveRoot,
+      argv.playlist
     )
-    if (argv.playlist) {
-      command = command.then(albums => {
-        return writeFile(untildify(argv.playlist), makePlaylist(albums), 'utf-8')
-      })
-    }
     break
   default:
     yargs.showHelp()
