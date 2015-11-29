@@ -44,7 +44,7 @@ const yargs = require('yargs')
 log.level = yargs.argv.loglevel
 log.verbose('config', config)
 
-let argv, roots
+let argv, command, roots
 const groups = new Map()
 switch (yargs.argv._[0]) {
   case 'albums':
@@ -61,7 +61,7 @@ switch (yargs.argv._[0]) {
                 .argv
 
     log.silly('albums argv', argv)
-    albums(argv._.slice(1), argv.R, groups)
+    command = albums(argv._.slice(1), argv.R, groups)
     break
   case 'artists':
     options.R.required = '- Must have at least one tree to scan.'
@@ -73,7 +73,7 @@ switch (yargs.argv._[0]) {
     log.silly('artists', 'argv', argv)
 
     log.enableProgress()
-    artists(roots, groups)
+    command = artists(roots, groups)
     break
   case 'audit':
     argv = yargs.reset()
@@ -90,7 +90,7 @@ switch (yargs.argv._[0]) {
     log.silly('audit', 'files', files)
 
     log.enableProgress()
-    scanAlbums(files, groups)
+    command = scanAlbums(files, groups)
       .then(albums => {
         log.disableProgress()
         log.silly('audit', 'albums', albums)
@@ -117,7 +117,7 @@ switch (yargs.argv._[0]) {
     log.silly('inspect', 'things', things)
 
     log.enableProgress()
-    Bluebird.map(things, f => {
+    command = Bluebird.map(things, f => {
       groups.set(basename(f), log.newGroup(f))
       return scanFLAC(f, groups)
     })
@@ -148,7 +148,7 @@ switch (yargs.argv._[0]) {
                 .argv
 
     log.silly('optimize argv', argv)
-    optimize(argv._.slice(1), argv.R, argv.S, argv.O, groups)
+    command = optimize(argv._.slice(1), argv.R, argv.S, argv.O, groups)
     break
   case 'pls':
     options.R.required = '- Must have at least one tree to scan.'
@@ -162,7 +162,7 @@ switch (yargs.argv._[0]) {
     log.silly('pls', 'argv', argv)
 
     log.enableProgress()
-    scanAlbums(roots, groups).then(sorted => console.log(makePlaylist(sorted)))
+    command = scanAlbums(roots, groups).then(sorted => console.log(makePlaylist(sorted)))
     break
   case 'unpack':
     options.R.describe = 'root directory containing zipped files'
@@ -172,7 +172,7 @@ switch (yargs.argv._[0]) {
                   s: options.s,
                   R: options.R,
                   P: options.P,
-                  'archive': options.archive,
+                  archive: options.archive,
                   'archive-root': options.archiveRoot,
                   playlist: options.playlist
                 })
@@ -186,21 +186,22 @@ switch (yargs.argv._[0]) {
     log.silly('unpack argv', argv)
     const zipfiles = argv._.slice(1)
 
-    let finish = unpack(
+    command = unpack(
       zipfiles,
       argv.s,
       (argv.R || [])[0], argv.P,
       argv.archive, argv.archiveRoot
     )
     if (argv.playlist) {
-      finish = finish.then(albums => {
+      command = command.then(albums => {
         return writeFile(untildify(argv.playlist), makePlaylist(albums), 'utf-8')
       })
     }
-    if (argv.saveConfig) finish = finish.then(() => saveConfig(argv))
-    finish.catch(e => log.error('unpack', e.stack))
     break
   default:
     yargs.showHelp()
     process.exit(1)
 }
+
+if (argv.saveConfig) command = command.then(() => saveConfig(argv))
+command.catch(e => log.error('packard', e.stack))
