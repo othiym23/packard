@@ -8,6 +8,7 @@ import mkdirpCB from 'mkdirp'
 import { open as openZipCB } from 'yauzl'
 import Bluebird from 'bluebird'
 
+import cruft from './cruft.js'
 import { Archive } from '@packard/model'
 import { reader as flacReader } from '../flac/scan.js'
 
@@ -40,8 +41,8 @@ export function unpack (archivePath, groups, directory) {
           return
         }
 
-        if (/^\./.test(basename(entry.fileName))) {
-          log.verbose('unpack', 'skipping dotfile', entry.fileName)
+        if (cruft.has(basename(entry.fileName)) || cruft.has(entry.fileName.split('/')[0])) {
+          log.verbose('unpack', 'skipping cruft', entry.fileName)
           return
         }
 
