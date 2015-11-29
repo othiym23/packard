@@ -60,7 +60,6 @@ export default function unpack (files, staging, root, pattern, archive, archiveR
     log.disableProgress()
     report(albums, staging)
     if (archive) reportArchived(albums)
-    log.silly('unpack', 'tracker debugging', log.tracker.debug())
     log.verbose('removing', tmp)
     return rimraf(tmp).then(() => albums)
   }).catch(error => {

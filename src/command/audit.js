@@ -15,6 +15,5 @@ export default function audit (roots, groups) {
         const id = album.artist.name + ': ' + album.name + ' /'
         for (let warning of auditAlbum(album)) log.warn('audit', id, warning)
       }
-      log.silly('audit', 'tracker debugging', log.tracker.debug())
     })
 }

@@ -107,11 +107,6 @@ switch (yargs.argv._[0]) {
     .then(track => {
       log.disableProgress()
       console.log(JSON.stringify(track, null, 2))
-      log.silly('inspect', 'tracker debugging', log.tracker.debug())
-    })
-    .catch(e => {
-      log.disableProgress()
-      log.error('inspect', e.stack)
     })
 
     break
@@ -187,7 +182,9 @@ switch (yargs.argv._[0]) {
 }
 
 if (argv.saveConfig) command = command.then(() => saveConfig(argv))
-command.catch(e => {
+command.then(() => {
+  log.silly('packard', 'tracker debugging', log.tracker.debug())
+}).catch(e => {
   log.disableProgress()
   log.error('packard', e.stack)
 })
