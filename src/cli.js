@@ -16,7 +16,7 @@ import options from './config/options.js'
 
 import albums from './command/albums.js'
 import artists from './command/artists.js'
-import audit from './metadata/audit.js'
+import audit from './command/audit.js'
 import makePlaylist from './utils/make-playlist.js'
 import optimize from './command/optimize.js'
 import saveConfig from './config/save.js'
@@ -84,27 +84,10 @@ switch (yargs.argv._[0]) {
                   return 'must pass either 1 or more files containing metadata'
                 })
                 .argv
-
-    const files = argv._.slice(1)
+    roots = argv._.slice(1).map(r => untildify(r))
     log.silly('audit', 'argv', argv)
-    log.silly('audit', 'files', files)
 
-    log.enableProgress()
-    command = scanAlbums(files, groups)
-      .then(albums => {
-        log.disableProgress()
-        log.silly('audit', 'albums', albums)
-        for (let album of albums) {
-          const id = album.artist.name + ': ' + album.name + ' /'
-          for (let warning of audit(album)) log.warn('audit', id, warning)
-        }
-        log.silly('audit', 'tracker debugging', log.tracker.debug())
-      })
-      .catch(e => {
-        log.disableProgress()
-        log.error('audit', e.stack)
-      })
-
+    command = audit(roots, groups)
     break
   case 'inspect':
     argv = yargs.reset()
