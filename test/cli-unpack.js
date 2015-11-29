@@ -18,9 +18,9 @@ var r = relative(process.cwd(), p)
 var lines = function () {/*
 
 Options:
-  -s, --staging   where to create the tree for unpacked artists  [required]
   -R, --root      root directory containing zipped files  [array]
   -P, --pattern   bash glob pattern used to match files under root
+  -s, --staging   where to create the tree for unpacked artists  [required]
   --archive       after other operations, archive original files  [boolean]
   --archive-root  where to archive zip files once they've been unpacked
   --playlist      create a playlist containing all of the unpacked albums  [string]

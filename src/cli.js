@@ -49,7 +49,9 @@ switch (yargs.argv._[0]) {
   case 'albums':
     argv = yargs.reset()
                 .usage('Usage: $0 [options] albums [-R dir [file...]]')
-                .options({ R: options.R })
+                .options({
+                  R: options.R
+                })
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
@@ -65,7 +67,9 @@ switch (yargs.argv._[0]) {
     options.R.required = '- Must have at least one tree to scan.'
     argv = yargs.reset()
                 .usage('Usage: $0 artists [-R dir [-R dir...]]')
-                .options({ R: options.R })
+                .options({
+                  R: options.R
+                })
                 .argv
     roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
@@ -101,9 +105,9 @@ switch (yargs.argv._[0]) {
     argv = yargs.reset()
                 .usage('Usage: $0 [options] optimize -O blocks [-R dir [file...]]')
                 .options({
+                  B: options.B,
                   O: options.O,
-                  R: options.R,
-                  B: options.B
+                  R: options.R
                 })
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
@@ -111,9 +115,11 @@ switch (yargs.argv._[0]) {
                   return 'Must pass 1 or more audio files or directory trees.'
                 })
                 .argv
-
+    files = argv._.slice(1).map(f => untildify(f))
+    roots = argv.R.map(r => untildify(r))
     log.silly('optimize argv', argv)
-    command = optimize(argv._.slice(1), argv.R, argv.S, argv.O, groups)
+
+    command = optimize(files, roots, argv.S, argv.O, groups)
     break
   case 'pls':
     options.R.required = '- Must have at least one tree to scan.'
@@ -134,9 +140,9 @@ switch (yargs.argv._[0]) {
     argv = yargs.reset()
                 .usage('Usage: $0 [options] unpack [zipfile [zipfile...]]')
                 .options({
-                  s: options.s,
                   R: options.R,
                   P: options.P,
+                  s: options.s,
                   archive: options.archive,
                   'archive-root': options.archiveRoot,
                   playlist: options.playlist
@@ -147,14 +153,14 @@ switch (yargs.argv._[0]) {
                   return 'Must pass either 1 or more zipfiles, or root and glob pattern.'
                 })
                 .argv
-
+    files = argv._.slice(1).map(f => untildify(f))
+    roots = (argv.R || []).map(r => untildify(r))
     log.silly('unpack argv', argv)
-    const zipfiles = argv._.slice(1)
 
     command = unpack(
-      zipfiles,
+      files,
       argv.s,
-      (argv.R || [])[0], argv.P,
+      roots[0], argv.P,
       argv.archive, argv.archiveRoot
     )
     if (argv.playlist) {
