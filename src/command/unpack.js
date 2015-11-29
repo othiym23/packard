@@ -42,8 +42,8 @@ export default function unpack (target, staging, archiveRoot, playlist) {
 
   locate = locate.then(files => {
     if (files.length === 0) {
-      log.info('unpack', 'no archives to process! CU L8R SAILOR')
       log.disableProgress()
+      log.info('unpack', 'no archives to process! CU L8R SAILOR')
       process.exit(0)
     }
 
