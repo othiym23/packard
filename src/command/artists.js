@@ -61,7 +61,8 @@ function albumsAndTracksToArtists (albums, artistTracks) {
   return artists
 }
 
-export default function scanArtists (roots, trackers) {
+export default function scanArtists (roots) {
+  const trackerGroups = new Map()
   log.enableProgress()
   return Bluebird.map(
       roots,
@@ -70,7 +71,7 @@ export default function scanArtists (roots, trackers) {
       log.verbose('scanArtists', 'processing', root)
       return Bluebird.map(
           [...entities],
-          entity => scanFLAC(entity.path, trackers, entity),
+          entity => scanFLAC(entity.path, trackerGroups, entity),
           { concurrency: 4 }
         ).then(tracks => {
           // 1. convert tracks into albums

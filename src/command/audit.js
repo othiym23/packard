@@ -3,11 +3,11 @@ import log from 'npmlog'
 import auditAlbum from '../metadata/audit.js'
 import scanAlbums from '../albums.js'
 
-export default function audit (roots, groups) {
+export default function audit (roots) {
   log.silly('audit', 'files', roots)
 
   log.enableProgress()
-  return scanAlbums(roots, groups)
+  return scanAlbums(roots)
     .then(albums => {
       log.disableProgress()
       log.silly('audit', 'albums', albums)

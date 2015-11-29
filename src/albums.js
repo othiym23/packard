@@ -30,14 +30,14 @@ function byDate (a, b) {
   }
 }
 
-export default function scanAlbums (roots, trackers) {
+export default function scanAlbums (roots, trackerGroups = new Map()) {
   return Bluebird.map(
       roots,
       root => {
         log.verbose('scanAlbums', 'processing', root)
         return readArtists(root)
                  .then(flatten)
-                 .map(track => scanFLAC(track.path, trackers, track), { concurrency: 2 })
+                 .map(track => scanFLAC(track.path, trackerGroups, track), { concurrency: 2 })
       },
       { concurrency: 2 }
     )

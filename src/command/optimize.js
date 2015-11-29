@@ -7,12 +7,11 @@ export default function optimizeAlbums (
   files = [],
   roots = [],
   blockSize,
-  capacity,
-  trackerGroups) {
+  capacity) {
   const entities = files.concat(roots)
   log.enableProgress()
   log.silly('optimizeAlbums', 'entities', entities)
-  return scanAlbums(entities, trackerGroups)
+  return scanAlbums(entities)
     .then(albums => {
       log.disableProgress()
       calculate(albums, blockSize, capacity)

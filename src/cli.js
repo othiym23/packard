@@ -39,7 +39,6 @@ log.level = yargs.argv.loglevel
 log.verbose('config', config)
 
 let argv, command, roots, files
-const groups = new Map()
 switch (yargs.argv._[0]) {
   case 'albums':
     argv = yargs.reset()
@@ -56,7 +55,7 @@ switch (yargs.argv._[0]) {
     roots = argv.R.map(r => untildify(r))
     log.silly('albums', 'argv', argv)
 
-    command = albums(argv._.slice(1), argv.R, groups)
+    command = albums(argv._.slice(1), argv.R)
     break
   case 'artists':
     options.R.required = '- Must have at least one tree to scan.'
@@ -69,7 +68,7 @@ switch (yargs.argv._[0]) {
     roots = argv.R.map(r => untildify(r))
     log.silly('artists', 'argv', argv)
 
-    command = artists(roots, groups)
+    command = artists(roots)
     break
   case 'audit':
     argv = yargs.reset()
@@ -83,7 +82,7 @@ switch (yargs.argv._[0]) {
     files = argv._.slice(1).map(f => untildify(f))
     log.silly('audit', 'argv', argv)
 
-    command = audit(files, groups)
+    command = audit(files)
     break
   case 'inspect':
     argv = yargs.reset()
@@ -94,7 +93,7 @@ switch (yargs.argv._[0]) {
     files = argv._.slice(1).map(f => untildify(f))
     log.silly('audit', 'argv', argv)
 
-    command = inspect(files, groups)
+    command = inspect(files)
     break
   case 'optimize':
     argv = yargs.reset()
@@ -127,7 +126,7 @@ switch (yargs.argv._[0]) {
     roots = argv.R.map(r => untildify(r))
     log.silly('pls', 'argv', argv)
 
-    command = pls(roots, groups)
+    command = pls(roots)
     break
   case 'unpack':
     options.R.describe = 'root directory containing zipped files'

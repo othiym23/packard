@@ -2,11 +2,11 @@ import log from 'npmlog'
 
 import scanAlbums from '../albums.js'
 
-export default function showAlbums (files = [], roots = [], trackerGroups) {
+export default function showAlbums (files = [], roots = []) {
   const entities = files.concat(roots)
   log.enableProgress()
   log.silly('showAlbums', 'scanning', entities)
-  return scanAlbums(entities, trackerGroups)
+  return scanAlbums(entities)
     .then(albums => {
       log.disableProgress()
       report(albums)
