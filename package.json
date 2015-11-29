@@ -1,6 +1,6 @@
 {
   "name": "packard",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
   "description": "many music files onto few devices",
   "main": "lib/packer.js",
