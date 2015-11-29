@@ -9,12 +9,12 @@ import log from 'npmlog'
 import rc from 'rc'
 import untildify from 'untildify'
 import { promisify } from 'bluebird'
-import { stringify as inify } from 'ini'
 import Bluebird from 'bluebird'
 
 import audit from './metadata/audit.js'
 import makePlaylist from './utils/make-playlist.js'
 import optimize from './command/optimize.js'
+import saveConfig from './config/save.js'
 import scanAlbums from './albums.js'
 import scanArtists from './artists.js'
 import scanFLAC from './flac/scan.js'
@@ -23,7 +23,6 @@ import unpack from './unpack.js'
 
 const writeFile = promisify(fs.writeFile)
 
-const configPath = untildify('~/.packardrc')
 const config = rc(
   'packard',
   {
@@ -39,25 +38,6 @@ const config = rc(
   },
   [] // don't want rc interpreting argv
 )
-
-function saveConfig (argv) {
-  log.verbose('saveConfig', 'saving to', configPath)
-  // JSON.parse(JSON.Stringify()) is an easy way to clear out undefined values,
-  // which ini will go ahead and save as the string "undefined", which is not
-  // what I want.
-  const toSave = JSON.parse(JSON.stringify({
-    loglevel: argv.loglevel,
-    roots: argv.root,
-    'staging-directory': argv.staging,
-    archive: {
-      'enabled-by-default': argv.archive,
-      'glob-pattern': argv.pattern,
-      root: argv.archiveRoot
-    }
-  }))
-  log.verbose('saveConfig', 'config', toSave)
-  return writeFile(configPath, inify(toSave))
-}
 
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
