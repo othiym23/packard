@@ -13,7 +13,7 @@ import { Cover, File } from '@packard/model'
 
 import albumsFromFLACTracks from '../flac/albums-from-tracks.js'
 import makePlaylist from '../utils/make-playlist.js'
-import scanFLAC from '../flac/scan.js'
+import toModel from '../path-to-model.js'
 import { place, moveToArchive } from '../mover.js'
 
 import { promisify } from 'bluebird'
@@ -111,31 +111,6 @@ function reportArchived (albums) {
   }
 }
 
-function scan (unpackedFiles, trackers) {
-  return Bluebird.map(
-    unpackedFiles,
-    ({ path, sourceArchive, flacTrack }) => {
-      switch (extname(path)) {
-        case '.flac':
-          if (flacTrack) {
-            if (sourceArchive) flacTrack.sourceArchive = sourceArchive
-            return Bluebird.resolve(flacTrack)
-          } else {
-            return scanFLAC(path, trackers, { sourceArchive })
-          }
-          break
-        case '.jpg':
-        case '.pdf':
-        case '.png':
-          return stat(path).then(stats => new Cover(path, stats))
-        default:
-          log.warn('scan', "don't recognize type of", path)
-          return stat(path).then(stats => new File(path, stats))
-      }
-    }
-  )
-}
-
 function populateImages (list, covers) {
   list.filter(e => e instanceof Cover)
       .forEach(c => {
@@ -155,7 +130,31 @@ function extractRelease (zipfile, tmpdir, covers, trackers) {
   log.verbose('extractReleaseMetadata', 'archive:', zipfile)
 
   return unzip(zipfile, trackers, tmpdir)
-          .then(list => scan(list, trackers))
+          .map(({ path, sourceArchive, flacTrack }) => {
+            switch (extname(path)) {
+              case '.flac':
+                flacTrack.sourceArchive = sourceArchive
+                const track = toModel(path, flacTrack.file.stats)
+                flacTrack.fsTrack = track
+                flacTrack.fsAlbum = track.album
+                flacTrack.fsArtist = track.artist
+                return flacTrack
+              case '.jpg':
+              case '.pdf':
+              case '.png':
+                return stat(path).then(stats => {
+                  const cover = new Cover(path, stats)
+                  cover.sourceArchive = sourceArchive
+                  return cover
+                })
+              default:
+                log.warn('scan', "don't recognize type of", path)
+                return stat(path).then(stats => {
+                  const file = File(path, stats)
+                  file.sourceArchive = sourceArchive
+                })
+            }
+          })
           .then(list => populateImages(list, covers))
           .then(list => list.filter(e => !(e instanceof Cover ||
                                            e instanceof Error)))
