@@ -204,4 +204,7 @@ switch (yargs.argv._[0]) {
 }
 
 if (argv.saveConfig) command = command.then(() => saveConfig(argv))
-command.catch(e => log.error('packard', e.stack))
+command.catch(e => {
+  log.disableProgress()
+  log.error('packard', e.stack)
+})
