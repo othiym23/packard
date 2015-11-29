@@ -2,13 +2,8 @@
 
 import 'babel-polyfill'
 
-import fs from 'graceful-fs'
-import { basename } from 'path'
-
 import log from 'npmlog'
 import untildify from 'untildify'
-import { promisify } from 'bluebird'
-import Bluebird from 'bluebird'
 
 // don't log the config until the log level is set
 import config from './config/default.js'
@@ -17,14 +12,16 @@ import options from './config/options.js'
 import albums from './command/albums.js'
 import artists from './command/artists.js'
 import audit from './command/audit.js'
+import inspect from './command/inspect.js'
 import makePlaylist from './utils/make-playlist.js'
 import optimize from './command/optimize.js'
 import saveConfig from './config/save.js'
 import scanAlbums from './albums.js'
-import scanFLAC from './flac/scan.js'
 import unpack from './unpack.js'
 
-const writeFile = promisify(fs.writeFile)
+import { promisify } from 'bluebird'
+import { writeFile as writeFileCB } from 'graceful-fs'
+const writeFile = promisify(writeFileCB)
 
 const yargs = require('yargs')
                 .usage('Usage: $0 [options] <command>')
@@ -46,7 +43,7 @@ const yargs = require('yargs')
 log.level = yargs.argv.loglevel
 log.verbose('config', config)
 
-let argv, command, roots
+let argv, command, roots, files
 const groups = new Map()
 switch (yargs.argv._[0]) {
   case 'albums':
@@ -84,10 +81,10 @@ switch (yargs.argv._[0]) {
                   return 'must pass either 1 or more files containing metadata'
                 })
                 .argv
-    roots = argv._.slice(1).map(r => untildify(r))
+    files = argv._.slice(1).map(f => untildify(f))
     log.silly('audit', 'argv', argv)
 
-    command = audit(roots, groups)
+    command = audit(files, groups)
     break
   case 'inspect':
     argv = yargs.reset()
@@ -95,20 +92,10 @@ switch (yargs.argv._[0]) {
                 .demand(2)
                 .argv
 
-    const things = argv._.slice(1)
-    log.silly('inspect', 'argv', argv)
-    log.silly('inspect', 'things', things)
+    files = argv._.slice(1).map(f => untildify(f))
+    log.silly('audit', 'argv', argv)
 
-    log.enableProgress()
-    command = Bluebird.map(things, f => {
-      groups.set(basename(f), log.newGroup(f))
-      return scanFLAC(f, groups)
-    })
-    .then(track => {
-      log.disableProgress()
-      console.log(JSON.stringify(track, null, 2))
-    })
-
+    command = inspect(files, groups)
     break
   case 'optimize':
     argv = yargs.reset()
