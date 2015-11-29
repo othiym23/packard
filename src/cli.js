@@ -34,8 +34,10 @@ const yargs = require('yargs')
                 .command('inspect', 'dump all the metadata from a track or album')
                 .command('pls', 'print a list of albums as a .pls file, sorted by date')
                 .command('unpack', 'unpack a set of zipped files into a staging directory')
-                .option('S', options.S)
-                .option('loglevel', options.loglevel)
+                .options({
+                  S: options.S,
+                  loglevel: options.loglevel
+                })
                 .help('h')
                 .alias('h', 'help')
                 .version(() => require('../package').version)
@@ -50,9 +52,7 @@ switch (yargs.argv._[0]) {
   case 'albums':
     argv = yargs.reset()
                 .usage('Usage: $0 [options] albums [-R dir [file...]]')
-                .options({
-                  R: options.R
-                })
+                .options({ R: options.R })
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
