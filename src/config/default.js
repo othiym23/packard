@@ -17,7 +17,21 @@ const config = rc(
   [] // don't want rc interpreting argv
 )
 
-log.verbose('config', config)
+log.setGaugeTemplate([
+  {type: 'name', separated: true, maxLength: 40, minLength: 40, align: 'left'},
+  {type: 'spinner', separated: true},
+  {type: 'startgroup'},
+  {type: 'completionbar'},
+  {type: 'endgroup'}
+])
+log.gauge.setTheme({
+  startgroup: '╢',
+  endgroup: '╟',
+  complete: '█',
+  incomplete: '░',
+  spinner: '◴◷◶◵',
+  subsection: '→'
+})
 
 // Babel object export doesn't do hoisting, so leave this here
 export default config

@@ -10,6 +10,8 @@ import untildify from 'untildify'
 import { promisify } from 'bluebird'
 import Bluebird from 'bluebird'
 
+// don't log the config until the log level is set
+import config from './config/default.js'
 import options from './config/options.js'
 
 import albums from './command/albums.js'
@@ -40,21 +42,7 @@ const yargs = require('yargs')
                 .demand(1)
 
 log.level = yargs.argv.loglevel
-log.setGaugeTemplate([
-  {type: 'name', separated: true, maxLength: 40, minLength: 40, align: 'left'},
-  {type: 'spinner', separated: true},
-  {type: 'startgroup'},
-  {type: 'completionbar'},
-  {type: 'endgroup'}
-])
-log.gauge.setTheme({
-  startgroup: '╢',
-  endgroup: '╟',
-  complete: '█',
-  incomplete: '░',
-  spinner: '◴◷◶◵',
-  subsection: '→'
-})
+log.verbose('config', config)
 
 let argv, roots
 const groups = new Map()
