@@ -59,8 +59,9 @@ switch (yargs.argv._[0]) {
                   return 'Must pass 1 or more audio files or directory trees.'
                 })
                 .argv
+    roots = argv.R.map(r => untildify(r))
+    log.silly('albums', 'argv', argv)
 
-    log.silly('albums argv', argv)
     command = albums(argv._.slice(1), argv.R, groups)
     break
   case 'artists':
