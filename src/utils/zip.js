@@ -95,8 +95,9 @@ export function unpack (archivePath, groups, directory) {
                   both({ sourceArchive, path: fullPath })
                 })
 
-              if (extname(fullPath) === '.flac' || extname(fullPath) === '.mp3') {
-                const flacStats = {
+              const type = extname(fullPath)
+              if (type === '.flac' || type === '.mp3' || type === '.m4a') {
+                const zipStats = {
                   size: zipData.uncompressedSize,
                   atime: zipData.getLastModDate(),
                   mtime: zipData.getLastModDate(),
@@ -108,7 +109,7 @@ export function unpack (archivePath, groups, directory) {
                 zipstream.pipe(reader(
                   fullPath,
                   groups,
-                  { stats: flacStats },
+                  { stats: zipStats },
                   both,
                   reject
                 ))
