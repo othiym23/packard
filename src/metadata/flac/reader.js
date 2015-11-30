@@ -43,9 +43,6 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
 
       gauge.silly('flac.read', path, 'tags', tags)
       gauge.silly('flac.read', path, 'musicbrainzTags', musicbrainzTags)
-      if (tags.index) extras.index = parseInt(tags.index, 10)
-      if (tags.disc) extras.disc = parseInt(tags.disc, 10)
-      if (tags.date) extras.date = tags.date
 
       const artist = new Artist(tags.artist)
       const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist

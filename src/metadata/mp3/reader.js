@@ -68,8 +68,6 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
 
       gauge.silly('mp3.read', path, 'tags', tags)
       gauge.verbose('mp3.read', 'musicbrainzTags', musicbrainzTags)
-      if (tags.index) extras.index = tags.index
-      if (tags.disc) extras.disc = tags.disc
 
       const artist = new Artist(tags.artist)
       const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
