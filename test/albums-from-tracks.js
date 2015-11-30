@@ -2,7 +2,7 @@ require('babel-polyfill')
 
 var test = require('tap').test
 
-var albumsFromTracks = require('../lib/metadata/flac/albums-from-tracks.js').default
+var albumsFromTracks = require('../lib/metadata/albums-from-tracks.js').default
 
 var model = require('@packard/model')
 var Album = model.MultitrackAlbum
@@ -16,17 +16,17 @@ function makeTrack () {
   var audioFile = new AudioFile('/test/file.flac', { fakeStats: true })
   var fsArtist = new Artist('fartist')
   var fsAlbum = new Album('falbum', fsArtist, { path: '/album/path' })
-  var flacTags = {
-    ARTIST: 'FARTIST',
-    ALBUMARTIST: 'FaRtIsT',
-    ALBUM: 'FALBUM'
+  var tags = {
+    artist: 'FARTIST',
+    albumArtist: 'FaRtIsT',
+    album: 'FALBUM'
   }
   var extras = {
     fsArtist: fsArtist,
     fsAlbum: fsAlbum,
     sourceArchive: sourceArchive,
     file: audioFile,
-    flacTags: flacTags,
+    tags: tags,
     date: '2007-08-28'
   }
   var artist = new Artist('Fartist')
@@ -41,10 +41,10 @@ function idealAlbum () {
   var fsArtist = new Artist('fartist')
   var fsAlbum = new Album('falbum', fsArtist, { path: '/album/path' })
 
-  var flacTags = {
-    ARTIST: 'FARTIST',
-    ALBUMARTIST: 'FaRtIsT',
-    ALBUM: 'FALBUM'
+  var tags = {
+    artist: 'FARTIST',
+    albumArtist: 'FaRtIsT',
+    album: 'FALBUM'
   }
 
   var extras = {
@@ -52,7 +52,7 @@ function idealAlbum () {
     fsAlbum: fsAlbum,
     sourceArchive: sourceArchive,
     file: audioFile,
-    flacTags: flacTags,
+    tags: tags,
     date: '2007-08-28'
   }
 

@@ -40,8 +40,8 @@ function makeAlbum (root, tracks) {
             'TRACKNUMBER=' + track.index,
             'DATE=' + track.date
           ]
-          if (track.flacTags && track.flacTags.GENRE) {
-            tags.push('GENRE=' + track.flacTags.GENRE)
+          if (track.tags && track.tags.genre) {
+            tags.push('GENRE=' + track.tags.genre)
           }
 
           if (mdb.isLast) {

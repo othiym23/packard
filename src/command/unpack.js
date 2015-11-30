@@ -11,7 +11,7 @@ import Bluebird from 'bluebird'
 import { unpack as unzip } from '../utils/zip.js'
 import { Cover, File } from '@packard/model'
 
-import albumsFromFLACTracks from '../metadata/flac/albums-from-tracks.js'
+import albumsFromTracks from '../metadata/albums-from-tracks.js'
 import makePlaylist from '../utils/make-playlist.js'
 import toModel from '../path-to-model.js'
 import { place, moveToArchive } from '../mover.js'
@@ -59,7 +59,7 @@ export default function unpack (target, staging, archiveRoot, playlist) {
     f => extractRelease(f, tmp, covers, groups),
     {concurrency: 2}
   ).then(m => {
-    return place(albumsFromFLACTracks(m, covers), staging, groups)
+    return place(albumsFromTracks(m, covers), staging, groups)
   })
 
   if (archiveRoot) {
@@ -130,15 +130,15 @@ function extractRelease (zipfile, tmpdir, covers, trackers) {
   log.verbose('extractReleaseMetadata', 'archive:', zipfile)
 
   return unzip(zipfile, trackers, tmpdir)
-          .map(({ path, sourceArchive, flacTrack }) => {
+          .map(({ path, sourceArchive, extractedTrack }) => {
             switch (extname(path)) {
               case '.flac':
-                flacTrack.sourceArchive = sourceArchive
-                const track = toModel(path, flacTrack.file.stats)
-                flacTrack.fsTrack = track
-                flacTrack.fsAlbum = track.album
-                flacTrack.fsArtist = track.artist
-                return flacTrack
+                extractedTrack.sourceArchive = sourceArchive
+                const track = toModel(path, extractedTrack.file.stats)
+                extractedTrack.fsTrack = track
+                extractedTrack.fsAlbum = track.album
+                extractedTrack.fsArtist = track.artist
+                return extractedTrack
               case '.jpg':
               case '.pdf':
               case '.png':

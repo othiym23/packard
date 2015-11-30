@@ -1,7 +1,7 @@
 import log from 'npmlog'
 import Bluebird from 'bluebird'
 
-import albumsFromFLACTracks from '../metadata/flac/albums-from-tracks.js'
+import albumsFromTracks from '../metadata/albums-from-tracks.js'
 import flatten from '../flatten-tracks.js'
 import readArtists from '../read-fs-artists.js'
 import scan from '../metadata/scan.js'
@@ -75,7 +75,7 @@ export default function scanArtists (roots) {
           { concurrency: 4 }
         ).then(tracks => {
           // 1. convert tracks into albums
-          const albums = albumsFromFLACTracks(tracks)
+          const albums = albumsFromTracks(tracks)
 
           // 2. find artist tracks that aren't on single-artist albums
           const artistTracks = albumsIntoArtistTracks(albums)

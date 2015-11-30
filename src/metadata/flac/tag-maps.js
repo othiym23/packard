@@ -1,0 +1,68 @@
+export const typeToStreamData = new Map([
+  ['duration', 'duration'],
+  ['bitsPerSample', 'bitsPerSample'],
+  ['bytesToFirstFrame', 'bytesToFirstFrame'],
+  ['channels', 'channels'],
+  ['maxBlockSize', 'maxBlockSize'],
+  ['maxFrameSize', 'maxFrameSize'],
+  ['minBlockSize', 'minBlockSize'],
+  ['minFrameSize', 'minFrameSize'],
+  ['sampleRate', 'sampleRate'],
+  ['samplesInStream', 'samplesInStream'],
+  ['TRAKTOR4', 'traktor4']
+])
+
+export const typeToTag = new Map([
+  ['ALBUM', 'album'],
+  ['ARTIST', 'artist'],
+  ['COMMENT', 'comment'],
+  ['DATE', 'date'],
+  ['GENRE', 'genre'],
+  ['TITLE', 'title'],
+  ['ENCODER', 'encodedWith'],
+  ['ALBUMARTIST', 'albumArtist'],
+  ['ASIN', 'ASIN'],
+  ['BARCODE', 'upc'],
+  ['picture', 'picture'],
+  ['COMPILATION', 'isCompilation'],
+  ['DISCNUMBER', 'disc'],
+  ['DISCTOTAL', 'discs'],
+  ['TOTALDISCS', 'discs'],
+  // ['pgap', 'hasPregap'],
+  // ['purd', 'purchaseDate'],
+  ['ALBUMARTISTSORT', 'sortAlbumArtist'],
+  ['ARTISTSORT', 'sortArtist'],
+  ['BPM', 'bpm'],
+  ['TRACKNUMBER', 'index'],
+  ['TOTALTRACKS', 'tracks'],
+  ['TRACKTOTAL', 'tracks'],
+  // ['iTunes_CDDB_IDs', 'cddb'],
+  // ['iTunNORM', 'iTunesNormalization'],
+  // ['iTunSMPB', 'iTunesGaplessData']
+  ['INITIALKEY', 'initialKey']
+])
+
+export const typeToMB = new Map([
+  ['MUSICBRAINZ_ALBUMARTISTID', 'albumArtistID'],
+  ['MUSICBRAINZ_ALBUMID', 'albumID'],
+  ['RELEASECOUNTRY', 'releaseCountry'],
+  ['MUSICBRAINZ_RELEASESTATUS', 'status'],
+  ['RELEASESTATUS', 'status'],
+  ['MUSICBRAINZ_RELEASETYPE', 'type'],
+  ['RELEASETYPE', 'type'],
+  ['MUSICBRAINZ_ARTISTID', 'artistID'],
+  ['MUSICBRAINZ_RELEASEGROUPID', 'releaseGroupID'],
+  ['MUSICBRAINZ_RELEASETRACKID', 'releaseTrackID'],
+  ['MUSICBRAINZ_TRACKID', 'trackID'],
+  ['MUSICIP_PUID', 'puid'],
+  ['ACOUSTID_ID', 'acoustID'],
+  ['ARTISTS', 'artists'],
+  ['CATALOGNUMBER', 'catalogID'],
+  ['DJMIXER', 'mixedBy'],
+  ['LABEL', 'label'],
+  ['LANGUAGE', 'language'],
+  ['MEDIA', 'media'],
+  ['SCRIPT', 'script'],
+  ['ORIGINALYEAR', 'originalYear'],
+  ['ORIGINALDATE', 'originalDate']
+])

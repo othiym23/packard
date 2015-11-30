@@ -9,9 +9,9 @@ import log from 'npmlog'
 import { MultitrackAlbum as Album, Artist } from '@packard/model'
 
 // heuristic as all get-out
-function getID ({ fsAlbum, flacTags, album }) {
-  if (flacTags && flacTags.ALBUMARTIST && flacTags.ALBUM) {
-    return flacTags.ALBUMARTIST + ' - ' + flacTags.ALBUM
+function getID ({ fsAlbum, tags, album }) {
+  if (tags && tags.albumArtist && tags.album) {
+    return tags.albumArtist + ' - ' + tags.album
   } else if (fsAlbum && fsAlbum.artist && fsAlbum.artist.name && album) {
     return fsAlbum.artist.name + ' - ' + album.name
   } else {

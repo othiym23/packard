@@ -67,12 +67,12 @@ export function unpack (archivePath, groups, directory) {
           const scanned = {}
           const notFlac = {}
           function both (metadata) {
-            if (metadata.track) scanned.flacTrack = metadata.track
+            if (metadata.track) scanned.extractedTrack = metadata.track
             if (metadata.sourceArchive) scanned.sourceArchive = metadata.sourceArchive
             if (metadata.path) scanned.path = metadata.path
 
-            if (scanned.flacTrack && scanned.sourceArchive && scanned.path) {
-              if (scanned.flacTrack === notFlac) delete scanned.flacTrack
+            if (scanned.extractedTrack && scanned.sourceArchive && scanned.path) {
+              if (scanned.extractedTrack === notFlac) delete scanned.extractedTrack
               resolve(scanned)
             }
           }

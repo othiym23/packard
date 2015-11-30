@@ -1,6 +1,6 @@
 import log from 'npmlog'
 
-import validateGenreTag from './validators/flac-genre-tag.js'
+import validateGenreTag from './validators/genre-tag.js'
 import validateISODate from './validators/iso-date.js'
 
 export function auditTrack (track) {

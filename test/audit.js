@@ -33,8 +33,8 @@ test('audit track with everything set', function (t) {
         'An Artist'
       ),
       {
-        flacTags: {
-          GENRE: 'Dubstep'
+        tags: {
+          genre: 'Dubstep'
         },
         date: '2015-11-27'
       }
@@ -67,7 +67,7 @@ test('audit album with a warning', function (t) {
     {
       date: '2015-11',
       index: 1,
-      flacTags: { GENRE: "Drum'n'Bass" }
+      tags: { genre: "Drum'n'Bass" }
     }
   )
   var album = new Album('Legacy', artist, { tracks: [track1] })
@@ -87,7 +87,7 @@ test('audit album with everything set', function (t) {
     {
       date: '2015-11-03',
       index: 1,
-      flacTags: { GENRE: "Drum'n'Bass" }
+      tags: { genre: "Drum'n'Bass" }
     }
   )
   var track2 = new Track(
@@ -97,7 +97,7 @@ test('audit album with everything set', function (t) {
     {
       date: '2015-11-03',
       index: 2,
-      flacTags: { GENRE: "Drum'n'Bass" }
+      tags: { genre: "Drum'n'Bass" }
     }
   )
   var album = new Album('Legacy', artist, { tracks: [track1, track2] })

@@ -47,10 +47,10 @@ const genres = new Set([
   'UK Hardcore'
 ])
 
-export default function validateFLACGenreTag (track, warnings) {
+export default function validateGenreTag (track, warnings) {
   validate('OA', arguments)
-  if (track.flacTags && track.flacTags.GENRE) {
-    const genre = track.flacTags.GENRE
+  if (track.tags && track.tags.genre) {
+    const genre = track.tags.genre
     if (!genres.has(genre)) {
       warnings.push('has unknown genre ' + genre)
     }

@@ -4,6 +4,7 @@ import FLACParser from 'flac-parser'
 import log from 'npmlog'
 
 import { Album, Artist, AudioFile, Track } from '@packard/model'
+import { typeToStreamData, typeToTag, typeToMB } from './tag-maps.js'
 
 export default function reader (path, progressGroups, extras, onFinish, onError) {
   const name = basename(path)
@@ -14,39 +15,42 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
   }
 
   const streamData = extras.streamData = {}
-  const flacTags = extras.flacTags = {}
+  const tags = extras.tags = {}
   const musicbrainzTags = extras.musicbrainzTags = {}
   const throughWatcher = gauge.newStream('FLAC tags: ' + name, extras.stats.size)
 
   return throughWatcher
     .pipe(new FLACParser())
-    .on('data', d => {
-      if (d.type.match(/^MUSICBRAINZ_/)) {
-        musicbrainzTags[d.type] = d.value
-      } else if (d.type.match(/[a-z]/)) {
-        streamData[d.type] = d.value
+    .on('data', ({ type, value }) => {
+      if (typeToTag.get(type)) {
+        tags[typeToTag.get(type)] = value
+      } else if (typeToMB.get(type)) {
+        musicbrainzTags[typeToMB.get(type)] = value
+      } else if (typeToStreamData.get(type)) {
+        streamData[typeToStreamData.get(type)] = value
       } else {
-        flacTags[d.type] = d.value
+        log.silly('flac.read', 'unknown type', type, 'value', value)
       }
     })
     .on('error', onError)
     .on('finish', () => {
       throughWatcher.end()
-      gauge.verbose('flac.scan', 'finished scanning', path)
+      gauge.verbose('flac.read', 'finished scanning', path)
       extras.file = new AudioFile(path, extras.stats, extras.streamData)
 
-      gauge.silly('flac.scan', path, 'streamData', streamData)
+      gauge.silly('flac.read', path, 'streamData', streamData)
       if (streamData.duration) extras.duration = parseFloat(streamData.duration)
 
-      gauge.silly('flac.scan', path, 'flacTags', flacTags)
-      if (flacTags.TRACKNUMBER) extras.index = parseInt(flacTags.TRACKNUMBER, 10)
-      if (flacTags.DISCNUMBER) extras.disc = parseInt(flacTags.DISCNUMBER, 10)
-      if (flacTags.DATE) extras.date = flacTags.DATE
+      gauge.silly('flac.read', path, 'tags', tags)
+      gauge.silly('flac.read', path, 'musicbrainzTags', musicbrainzTags)
+      if (tags.index) extras.index = parseInt(tags.index, 10)
+      if (tags.disc) extras.disc = parseInt(tags.disc, 10)
+      if (tags.date) extras.date = tags.date
 
-      const artist = new Artist(flacTags.ARTIST)
-      const albumArtist = flacTags.ALBUMARTIST ? new Artist(flacTags.ALBUMARTIST) : artist
-      const album = new Album(flacTags.ALBUM, albumArtist)
-      const track = new Track(flacTags.TITLE, album, artist, extras)
+      const artist = new Artist(tags.artist)
+      const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
+      const album = new Album(tags.album, albumArtist)
+      const track = new Track(tags.title, album, artist, extras)
       onFinish({ track })
     })
 }

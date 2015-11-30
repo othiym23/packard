@@ -2,7 +2,7 @@ import log from 'npmlog'
 import moment from 'moment'
 import Bluebird from 'bluebird'
 
-import albumsFromFLACTracks from './metadata/flac/albums-from-tracks.js'
+import albumsFromTracks from './metadata/albums-from-tracks.js'
 import flatten from './flatten-tracks.js'
 import readArtists from './read-fs-artists.js'
 import scan from './metadata/scan.js'
@@ -41,7 +41,7 @@ export default function scanAlbums (roots, trackerGroups = new Map()) {
       },
       { concurrency: 2 }
     )
-    .then(tracks => albumsFromFLACTracks(tracks))
+    .then(tracks => albumsFromTracks(tracks))
     .then(albums => {
       log.silly('scanAlbums', 'albums', albums)
       const sorted = [...albums].sort(byDate)
