@@ -36,6 +36,12 @@ export const typeToTag = new Map([
   ['iTunNORM', 'iTunesNormalization'],
   ['iTunSMPB', 'iTunesGaplessData']
   // ['INITIALKEY', 'initialKey']
+  // ['TCOM', 'composer'],
+  // ['TDRC', 'recordingDate'],
+  // ['TDOR', 'recordingTime'],
+  // ['TENC', 'encodedBy'],
+  // ['TSOA', 'sortAlbum'],
+  // ['Album Subtitle', 'subtitle'],
 ])
 
 export const typeToMB = new Map([
@@ -45,6 +51,7 @@ export const typeToMB = new Map([
   ['MusicBrainz Album Status', 'status'],
   ['MusicBrainz Album Type', 'type'],
   ['MusicBrainz Artist Id', 'artistID'],
+  ['MusicBrainz Disc Id', 'discID'],
   ['MusicBrainz Release Group Id', 'releaseGroupID'],
   ['MusicBrainz Release Track Id', 'releaseTrackID'],
   ['MusicBrainz Track Id', 'trackID'],

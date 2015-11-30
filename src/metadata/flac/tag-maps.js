@@ -39,6 +39,11 @@ export const typeToTag = new Map([
   // ['iTunes_CDDB_IDs', 'cddb'],
   // ['iTunNORM', 'iTunesNormalization'],
   // ['iTunSMPB', 'iTunesGaplessData']
+  // ['TCOM', 'composer'],
+  // ['TDRC', 'recordingDate'],
+  // ['TDOR', 'recordingTime'],
+  // ['TENC', 'encodedBy'],
+  // ['Album Subtitle', 'subtitle'],
   ['INITIALKEY', 'initialKey']
 ])
 
@@ -51,6 +56,7 @@ export const typeToMB = new Map([
   ['MUSICBRAINZ_RELEASETYPE', 'type'],
   ['RELEASETYPE', 'type'],
   ['MUSICBRAINZ_ARTISTID', 'artistID'],
+  ['MUSICBRAINZ_DISCID', 'discID'],
   ['MUSICBRAINZ_RELEASEGROUPID', 'releaseGroupID'],
   ['MUSICBRAINZ_RELEASETRACKID', 'releaseTrackID'],
   ['MUSICBRAINZ_TRACKID', 'trackID'],
