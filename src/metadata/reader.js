@@ -1,7 +1,7 @@
 import { extname } from 'path'
 
 import flacReader from './flac/reader.js'
-import { reader as mp3Reader } from '../mp3/scan.js'
+import mp3Reader from './mp3/reader.js'
 import m4aReader from './m4a/reader.js'
 
 export default function reader (path, progressGroups, extras, onFinish, onError) {

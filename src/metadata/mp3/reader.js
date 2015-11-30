@@ -5,7 +5,7 @@ import mm from 'musicmetadata'
 
 import { Album, Artist, AudioFile, Track } from '@packard/model'
 
-export function reader (path, progressGroups, extras, onFinish, onError) {
+export default function reader (path, progressGroups, extras, onFinish, onError) {
   const name = basename(path)
   let gauge = progressGroups.get(name)
   if (!gauge) {
@@ -13,7 +13,6 @@ export function reader (path, progressGroups, extras, onFinish, onError) {
     progressGroups.set(name, gauge)
   }
 
-  const streamData = extras.streamData = {}
   const tags = extras.tags = {}
   const musicbrainzTags = extras.musicbrainzTags = {}
   const throughWatcher = gauge.newStream('Tags: ' + name, extras.stats.size)
@@ -26,13 +25,14 @@ export function reader (path, progressGroups, extras, onFinish, onError) {
       if (err) return onError(err)
 
       gauge.verbose('mp3.scan', 'finished scanning', path)
-      extras.file = new AudioFile(path, extras.stats, streamData)
+      extras.file = new AudioFile(path, extras.stats)
 
+      gauge.verbose('mp3.scan', 'metadata', metadata)
       for (let tag in metadata) tags[tag] = metadata[tag]
       chunkFrames(textFrames, musicbrainzTags)
+      gauge.verbose('mp3.scan', 'user frames', musicbrainzTags)
 
-      gauge.silly('mp3.scan', path, 'streamData', streamData)
-      if (metadata.duration) extras.duration = streamData.duration
+      if (metadata.duration) extras.duration = metadata.duration
 
       gauge.silly('mp3.scan', path, 'tags', tags)
       if (tags.track && tags.track.no) extras.index = tags.track.no
