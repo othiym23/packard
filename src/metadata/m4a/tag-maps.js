@@ -19,6 +19,7 @@ export const typeToTag = new Map([
   ['©day', 'date'],
   ['©gen', 'genre'],
   ['©nam', 'title'],
+  ['©src', 'isrc'],
   ['©too', 'encodedWith'],
   ['aART', 'albumArtist'],
   ['ASIN', 'ASIN'],

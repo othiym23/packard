@@ -24,6 +24,7 @@ export const typeToTag = new Map([
   ['TPE2', 'albumArtist'],
   // ['ASIN', 'ASIN'],
   // ['BARCODE', 'upc'],
+  ['ISRC', 'isrc'],
   ['APIC', 'picture'],
   ['TCMP', 'isCompilation'],
   // ['DISCNUMBER', 'disc'],
