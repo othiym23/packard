@@ -1,11 +1,11 @@
 import { basename } from 'path'
 
-import FLACReader from 'flac-parser'
+import FLACParser from 'flac-parser'
 import log from 'npmlog'
 
 import { Album, Artist, AudioFile, Track } from '@packard/model'
 
-export function reader (path, progressGroups, extras, onFinish, onError) {
+export default function reader (path, progressGroups, extras, onFinish, onError) {
   const name = basename(path)
   let gauge = progressGroups.get(name)
   if (!gauge) {
@@ -19,7 +19,7 @@ export function reader (path, progressGroups, extras, onFinish, onError) {
   const throughWatcher = gauge.newStream('FLAC tags: ' + name, extras.stats.size)
 
   return throughWatcher
-    .pipe(new FLACReader())
+    .pipe(new FLACParser())
     .on('data', d => {
       if (d.type.match(/^MUSICBRAINZ_/)) {
         musicbrainzTags[d.type] = d.value

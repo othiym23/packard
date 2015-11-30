@@ -11,7 +11,7 @@ import Bluebird from 'bluebird'
 import { unpack as unzip } from '../utils/zip.js'
 import { Cover, File } from '@packard/model'
 
-import albumsFromFLACTracks from '../flac/albums-from-tracks.js'
+import albumsFromFLACTracks from '../metadata/flac/albums-from-tracks.js'
 import makePlaylist from '../utils/make-playlist.js'
 import toModel from '../path-to-model.js'
 import { place, moveToArchive } from '../mover.js'

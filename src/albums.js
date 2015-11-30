@@ -2,7 +2,7 @@ import log from 'npmlog'
 import moment from 'moment'
 import Bluebird from 'bluebird'
 
-import albumsFromFLACTracks from './flac/albums-from-tracks.js'
+import albumsFromFLACTracks from './metadata/flac/albums-from-tracks.js'
 import flatten from './flatten-tracks.js'
 import readArtists from './read-fs-artists.js'
 import scan from './metadata/scan.js'

@@ -1,6 +1,6 @@
 import { extname } from 'path'
 
-import { reader as flacReader } from '../flac/scan.js'
+import flacReader from './flac/reader.js'
 import { reader as mp3Reader } from '../mp3/scan.js'
 import m4aReader from './m4a/reader.js'
 

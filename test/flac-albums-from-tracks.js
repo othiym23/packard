@@ -2,7 +2,7 @@ require('babel-polyfill')
 
 var test = require('tap').test
 
-var albumsFromTracks = require('../lib/flac/albums-from-tracks.js').default
+var albumsFromTracks = require('../lib/metadata/flac/albums-from-tracks.js').default
 
 var model = require('@packard/model')
 var Album = model.MultitrackAlbum
