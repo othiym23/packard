@@ -53,10 +53,11 @@ switch (yargs.argv._[0]) {
                   return 'Must pass 1 or more audio files or directory trees.'
                 })
                 .argv
-    roots = argv.R.map(r => untildify(r))
+    files = argv._.slice(1).map(f => untildify(f))
+    roots = (argv.R || []).map(r => untildify(r))
     log.silly('albums', 'argv', argv)
 
-    command = albums(argv._.slice(1), argv.R)
+    command = albums(files, roots)
     break
   case 'artists':
     options.R.required = '- Must have at least one tree to scan.'
