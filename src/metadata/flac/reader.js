@@ -29,7 +29,7 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
       } else if (typeToStreamData.get(type)) {
         streamData[typeToStreamData.get(type)] = value
       } else {
-        gauge.silly('flac.read', 'unknown type', type, 'value', value)
+        gauge.warn('flac.read', 'unknown type', type, 'value', value)
       }
     })
     .on('error', onError)
