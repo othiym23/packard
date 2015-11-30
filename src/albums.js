@@ -5,7 +5,7 @@ import Bluebird from 'bluebird'
 import albumsFromFLACTracks from './flac/albums-from-tracks.js'
 import flatten from './flatten-tracks.js'
 import readArtists from './read-fs-artists.js'
-import scanFLAC from './flac/scan.js'
+import scan from './metadata/scan.js'
 
 function toMoment (date) {
   let components = (date || '1970-01-01').split('-')
@@ -37,7 +37,7 @@ export default function scanAlbums (roots, trackerGroups = new Map()) {
         log.verbose('scanAlbums', 'processing', root)
         return readArtists(root)
                  .then(flatten)
-                 .map(track => scanFLAC(track.path, trackerGroups, track), { concurrency: 2 })
+                 .map(track => scan(track.path, trackerGroups, track), { concurrency: 2 })
       },
       { concurrency: 2 }
     )

@@ -45,6 +45,7 @@
     "knapsack-js": "^1.0.1",
     "mkdirp": "^0.5.1",
     "moment": "^2.10.6",
+    "musicmetadata": "^2.0.2",
     "mv": "^2.1.1",
     "npmlog": "^2.0.0",
     "rc": "^1.1.0",

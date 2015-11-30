@@ -4,7 +4,7 @@ import Bluebird from 'bluebird'
 import albumsFromFLACTracks from '../flac/albums-from-tracks.js'
 import flatten from '../flatten-tracks.js'
 import readArtists from '../read-fs-artists.js'
-import scanFLAC from '../flac/scan.js'
+import scan from '../metadata/scan.js'
 import { Artist } from '@packard/model'
 
 function bySizeReverse (a, b) {
@@ -71,7 +71,7 @@ export default function scanArtists (roots) {
       log.verbose('scanArtists', 'processing', root)
       return Bluebird.map(
           [...entities],
-          entity => scanFLAC(entity.path, trackerGroups, entity),
+          entity => scan(entity.path, trackerGroups, entity),
           { concurrency: 4 }
         ).then(tracks => {
           // 1. convert tracks into albums

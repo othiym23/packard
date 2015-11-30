@@ -10,7 +10,7 @@ import Bluebird from 'bluebird'
 
 import cruft from './cruft.js'
 import { Archive } from '@packard/model'
-import { reader as flacReader } from '../flac/scan.js'
+import reader from '../metadata/reader.js'
 
 const stat = Bluebird.promisify(fs.stat)
 const mkdirp = Bluebird.promisify(mkdirpCB)
@@ -95,7 +95,7 @@ export function unpack (archivePath, groups, directory) {
                   both({ sourceArchive, path: fullPath })
                 })
 
-              if (extname(fullPath) === '.flac') {
+              if (extname(fullPath) === '.flac' || extname(fullPath) === '.mp3') {
                 const flacStats = {
                   size: zipData.uncompressedSize,
                   atime: zipData.getLastModDate(),
@@ -105,7 +105,7 @@ export function unpack (archivePath, groups, directory) {
                   uid: process.getuid(),
                   gid: process.getgid()
                 }
-                zipstream.pipe(flacReader(
+                zipstream.pipe(reader(
                   fullPath,
                   groups,
                   { stats: flacStats },
