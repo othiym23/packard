@@ -3,7 +3,7 @@
   "version": "3.1.0",
   "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
   "description": "many music files onto few devices",
-  "main": "lib/packer.js",
+  "main": "lib/cli.js",
   "bin": "lib/cli.js",
   "scripts": {
     "transpile": "rimraf lib && babel src -d lib",
