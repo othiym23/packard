@@ -1,7 +1,7 @@
 import log from 'npmlog'
 
 import auditAlbum from '../metadata/audit.js'
-import scanAlbums from '../albums.js'
+import { scanAlbums } from './albums.js'
 
 export default function audit (roots) {
   log.silly('audit', 'files', roots)

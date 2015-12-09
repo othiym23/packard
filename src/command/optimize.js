@@ -1,7 +1,7 @@
 import { resolve as optimize } from 'knapsack-js'
 import log from 'npmlog'
 
-import scanAlbums from '../albums.js'
+import { scanAlbums } from './albums.js'
 
 export default function optimizeAlbums (
   files = [],
@@ -14,7 +14,7 @@ export default function optimizeAlbums (
   return scanAlbums(entities)
     .then(albums => {
       log.disableProgress()
-      calculate(albums, blockSize, capacity)
+      calculate([...albums], blockSize, capacity)
     })
 }
 

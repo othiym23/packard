@@ -6,10 +6,7 @@ import flatten from '../flatten-tracks.js'
 import readArtists from '../read-fs-artists.js'
 import scan from '../metadata/scan.js'
 import { Artist } from '@packard/model'
-
-function bySizeReverse (a, b) {
-  return b.getSize() - a.getSize()
-}
+import { byLocale, bySize } from '../utils/sort.js'
 
 function safe (string) {
   return string.replace(/[^ \]\[A-Za-z0-9-]/g, '')
@@ -30,13 +27,7 @@ function albumsIntoArtistTracks (albums) {
       }
     }
 
-  log.verbose(
-    'albumsIntoArtistTracks',
-    'artists',
-    [...artistTracks.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(e => e[0])
-  )
+  log.verbose('albumsIntoArtistTracks', 'artists', [...artistTracks.keys()].sort(byLocale))
   return artistTracks
 }
 
@@ -61,40 +52,40 @@ function albumsAndTracksToArtists (albums, artistTracks) {
   return artists
 }
 
-export default function scanArtists (roots) {
-  const trackerGroups = new Map()
+function fsTracksToArtists (fsTracks, progressGroups = new Map()) {
+  return fsTracks.map(
+      fsTrack => scan(fsTrack.path, progressGroups, fsTrack),
+      { concurrency: 4 }
+    ).then(tracks => {
+      // 1. convert tracks into albums
+      const albums = albumsFromTracks(tracks)
+
+      // 2. find artist tracks that aren't on single-artist albums
+      const artistTracks = albumsIntoArtistTracks(albums)
+
+      // 3. roll up albums to artists
+      // 4. add loose tracks to artists
+      return albumsAndTracksToArtists(albums, artistTracks)
+    })
+}
+
+export default function scanArtists (roots, progressGroups) {
   log.enableProgress()
   return Bluebird.map(
-      roots,
-      root => readArtists(root).then(artists => [root, flatten(artists)])
-    ).map(([root, entities]) => {
+    roots,
+    root => {
       log.verbose('scanArtists', 'processing', root)
-      return Bluebird.map(
-          [...entities],
-          entity => scan(entity.path, trackerGroups, entity),
-          { concurrency: 4 }
-        ).then(tracks => {
-          // 1. convert tracks into albums
-          const albums = albumsFromTracks(tracks)
-
-          // 2. find artist tracks that aren't on single-artist albums
-          const artistTracks = albumsIntoArtistTracks(albums)
-
-          // 3. roll up albums to artists
-          // 4. add loose tracks to artists
-          const artists = albumsAndTracksToArtists(albums, artistTracks)
-
-          // 5. compile list per-artist
-          const sorted = [...artists.values()].sort(bySizeReverse)
-
-          return [root, sorted]
-        })
-    }).then(report)
+      const fsTracks = readArtists(root).then(flatten)
+      return fsTracksToArtists(fsTracks, progressGroups)
+        .then(artists => [root, artists])
+    }
+  ).then(report)
 }
 
 function report (roots) {
   log.disableProgress()
-  for (let [root, sorted] of roots) {
+  for (let [root, artists] of roots) {
+    const sorted = [...artists.values()].sort(bySize)
     if (sorted.length) {
       console.log('\nROOT %s:', root)
       for (let a of sorted) {
