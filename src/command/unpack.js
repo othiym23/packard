@@ -116,10 +116,10 @@ function populateImages (list, covers) {
       .forEach(c => {
         const directory = dirname(c.path)
         if (!covers.get(directory)) {
-          log.silly('scan', 'creating image list for', directory)
+          log.silly('populateImages', 'creating image list for', directory)
           covers.set(directory, [])
         }
-        log.silly('scan', 'cover', c)
+        log.silly('populateImages', 'cover', c)
         covers.get(directory).push(c)
       })
 
@@ -133,6 +133,8 @@ function extractRelease (zipfile, tmpdir, covers, trackers) {
           .map(({ path, sourceArchive, extractedTrack }) => {
             switch (extname(path)) {
               case '.flac':
+              case '.m4a':
+              case '.mp3':
                 extractedTrack.sourceArchive = sourceArchive
                 const track = toModel(path, extractedTrack.file.stats)
                 extractedTrack.fsTrack = track
@@ -148,7 +150,7 @@ function extractRelease (zipfile, tmpdir, covers, trackers) {
                   return cover
                 })
               default:
-                log.warn('scan', "don't recognize type of", path)
+                log.warn('extractRelease', "don't recognize type of", path)
                 return stat(path).then(stats => {
                   const file = File(path, stats)
                   file.sourceArchive = sourceArchive

@@ -6,13 +6,13 @@ import Bluebird from 'bluebird'
 import scan from '../metadata/scan.js'
 
 export default function inspect (files) {
-  const trackerGroups = new Map()
+  const progressGroups = new Map()
   log.silly('inspect', 'files', files)
 
   log.enableProgress()
-  return Bluebird.map(files, f => {
-    trackerGroups.set(basename(f), log.newGroup(f))
-    return scan(f, trackerGroups)
+  return Bluebird.map(files, path => {
+    progressGroups.set(basename(path), log.newGroup(path))
+    return scan({ path }, progressGroups)
   }).then(track => {
     log.disableProgress()
     console.log(JSON.stringify(track, null, 2))

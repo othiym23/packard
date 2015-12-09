@@ -107,9 +107,8 @@ export function unpack (archivePath, groups, directory) {
                   gid: process.getgid()
                 }
                 zipstream.pipe(reader(
-                  fullPath,
+                  { path: fullPath, stats: zipStats },
                   groups,
-                  { stats: zipStats },
                   both,
                   reject
                 ))

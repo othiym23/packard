@@ -9,7 +9,8 @@ import { Album, Artist, AudioFile, Track } from '@packard/model'
 import { typeToStreamData, typeToTag, typeToMB } from './tag-maps.js'
 import { parseGapless, parseNormalization } from '../../utils/itunes.js'
 
-export default function reader (path, progressGroups, extras, onFinish, onError) {
+export default function reader (info, progressGroups, onFinish, onError) {
+  const path = info.path
   const name = basename(path)
   let gauge = progressGroups.get(name)
   if (!gauge) {
@@ -17,10 +18,10 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
     progressGroups.set(name, gauge)
   }
 
-  const streamData = extras.streamData = {}
-  const tags = extras.tags = {}
-  const musicbrainzTags = extras.musicbrainzTags = {}
-  const throughWatcher = gauge.newStream('Tags: ' + name, extras.stats.size)
+  const streamData = info.streamData = {}
+  const tags = info.tags = {}
+  const musicbrainzTags = info.musicbrainzTags = {}
+  const throughWatcher = gauge.newStream('Tags: ' + name, info.stats.size)
 
   return throughWatcher
     .pipe(new MP4Parser())
@@ -40,10 +41,10 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
     .on('finish', () => {
       throughWatcher.end()
       gauge.verbose('m4a.read', 'finished parsing', path)
-      extras.file = new AudioFile(path, extras.stats, extras.streamData)
+      info.file = new AudioFile(path, info.stats, info.streamData)
 
-      gauge.silly('flac.scan', path, 'streamData', streamData)
-      if (streamData.duration) extras.duration = parseFloat(streamData.duration)
+      gauge.silly('m4a.read', path, 'streamData', streamData)
+      if (streamData.duration) info.duration = parseFloat(streamData.duration)
       if (tags.tracks) {
         tags.index = parseInt(tags.tracks.split('/')[0], 10)
         tags.tracks = parseInt(tags.tracks.split('/')[1], 10)
@@ -59,13 +60,13 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
         tags.iTunesGaplessData = parseGapless(tags.iTunesGaplessData)
       }
 
-      gauge.silly('flac.scan', path, 'tags', tags)
-      gauge.silly('flac.scan', path, 'musicbrainzTags', musicbrainzTags)
+      gauge.silly('m4a.read', path, 'tags', tags)
+      gauge.silly('m4a.read', path, 'musicbrainzTags', musicbrainzTags)
 
       const artist = new Artist(tags.artist)
       const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
       const album = new Album(tags.album, albumArtist)
-      const track = new Track(tags.title, album, artist, extras)
+      const track = new Track(tags.title, album, artist, info)
       onFinish({ track })
     })
 }

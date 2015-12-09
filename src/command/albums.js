@@ -2,7 +2,7 @@ import log from 'npmlog'
 import Bluebird from 'bluebird'
 
 import albumsFromTracks from '../metadata/albums-from-tracks.js'
-import readFSTracks from '../read-fs-artists.js'
+import readFSMetadata from '../read-fs-artists.js'
 import scan from '../metadata/scan.js'
 import { byDate, bySize } from '../utils/sort.js'
 
@@ -11,8 +11,8 @@ export function scanAlbums (roots, progressGroups = new Map()) {
     roots,
     root => {
       log.verbose('scanAlbums', 'processing', root)
-      return readFSTracks(root).map(
-        fsTrack => scan(fsTrack.path, progressGroups, fsTrack),
+      return readFSMetadata(root).map(
+        info => scan(info, progressGroups),
         { concurrency: 2 }
       )
     },

@@ -1,13 +1,13 @@
 import readAlbums from './read-fs-albums.js'
 
 export function flatten (artists) {
-  const tracks = new Set()
+  const info = new Set()
   for (let fsArtist of artists)
     for (let fsAlbum of fsArtist.albums)
       for (let fsTrack of (fsAlbum.tracks || []))
-        tracks.add({ fsArtist, fsAlbum, fsTrack, path: fsTrack.file.path })
+        info.add({ fsArtist, fsAlbum, fsTrack, path: fsTrack.file.path })
 
-  return tracks
+  return info
 }
 
 export function readArtists (root) {
@@ -28,6 +28,6 @@ export function readArtists (root) {
   })
 }
 
-export default function readFSTracks (root) {
+export default function readFSMetadata (root) {
   return readArtists(root).then(flatten)
 }

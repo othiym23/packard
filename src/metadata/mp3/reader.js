@@ -8,7 +8,8 @@ import mm from 'musicmetadata'
 import { Album, Artist, AudioFile, Track } from '@packard/model'
 import { typeToStreamData, typeToTag, typeToMB } from './tag-maps.js'
 
-export default function reader (path, progressGroups, extras, onFinish, onError) {
+export default function reader (info, progressGroups, onFinish, onError) {
+  const path = info.path
   const name = basename(path)
   let gauge = progressGroups.get(name)
   if (!gauge) {
@@ -16,22 +17,22 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
     progressGroups.set(name, gauge)
   }
 
-  const streamData = extras.streamData = {}
-  const tags = extras.tags = {}
-  const musicbrainzTags = extras.musicbrainzTags = {}
-  const throughWatcher = gauge.newStream('Tags: ' + name, extras.stats.size)
+  const streamData = info.streamData = {}
+  const tags = info.tags = {}
+  const musicbrainzTags = info.musicbrainzTags = {}
+  const throughWatcher = gauge.newStream('Tags: ' + name, info.stats.size)
 
   let textFrames = []
   const rawTags = new Map()
   const parser = mm(
     throughWatcher,
-    { duration: true, fileSize: extras.stats.size },
+    { duration: true, fileSize: info.stats.size },
     (err) => {
       if (err) return onError(err)
 
       throughWatcher.end()
       gauge.verbose('mp3.read', 'finished scanning', path)
-      extras.file = new AudioFile(path, extras.stats, extras.streamData)
+      info.file = new AudioFile(path, info.stats, info.streamData)
 
       chunkFramesIntoTags(textFrames, rawTags)
       for (let [type, value] of rawTags) {
@@ -47,7 +48,7 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
       }
 
       gauge.silly('mp3.read', path, 'streamData', streamData)
-      if (streamData.duration) extras.duration = streamData.duration
+      if (streamData.duration) info.duration = streamData.duration
       if (tags.tracks) {
         tags.index = parseInt(tags.tracks.split('/')[0], 10)
         tags.tracks = parseInt(tags.tracks.split('/')[1], 10)
@@ -72,7 +73,7 @@ export default function reader (path, progressGroups, extras, onFinish, onError)
       const artist = new Artist(tags.artist)
       const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
       const album = new Album(tags.album, albumArtist)
-      const track = new Track(tags.title, album, artist, extras)
+      const track = new Track(tags.title, album, artist, info)
       onFinish({ track })
     }
   )
