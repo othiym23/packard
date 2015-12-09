@@ -2,8 +2,7 @@ import log from 'npmlog'
 import Bluebird from 'bluebird'
 
 import albumsFromTracks from '../metadata/albums-from-tracks.js'
-import flatten from '../flatten-tracks.js'
-import readArtists from '../read-fs-artists.js'
+import readFSTracks from '../read-fs-artists.js'
 import scan from '../metadata/scan.js'
 import { Artist } from '@packard/model'
 import { byLocale, bySize } from '../utils/sort.js'
@@ -52,33 +51,33 @@ function albumsAndTracksToArtists (albums, artistTracks) {
   return artists
 }
 
-function fsTracksToArtists (fsTracks, progressGroups = new Map()) {
-  return fsTracks.map(
-      fsTrack => scan(fsTrack.path, progressGroups, fsTrack),
-      { concurrency: 4 }
-    ).then(tracks => {
-      // 1. convert tracks into albums
-      const albums = albumsFromTracks(tracks)
+function tracksToArtists (tracks) {
+  // 1. convert tracks into albums
+  const albums = albumsFromTracks(tracks)
 
-      // 2. find artist tracks that aren't on single-artist albums
-      const artistTracks = albumsIntoArtistTracks(albums)
+  // 2. find artist tracks that aren't on single-artist albums
+  const artistTracks = albumsIntoArtistTracks(albums)
 
-      // 3. roll up albums to artists
-      // 4. add loose tracks to artists
-      return albumsAndTracksToArtists(albums, artistTracks)
-    })
+  // 3. roll up albums to artists
+  // 4. add loose tracks to artists
+  return albumsAndTracksToArtists(albums, artistTracks)
 }
 
-export default function scanArtists (roots, progressGroups) {
+export default function scanArtists (roots, progressGroups = new Map()) {
   log.enableProgress()
   return Bluebird.map(
     roots,
     root => {
       log.verbose('scanArtists', 'processing', root)
-      const fsTracks = readArtists(root).then(flatten)
-      return fsTracksToArtists(fsTracks, progressGroups)
-        .then(artists => [root, artists])
-    }
+
+      const artists = readFSTracks(root).map(
+        fsTrack => scan(fsTrack.path, progressGroups, fsTrack),
+        { concurrency: 2 }
+      ).then(tracksToArtists)
+
+      return artists.then(artists => [root, artists])
+    },
+    { concurrency: 1 }
   ).then(report)
 }
 

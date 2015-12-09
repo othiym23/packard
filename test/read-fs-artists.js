@@ -5,7 +5,7 @@ var mkdirp = require('mkdirp')
 var rimraf = require('rimraf')
 var test = require('tap').test
 
-var readArtists = require('../lib/read-fs-artists.js').default
+var readArtists = require('../lib/read-fs-artists.js').readArtists
 
 var basedir = join(__dirname, 'test-read-tree')
 
@@ -26,7 +26,7 @@ test('setup', function (t) {
 test('read empty root', function (t) {
   readArtists(basedir).then(
     function (artists) {
-      t.same(artists, [], 'no artists found in empty directory')
+      t.same([...artists], [], 'no artists found in empty directory')
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
@@ -40,7 +40,7 @@ test('read root with one empty artist directory', function (t) {
   mkdirp.sync(join(basedir, 'eMPTy'))
   readArtists(basedir).then(
     function (artists) {
-      t.same(artists, [], 'no albums found in empty directory')
+      t.same([...artists], [], 'no albums found in empty directory')
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
@@ -54,7 +54,7 @@ test('read root with one empty album directory', function (t) {
   mkdirp.sync(join(basedir, 'eMPTy', 'nOTHINg'))
   readArtists(basedir).then(
     function (artists) {
-      t.same(artists, [], 'no tracks found in empty directory')
+      t.same([...artists], [], 'no tracks found in empty directory')
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
@@ -72,7 +72,7 @@ test('read root with one one-track directory, no cue sheet', function (t) {
 
   readArtists(basedir).then(
     function (artists) {
-      var artist = artists[0]
+      var artist = [...artists][0]
       t.ok(artist, 'found artist')
       t.equal(artist.name, 'The Beatles', "name didn't change")
 
@@ -104,7 +104,7 @@ test('read root with one one-track directory, with cue sheet', function (t) {
 
   readArtists(basedir).then(
     function (artists) {
-      var artist = artists[0]
+      var artist = [...artists][0]
       t.ok(artist, 'found artist')
       t.equal(artist.name, 'The Beatles', "name didn't change")
 

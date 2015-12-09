@@ -2,26 +2,21 @@ import log from 'npmlog'
 import Bluebird from 'bluebird'
 
 import albumsFromTracks from '../metadata/albums-from-tracks.js'
-import flatten from '../flatten-tracks.js'
-import readArtists from '../read-fs-artists.js'
+import readFSTracks from '../read-fs-artists.js'
 import scan from '../metadata/scan.js'
 import { byDate, bySize } from '../utils/sort.js'
 
-function scanFSTracks (fsTracks, progressGroups = new Map()) {
-  return fsTracks.map(
-    fsTrack => scan(fsTrack.path, progressGroups, fsTrack),
-    { concurrency: 2 }
-  )
-}
-
-export function scanAlbums (roots, progressGroups) {
+export function scanAlbums (roots, progressGroups = new Map()) {
   return Bluebird.map(
     roots,
     root => {
       log.verbose('scanAlbums', 'processing', root)
-      const fsTracks = readArtists(root).then(flatten)
-      return scanFSTracks(fsTracks, progressGroups)
-    }
+      return readFSTracks(root).map(
+        fsTrack => scan(fsTrack.path, progressGroups, fsTrack),
+        { concurrency: 2 }
+      )
+    },
+    { concurrency: 1 }
   ).then(albumsFromTracks)
 }
 
