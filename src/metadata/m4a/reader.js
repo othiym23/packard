@@ -3,6 +3,7 @@ import 'babel-polyfill'
 import { basename } from 'path'
 
 import log from 'npmlog'
+import { indexOf } from 'buffertools'
 import MP4Parser from 'mp4-parser'
 
 import trackFromTags from '../track-from-tags.js'
@@ -73,6 +74,6 @@ export default function reader (info, progressGroups, onFinish, onError) {
 const whoops = new Buffer([0xef, 0xbf, 0xbd])
 function fixupType (maybeBroken) {
   let raw = new Buffer(maybeBroken)
-  if (raw.indexOf(whoops) === 0) maybeBroken = '©' + raw.slice(3).toString()
+  if (indexOf(raw, whoops) === 0) maybeBroken = '©' + raw.slice(3).toString()
   return maybeBroken.replace('----:com.apple.iTunes:', '')
 }
