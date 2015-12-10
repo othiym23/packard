@@ -5,7 +5,8 @@ import { basename } from 'path'
 import log from 'npmlog'
 import MP4Parser from 'mp4-parser'
 
-import { Album, Artist, AudioFile, Track } from '@packard/model'
+import trackFromTags from '../track-from-tags.js'
+import { AudioFile } from '@packard/model'
 import { typeToStreamData, typeToTag, typeToMB } from './tag-maps.js'
 import { parseGapless, parseNormalization } from '../../utils/itunes.js'
 
@@ -25,8 +26,8 @@ export default function reader (info, progressGroups, onFinish, onError) {
 
   return throughWatcher
     .pipe(new MP4Parser())
-    .on('data', ({ busted, value }) => {
-      const type = fixupType(busted)
+    .on('data', ({ type, value }) => {
+      type = fixupType(type)
       if (typeToTag.get(type)) {
         tags[typeToTag.get(type)] = value
       } else if (typeToMB.get(type)) {
@@ -63,11 +64,7 @@ export default function reader (info, progressGroups, onFinish, onError) {
       gauge.silly('m4a.read', path, 'tags', tags)
       gauge.silly('m4a.read', path, 'musicbrainzTags', musicbrainzTags)
 
-      const artist = new Artist(tags.artist)
-      const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
-      const album = new Album(tags.album, albumArtist)
-      const track = new Track(tags.title, album, artist, info)
-      onFinish({ track })
+      onFinish({ track: trackFromTags(info) })
     })
 }
 

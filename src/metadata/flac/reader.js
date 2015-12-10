@@ -3,7 +3,8 @@ import { basename } from 'path'
 import FLACParser from 'flac-parser'
 import log from 'npmlog'
 
-import { Album, Artist, AudioFile, Track } from '@packard/model'
+import trackFromTags from '../track-from-tags.js'
+import { AudioFile } from '@packard/model'
 import { typeToStreamData, typeToTag, typeToMB } from './tag-maps.js'
 
 export default function reader (info, progressGroups, onFinish, onError) {
@@ -45,10 +46,6 @@ export default function reader (info, progressGroups, onFinish, onError) {
       gauge.silly('flac.read', path, 'tags', tags)
       gauge.silly('flac.read', path, 'musicbrainzTags', musicbrainzTags)
 
-      const artist = new Artist(tags.artist)
-      const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
-      const album = new Album(tags.album, albumArtist)
-      const track = new Track(tags.title, album, artist, info)
-      onFinish({ track })
+      onFinish({ track: trackFromTags(info) })
     })
 }

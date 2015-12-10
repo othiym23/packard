@@ -5,7 +5,8 @@ import { basename } from 'path'
 import log from 'npmlog'
 import mm from 'musicmetadata'
 
-import { Album, Artist, AudioFile, Track } from '@packard/model'
+import trackFromTags from '../track-from-tags.js'
+import { AudioFile } from '@packard/model'
 import { typeToStreamData, typeToTag, typeToMB } from './tag-maps.js'
 
 export default function reader (info, progressGroups, onFinish, onError) {
@@ -28,7 +29,10 @@ export default function reader (info, progressGroups, onFinish, onError) {
     throughWatcher,
     { duration: true, fileSize: info.stats.size },
     (err) => {
-      if (err) return onError(err)
+      // you'll get back a blank track if there's no metadata at all
+      if (err && err.message !== 'Could not find metadata header') {
+        return onError(err)
+      }
 
       throughWatcher.end()
       gauge.verbose('mp3.read', 'finished scanning', path)
@@ -43,7 +47,7 @@ export default function reader (info, progressGroups, onFinish, onError) {
         } else if (typeToStreamData.get(type)) {
           streamData[typeToStreamData.get(type)] = value
         } else {
-          gauge.warn('mp3.read', 'unknown type', type, 'value', value)
+          gauge.warn('mp3.read', 'unknown TXXX type', type, 'value', value)
         }
       }
 
@@ -70,11 +74,7 @@ export default function reader (info, progressGroups, onFinish, onError) {
       gauge.silly('mp3.read', path, 'tags', tags)
       gauge.verbose('mp3.read', 'musicbrainzTags', musicbrainzTags)
 
-      const artist = new Artist(tags.artist)
-      const albumArtist = tags.albumArtist ? new Artist(tags.albumArtist) : artist
-      const album = new Album(tags.album, albumArtist)
-      const track = new Track(tags.title, album, artist, info)
-      onFinish({ track })
+      onFinish({ track: trackFromTags(info) })
     }
   )
 
