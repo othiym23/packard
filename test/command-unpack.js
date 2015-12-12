@@ -3,6 +3,7 @@ var statSync = require('graceful-fs').statSync
 
 var Bluebird = require('bluebird')
 var promisify = Bluebird.promisify
+var readFile = promisify(require('graceful-fs').readFile)
 var rimraf = promisify(require('rimraf'))
 var test = require('tap').test
 
@@ -13,12 +14,18 @@ var zip = require('./lib/zip.js')
 
 var root = join(__dirname, 'single-artist-unpack')
 
+test('unpacking nothing', function (t) {
+  return unpack({}).then(function (albums) {
+    t.same(albums, [], 'returned empty list of albums')
+  })
+})
+
 test('unpacking a single-artist album', function (t) {
   var staging = join(root, 'staging', 'flac')
   var flacRoot = join(root, 'flac')
   var albumRoot = join(flacRoot, 'Gary Beck', 'Feel It')
 
-  rimraf(root).then(function () {
+  var makeAlbum = rimraf(root).then(function () {
     return metadata.makeAlbum(
       albumRoot,
       '2012-01-20',
@@ -30,25 +37,174 @@ test('unpacking a single-artist album', function (t) {
         { name: 'Hillview' }
       ]
     )
-  }).then(function (paths) {
+  })
+
+  var makeZip = makeAlbum.then(function (paths) {
     t.equal(paths.length, 3, 'all three FLAC files written')
     return zip.pack(join(root, 'Feel It.zip'), paths)
-  }).then(function (zipfile) {
+  })
+
+  var unpackZip = makeZip.then(function (zipfile) {
     return unpack({ files: [zipfile] }, staging)
-             .catch(function (e) {
-               t.ifError(e, 'unpacking zipfile succeeded')
-             })
-  }).then(function (albums) {
+  })
+
+  return unpackZip.then(function (albums) {
     t.equal(albums.size, 1, 'got 1 album back')
     var album = albums.values().next().value
     t.ok(album, 'found album OK')
     t.equal(album.artist.name, 'Gary Beck', 'got correct artist name')
     t.equal(album.name, 'Feel It', 'got correct album name')
     t.equal(album.tracks.length, 3, 'album has its tracks')
-  }).catch(function (e) {
-    t.ifError(e, 'creating album succeeded')
-  }).finally(function () {
-    t.end()
+  })
+})
+
+test('unpacking album and making a playlist', function (t) {
+  var staging = join(root, 'staging', 'flac')
+  var flacRoot = join(root, 'flac')
+  var albumRoot = join(flacRoot, 'Demdike Stare', 'Testpressing 006')
+  var playlist = join(root, 'untilted.pls')
+
+  var makeAlbum = rimraf(root).then(function () {
+    return metadata.makeAlbum(
+      albumRoot,
+      '2014-08-26',
+      'Demdike Stare',
+      'Testpressing #006',
+      [
+        { name: '40 Years Under the Cosh' },
+        { name: "Frontin'" }
+      ]
+    )
+  })
+
+  var makeZip = makeAlbum.then(function (paths) {
+    t.equal(paths.length, 2, 'both FLAC files written')
+    return zip.pack(join(root, 'Testpressing-006.zip'), paths)
+  })
+
+  var unpackZip = makeZip.then(function (zipfile) {
+    return unpack({ files: [zipfile] }, staging, null, playlist)
+  })
+
+  return unpackZip.then(function (albums) {
+    t.equal(albums.size, 1, 'got 1 album back')
+    return readFile(playlist, { encoding: 'utf8' })
+      .then(function (contents) {
+        t.matches(contents, /^\[playlist\]/)
+        t.matches(contents, /NumberOfEntries=2/)
+        t.matches(contents, /File1.+40 Years/)
+        t.matches(contents, /Title1=40 Years Under the Cosh/)
+        t.matches(contents, /File2.+Frontin/)
+        t.matches(contents, /Title2=Frontin'/)
+      })
+  })
+})
+
+test('unpacking two albums and ensuring sort', function (t) {
+  var staging = join(root, 'staging', 'flac')
+  var flacRoot = join(root, 'flac')
+  var firstRoot = join(flacRoot, 'Demdike Stare', 'Testpressing 002')
+  var secondRoot = join(flacRoot, 'Demdike Stare', 'Testpressing 005')
+  var output = ''
+  var _log
+
+  var makeAlbums = rimraf(root).then(function () {
+    return Bluebird.all([
+      metadata.makeAlbum(
+        firstRoot,
+        '2014-07-03',
+        'Demdike Stare',
+        'Testpressing #005',
+        [
+          { name: 'Procrastination' },
+          { name: 'Past Majesty' }
+        ]
+      ),
+      metadata.makeAlbum(
+        secondRoot,
+        '2014-04-17',
+        'Demdike Stare',
+        'Testpressing #002',
+        [
+          { name: 'Grows Without Bound' },
+          { name: 'Primitive Equations' }
+        ]
+      )
+    ])
+  })
+
+  var makeZip = makeAlbums.then(function (paths) {
+    paths = paths[0].concat(paths[1])
+    t.equal(paths.length, 4, 'all 4 FLAC files written')
+    return zip.pack(join(root, 'Testpressings.zip'), paths)
+  })
+
+  var unpackZip = makeZip.then(function (zipfile) {
+    _log = console.log
+    console.log = function () {
+      output += require('util').format.apply(console, arguments)
+    }
+    return unpack({ files: [zipfile] }, staging)
+  })
+
+  return unpackZip.then(function (albums) {
+    console.log = _log
+    t.equal(albums.size, 2, 'got 2 albums back')
+    t.match(output, /Testpressing 002.+Testpressing 005/)
+  })
+})
+
+test('unpacking two albums and ensuring sort with same date', function (t) {
+  var staging = join(root, 'staging', 'flac')
+  var flacRoot = join(root, 'flac')
+  var firstRoot = join(flacRoot, 'Demdike Stare', 'Testpressing 002')
+  var secondRoot = join(flacRoot, 'Demdike Stare', 'Testpressing 005')
+  var output = ''
+  var _log
+
+  var makeAlbums = rimraf(root).then(function () {
+    return Bluebird.all([
+      metadata.makeAlbum(
+        firstRoot,
+        '2014',
+        'Demdike Stare',
+        'Testpressing #005',
+        [
+          { name: 'Procrastination' },
+          { name: 'Past Majesty' }
+        ]
+      ),
+      metadata.makeAlbum(
+        secondRoot,
+        '2014',
+        'Demdike Stare',
+        'Testpressing #002',
+        [
+          { name: 'Grows Without Bound' },
+          { name: 'Primitive Equations' }
+        ]
+      )
+    ])
+  })
+
+  var makeZip = makeAlbums.then(function (paths) {
+    paths = paths[0].concat(paths[1])
+    t.equal(paths.length, 4, 'all 4 FLAC files written')
+    return zip.pack(join(root, 'Testpressings.zip'), paths)
+  })
+
+  var unpackZip = makeZip.then(function (zipfile) {
+    _log = console.log
+    console.log = function () {
+      output += require('util').format.apply(console, arguments)
+    }
+    return unpack({ files: [zipfile] }, staging)
+  })
+
+  return unpackZip.then(function (albums) {
+    console.log = _log
+    t.equal(albums.size, 2, 'got 2 albums back')
+    t.match(output, /Testpressing 002.+Testpressing 005/)
   })
 })
 
@@ -58,7 +214,7 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
   var archive = join(root, 'archive')
   var archivedZip = join(archive, 'low-ones_and_sixes-flac-sp144.zip')
 
-  rimraf(root).then(function () {
+  var makeFLACs = rimraf(root).then(function () {
     return metadata.makeAlbum(
       root,
       '2015-09-11',
@@ -115,7 +271,9 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
         }
       ]
     )
-  }).then(function (paths) {
+  })
+
+  var makeCruft = makeFLACs.then(function (paths) {
     t.equal(paths.length, 12, '12 FLAC files written')
     return metadata.makeStubFiles(
       root,
@@ -135,22 +293,28 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
         '__MACOSX/low-ones_and_sixes-flac/._sp1144-10_lies.flac',
         '__MACOSX/low-ones_and_sixes-flac/._sp1144-11_landslide.flac',
         '__MACOSX/low-ones_and_sixes-flac/._sp1144-12_dj.flac',
+        'low-ones_and_sixes-flac/README.txt',
+        'low-ones_and_sixes-flac/album.cue',
+        'low-ones_and_sixes-flac/cover.jpeg',
         'low-ones_and_sixes-flac/.DS_Store'
       ]
     )
-  }).then(function (paths) {
-    t.equal(paths.length, 27, '12 FLAC files and 15 cruft files written')
+  })
+
+  var makeZip = makeCruft.then(function (paths) {
+    t.equal(paths.length, 30, '12 FLAC files and 18 other files written')
     return zip.pack(zipfile, paths)
-  }).then(function () {
+  })
+
+  var unpackZip = makeZip.then(function () {
     t.doesNotThrow(function () {
       t.ok(statSync(zipfile), 'zipfile is where it should be')
     }, 'zipfile created')
 
-    return unpack({ files: [zipfile] }, staging, archive)
-             .catch(function (e) {
-               t.ifError(e, 'unpacking zipfile succeeded')
-             })
-  }).then(function (albums) {
+    return unpack({ roots: [root], pattern: '*.zip' }, staging, archive)
+  })
+
+  return unpackZip.then(function (albums) {
     t.throws(function () { statSync(zipfile) }, 'zipfile gone from old location')
     t.doesNotThrow(function () {
       t.ok(statSync(archivedZip), 'zipfile has moved')
@@ -162,6 +326,7 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
     t.equal(album.artist.name, 'Low', 'got correct artist name')
     t.equal(album.name, 'Ones and Sixes', 'got correct album name')
     t.equal(album.tracks.length, 12, 'album has its tracks')
+    t.equal(album.pictures.length, 1, 'album has a cover')
 
     var stagedPath = join(staging, 'Low', '[2015-09-11] Ones and Sixes')
     var prefix = 'Low - Ones and Sixes - '
@@ -182,13 +347,7 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
     tracks.forEach(function (unpacked) {
       t.doesNotThrow(statSync.bind(null, unpacked), 'track staged')
     })
-  }).catch(function (e) {
-    t.ifError(e, 'creating album succeeded')
-  }).finally(function () {
-    t.end()
   })
 })
 
-test('cleanup', function (t) {
-  rimraf(root).then(function () { t.end() })
-})
+test('cleanup', function () { return rimraf(root) })

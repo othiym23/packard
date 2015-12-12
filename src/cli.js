@@ -155,8 +155,8 @@ switch (yargs.argv._[0]) {
     command = unpack(
       { files, roots, pattern: argv.P },
       argv.s,
-      argv.archive && argv.archiveRoot,
-      argv.playlist
+      argv.archive && argv.archiveRoot && untildify(argv.archiveRoot),
+      argv.playlist && untildify(argv.playlist)
     )
     break
   default:

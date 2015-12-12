@@ -6,7 +6,7 @@ import { dirname } from 'path'
 
 import log from 'npmlog'
 
-import { MultitrackAlbum as Album, Artist } from '@packard/model'
+import { MultitrackAlbum as Album, Artist, Cover } from '@packard/model'
 
 // heuristic as all get-out
 function getID ({ fsAlbum, tags, album }) {
@@ -14,20 +14,37 @@ function getID ({ fsAlbum, tags, album }) {
     return tags.albumArtist + ' - ' + tags.album
   } else if (fsAlbum && fsAlbum.artist && fsAlbum.artist.name && album) {
     return fsAlbum.artist.name + ' - ' + album.name
-  } else {
-    return album && album.name
+  } else if (album && album.name) {
+    return album.name
   }
 }
 
-export default function albumsFromTracks (metadata, covers = new Map()) {
+function findCovers (list) {
+  const covers = new Map()
+  list.filter(e => e instanceof Cover)
+      .forEach(c => {
+        const directory = dirname(c.path)
+        if (!covers.get(directory)) {
+          log.silly('populateImages', 'creating image list for', directory)
+          covers.set(directory, [])
+        }
+        log.silly('populateImages', 'cover', c)
+        covers.get(directory).push(c)
+      })
+
+  return covers
+}
+
+export default function albumsFromTracks (metadata) {
   assert(metadata, 'must pass metadata')
 
+  metadata = [].concat(...metadata)
   const albums = new Map()
-  const tracks = [].concat(...metadata)
+  const tracks = metadata.filter(getID)
+  const covers = findCovers(metadata)
   log.silly('albumsFromTracks', tracks.length, 'tracks')
   for (let track of tracks) {
     const id = getID(track)
-    if (!id) continue
     if (!albums.get(id)) albums.set(id, [])
     albums.get(id).push(track)
   }
