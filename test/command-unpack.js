@@ -16,7 +16,7 @@ var root = join(__dirname, 'single-artist-unpack')
 
 test('unpacking nothing', function (t) {
   return unpack({}).then(function (albums) {
-    t.same(albums, [], 'returned empty list of albums')
+    t.equal(albums.size, 0)
   })
 })
 
