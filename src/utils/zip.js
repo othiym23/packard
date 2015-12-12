@@ -1,127 +1,148 @@
-import fs from 'graceful-fs'
+import { basename, dirname, extname, join } from 'path'
 import { createHash } from 'crypto'
-import { createWriteStream } from 'graceful-fs'
-import { join, basename, dirname, extname } from 'path'
+import { createWriteStream, stat as statCB } from 'graceful-fs'
 
 import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
-import { open as openZipCB } from 'yauzl'
+import validate from 'aproba'
 import Bluebird from 'bluebird'
+import { open as openZipCB } from 'yauzl'
 
 import cruft from './cruft.js'
-import { Archive } from '@packard/model'
 import reader from '../metadata/reader.js'
+import { Archive } from '@packard/model'
 
-const stat = Bluebird.promisify(fs.stat)
-const mkdirp = Bluebird.promisify(mkdirpCB)
-const openZip = Bluebird.promisify(openZipCB)
+import { promisify } from 'bluebird'
+const stat = promisify(statCB)
+const mkdirp = promisify(mkdirpCB)
+const openZip = promisify(openZipCB)
 
-export function unpack (archivePath, groups, directory) {
-  log.silly('unpack', 'unpacking', archivePath)
-  const path = join(directory, createHash('sha1').update(archivePath).digest('hex'))
-  const group = groups.get(archivePath)
-  return mkdirp(path).then(() => stat(path)).then(stats => new Bluebird((resolve, reject) => {
-    log.verbose('unpack', 'made', path)
-    openZip(archivePath, {autoClose: false}).then(zf => {
-      log.verbose('unpack', 'unpacking up to', zf.entryCount, 'entries')
+export function unpack (archivePath, progressGroups, targetPath) {
+  validate('SOS', arguments)
+
+  const notFlac = {} // sentinel
+  const name = basename(archivePath)
+  let gauge = progressGroups.get(name)
+  if (!gauge) {
+    gauge = log.newGroup(name)
+    progressGroups.set(name, gauge)
+  }
+  const unpacked = join(targetPath, createHash('sha1').update(archivePath).digest('hex'))
+
+  gauge.silly('unpack', 'unpacking', archivePath, 'to', unpacked)
+  const getArchiveStats = mkdirp(unpacked).return(archivePath).then(stat)
+
+  return getArchiveStats.then(stats => new Bluebird((resolve, reject) => {
+    openZip(archivePath, { autoClose: false }).then(archive => {
+      gauge.silly('unpack', 'unpacking up to', archive.entryCount, 'entries')
       const entries = []
+      const unzipGauge = gauge.newItem('scanning: ' + name, archive.entryCount, 1)
+      const sourceArchive = new Archive(archivePath, stats, { info: archive })
 
-      const tracker = group.newItem(
-        'scanning: ' + basename(archivePath),
-        zf.entryCount,
-        1
-      )
-
-      zf.on('error', reject)
-      zf.on('entry', entry => {
-        tracker.completeWork(1)
-
-        if (/\/$/.test(entry.fileName)) {
-          log.silly('unpack', 'skipping directory', entry.fileName)
-          return
-        }
-
-        if (cruft.has(basename(entry.fileName)) || cruft.has(entry.fileName.split('/')[0])) {
-          log.verbose('unpack', 'skipping cruft', entry.fileName)
-          return
-        }
-
-        groups.set(
-          basename(entry.fileName),
-          group.newGroup('extract: ' + entry.fileName)
-        )
-        entries.push(entry)
+      archive.on('error', reject)
+      archive.on('entry', enqueue)
+      archive.on('end', () => {
+        // yauzl can't handle multiple entries being read at once
+        Bluebird.map(entries, eachEntry, {concurrency: 1})
+          .then(extracted => {
+            gauge.silly('unpack', 'unpacked', archivePath, 'to', extracted)
+            resolve(extracted)
+          })
       })
-      zf.on('end', () => {
-        Bluebird.map(entries, zipData => new Bluebird((resolve, reject) => {
-          log.silly('unpack', 'zipData', zipData)
-          const sourceArchive = new Archive(archivePath, stats, { info: zipData })
 
-          const fullPath = join(path, zipData.fileName)
-          const writeTracker = groups.get(basename(zipData.fileName)).newStream(
-            'writing: ' + zipData.fileName,
-            zipData.uncompressedSize,
-            3
-          )
+      function enqueue (entry) {
+        const filename = basename(entry.fileName)
+        if (/\/$/.test(entry.fileName)) {
+          gauge.verbose('unpack', 'skipping directory', entry.fileName)
+        } else if (cruft.has(filename) || cruft.has(entry.fileName.split('/')[0])) {
+          gauge.verbose('unpack', 'skipping cruft', entry.fileName)
+        } else {
+          progressGroups.set(filename, gauge.newGroup('extract: ' + entry.fileName))
+          entries.push(entry)
+        }
+
+        unzipGauge.completeWork(1)
+      }
+
+      function eachEntry (metadata) {
+        return new Bluebird((resolve, reject) => {
+          gauge.silly('unpack', 'zip metadata', metadata)
 
           const scanned = {}
-          const notFlac = {}
           function both (metadata) {
             if (metadata.track) scanned.extractedTrack = metadata.track
-            if (metadata.sourceArchive) scanned.sourceArchive = metadata.sourceArchive
             if (metadata.path) scanned.path = metadata.path
 
-            if (scanned.extractedTrack && scanned.sourceArchive && scanned.path) {
+            if (scanned.extractedTrack && scanned.path) {
               if (scanned.extractedTrack === notFlac) delete scanned.extractedTrack
+              scanned.sourceArchive = sourceArchive
               resolve(scanned)
             }
           }
 
-          zf.openReadStream(zipData, function (err, zipstream) {
+          archive.openReadStream(metadata, function (err, zipStream) {
             if (err) {
-              log.error('unpack', 'reading stream', err.stack)
+              gauge.error('unpack', 'reading stream', metadata)
               return reject(err)
             }
 
-            log.verbose('unpack', 'creating directory', dirname(fullPath))
-            mkdirp(dirname(fullPath)).then(() => {
-              log.verbose('unpack', 'writing', fullPath, zipData.uncompressedSize)
-              zipstream
-                .pipe(writeTracker)
-                .pipe(createWriteStream(fullPath))
-                .on('error', reject)
-                .on('finish', () => {
-                  log.verbose('unpack', 'finished writing', fullPath)
-                  both({ sourceArchive, path: fullPath })
-                })
+            const path = join(unpacked, metadata.fileName)
+            const directory = dirname(path)
+            gauge.silly('unpack', 'creating directory', directory)
+            mkdirp(directory).then(() => {
+              pipeToFile(zipStream, metadata, path, both, reject)
 
-              const type = extname(fullPath)
+              const type = extname(path)
               if (type === '.flac' || type === '.mp3' || type === '.m4a') {
-                const zipStats = {
-                  size: zipData.uncompressedSize,
-                  atime: zipData.getLastModDate(),
-                  mtime: zipData.getLastModDate(),
-                  ctime: zipData.getLastModDate(),
-                  birthtime: zipData.getLastModDate(),
-                  uid: process.getuid(),
-                  gid: process.getgid()
-                }
-                zipstream.pipe(reader(
-                  { path: fullPath, stats: zipStats },
-                  groups,
-                  both,
-                  reject
-                ))
+                pipeToMetadataReader(zipStream, metadata, path, both, reject)
               } else {
                 both({ track: notFlac })
               }
             })
           })
-        }), {concurrency: 1}).then(paths => {
-          log.silly('unpack', 'unpacked', archivePath, 'to', paths)
-          resolve(paths)
         })
-      })
-    }).catch(reject)
+      }
+    })
   }))
+
+  function pipeToFile (zipStream, md, path, onFinish, onError) {
+    validate('OOSFF', arguments)
+
+    gauge.verbose('unpack', 'writing', path, md.uncompressedSize)
+    const filename = basename(md.fileName)
+    const writeGauge = progressGroups.get(filename).newStream(
+      'writing: ' + path,
+      md.uncompressedSize,
+      3
+    )
+    zipStream
+      .pipe(writeGauge)
+      .on('error', onError)
+      .pipe(createWriteStream(path))
+      .on('error', onError)
+      .on('finish', () => {
+        gauge.verbose('unpack', 'finished writing', path)
+        onFinish({ path })
+      })
+  }
+
+  function pipeToMetadataReader (zipStream, md, path, onFinish, onError) {
+    validate('OOSFF', arguments)
+
+    const zipStats = {
+      size: md.uncompressedSize,
+      atime: md.getLastModDate(),
+      mtime: md.getLastModDate(),
+      ctime: md.getLastModDate(),
+      birthtime: md.getLastModDate(),
+      uid: process.getuid(),
+      gid: process.getgid()
+    }
+    zipStream.pipe(reader(
+      { path: path, stats: zipStats },
+      progressGroups,
+      onFinish,
+      onError
+    ))
+  }
 }
