@@ -14,7 +14,7 @@ var unzip = require('../lib/utils/zip.js').unpack
 var metadata = require('./lib/metadata.js')
 var zip = require('./lib/zip.js')
 
-var root = join(__dirname, 'single-artist-zipped')
+var root = join(__dirname, 'utils-zip')
 
 test('calling unzip with bad arguments', function (t) {
   t.test('no path, no progress groups, no target directory', function (t) {
