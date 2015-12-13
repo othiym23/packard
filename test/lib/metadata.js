@@ -13,6 +13,7 @@ var Album = model.MultitrackAlbum
 var Track = model.Track
 
 var flac = require('./flac.js')
+var m4a = require('./m4a.js')
 var mp3 = require('./mp3.js')
 
 var EMPTY_TRACK = path.join(__dirname, '../fixtures/empty.flac')
@@ -44,6 +45,7 @@ function makeAlbum (root, date, artistName, albumName, trackTemplates, ext) {
     })
 
     if (ext === '.flac') return flac.makeAlbum(root, prepared)
+    else if (ext === '.m4a') return m4a.makeAlbum(root, prepared)
     else if (ext === '.mp3') return mp3.makeAlbum(root, prepared)
     else throw new TypeError("Can't create album for " + ext)
   })
