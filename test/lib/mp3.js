@@ -16,7 +16,6 @@ var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.mp3')
 function eye (path, tags) {
   var args = [
     '--no-color',
-    '--quiet',
     path
   ]
 
