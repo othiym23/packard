@@ -55,7 +55,7 @@ export default function reader (info, progressGroups, onFinish, onError) {
       if (streamData.duration) info.duration = streamData.duration
       if (tags.tracks) {
         tags.index = parseInt(tags.tracks.split('/')[0], 10)
-        tags.tracks = parseInt(tags.tracks.split('/')[1], 10)
+        tags.tracks = parseInt(tags.tracks.split('/')[1] || 0, 10)
       }
       if (tags.discs) {
         tags.disc = parseInt(tags.discs.split('/')[0], 10)

@@ -20,6 +20,7 @@ export const typeToTag = new Map([
   ['TPE1', 'artist'],
   ['COMM', 'comment'],
   ['TYER', 'date'],
+  ['TDRL', 'date'],
   ['TDAT', 'monthYear'], // needs fixing up
   ['TCON', 'genre'],
   ['STYLE', 'genre'],

@@ -4,7 +4,8 @@
 # packard
 
 Optimize the storage of media files on fixed-size storage volumes. Currently
-supports FLAC files with Vorbis comments.
+supports FLAC files with Vorbis comments, AAC files in QuickTime containers
+(`.m4a` files), and MP3 files with ID3v2 tags.
 
 ## usage
 

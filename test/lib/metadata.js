@@ -13,14 +13,17 @@ var Album = model.MultitrackAlbum
 var Track = model.Track
 
 var flac = require('./flac.js')
+var mp3 = require('./mp3.js')
 
 var EMPTY_TRACK = path.join(__dirname, '../fixtures/empty.flac')
 
-function makeAlbum (root, date, artistName, albumName, trackTemplates) {
-  var artist = new Artist(artistName)
-  var album = new Album(albumName, artist)
+function makeAlbum (root, date, artistName, albumName, trackTemplates, ext) {
+  if (!ext) ext = '.flac'
+
   return stat(EMPTY_TRACK).then(function (stats) {
-    return flac.makeAlbum(root, trackTemplates.map(function (template, index) {
+    var artist = new Artist(artistName)
+    var album = new Album(albumName, artist)
+    var prepared = trackTemplates.map(function (template, index) {
       var trackArtist = template.artist ? new Artist(template.artist) : artist
       var track = new Track(
         template.name || '[untitled]',
@@ -29,16 +32,20 @@ function makeAlbum (root, date, artistName, albumName, trackTemplates) {
         {
           path: EMPTY_TRACK,
           stats: stats,
-          ext: '.flac',
+          ext: ext,
           index: index + 1,
           date: date
         }
       )
+      if (template.genre) track.tags = { genre: template.genre }
       track.file.path = path.join(root, template.path || track.safeName())
-      if (template.genre) track.flacTags = { GENRE: template.genre }
 
       return track
-    }))
+    })
+
+    if (ext === '.flac') return flac.makeAlbum(root, prepared)
+    else if (ext === '.mp3') return mp3.makeAlbum(root, prepared)
+    else throw new TypeError("Can't create album for " + ext)
   })
 }
 
