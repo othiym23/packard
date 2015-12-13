@@ -20,6 +20,4 @@ before_install:
   - sudo apt-get install atomicparsley
   - sudo apt-get install eyed3
   - npm install -g npm@latest
-  - eyeD3 --help
-  - eyeD3 --longhelp
 script: npm run-script coverage

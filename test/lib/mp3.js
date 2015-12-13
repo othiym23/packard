@@ -16,7 +16,9 @@ var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.mp3')
 function eye (path, tags) {
   var args = [
     '--no-color',
-    path
+    '--v2',
+    '--to-v2.4',
+    '--force-update'
   ]
 
   Object.keys(tags).forEach(function (k) {
@@ -49,7 +51,7 @@ function eye (path, tags) {
 
   return which('eyeD3').then(function (bin) {
     return new Bluebird(function (resolve, reject) {
-      var child = spawn(bin, args, { encoding: 'utf8' })
+      var child = spawn(bin, args.concat(path), { encoding: 'utf8' })
 
       var stdout = ''
       if (child.stdout) {
