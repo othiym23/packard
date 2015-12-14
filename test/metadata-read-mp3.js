@@ -2,8 +2,8 @@ var createReadStream = require('graceful-fs').createReadStream
 var join = require('path').join
 var stat = require('graceful-fs').stat
 
-var Bluebird = require('bluebird')
 var test = require('tap').test
+var Bluebird = require('bluebird')
 
 var promisify = Bluebird.promisify
 var rimraf = promisify(require('rimraf'))

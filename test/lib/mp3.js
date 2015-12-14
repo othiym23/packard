@@ -1,5 +1,6 @@
 var createReadStream = require('fs').createReadStream
 var createWriteStream = require('fs').createWriteStream
+var exec = require('child_process').exec
 var path = require('path')
 var spawn = require('child_process').spawn
 
@@ -12,13 +13,53 @@ var which = promisify(whichCB)
 
 var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.mp3')
 
-// I'm not writing a JS ID3v2.4 editor this week
-function eye (path, tags) {
+var eyeV
+
+function v6itialize (path, tags) {
   var args = [
     '--no-color',
     '--v2',
-    '--to-v2.4',
-    '--force-update'
+    '--to-v2.4'
+  ]
+
+  Object.keys(tags).forEach(function (k) {
+    switch (k) {
+      case 'title':
+        args.push('--title')
+        args.push(tags[k])
+        break
+      case 'artist':
+        args.push('--artist')
+        args.push(tags[k])
+        break
+      case 'album':
+        args.push('--album')
+        args.push(tags[k])
+        break
+      case 'track':
+        args.push('--track')
+        args.push(tags[k])
+        break
+      case 'date':
+        args.push('--set-text-frame')
+        args.push('TDRL:' + tags[k])
+        break
+      case 'genre':
+        args.push('--genre')
+        args.push(tags[k])
+    }
+  })
+
+  args.push(path)
+
+  return args
+}
+
+function v7itialize (path, tags) {
+  var args = [
+    '--no-color',
+    '--quiet',
+    path
   ]
 
   Object.keys(tags).forEach(function (k) {
@@ -44,14 +85,43 @@ function eye (path, tags) {
         args.push(tags[k])
         break
       case 'genre':
-        args.push('-G')
+        args.push('--genre')
         args.push(tags[k])
     }
   })
 
-  return which('eyeD3').then(function (bin) {
+  return args
+}
+
+// I'm not writing a JS ID3v2.4 editor this week
+function eye (path, tags) {
+  var findBin = which('eyeD3')
+
+  // eyeD3 exits with 1 and prints the version string to stderr
+  // when you run eyeD3 --version, which doesn't play nice with
+  // spawn
+  if (!eyeV) {
+    findBin = findBin.then(function (bin) {
+      return new Bluebird(function (resolve, reject) {
+        exec(bin + ' --version', function (err, stdout, stderr) {
+          if (!err) return reject(new Error('expected error'))
+          if (err && err.code !== 1) return reject(err)
+
+          if (stderr.match(/^eyeD3 0\.7/)) eyeV = 'v7'
+          else eyeV = 'v6'
+          resolve(bin)
+        })
+      })
+    })
+  }
+
+  return findBin.then(function (bin) {
+    var args
+    if (eyeV === 'v7') args = v7itialize(path, tags)
+    else args = v6itialize(path, tags)
+
     return new Bluebird(function (resolve, reject) {
-      var child = spawn(bin, args.concat(path), { encoding: 'utf8' })
+      var child = spawn(bin, args, { encoding: 'utf8' })
 
       var stdout = ''
       if (child.stdout) {
