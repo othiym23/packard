@@ -99,6 +99,7 @@ function report (albums, root, archives, archiveRoot) {
 
     return first.toSafePath().toLowerCase().localeCompare(second.toSafePath().toLowerCase())
   })
+  if (!sorted.length) return
 
   console.log('new albums from this run:\n')
   for (let album of sorted) console.log(join(root, album.toSafePath()))
