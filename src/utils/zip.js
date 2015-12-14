@@ -6,7 +6,7 @@ import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
 import validate from 'aproba'
 import Bluebird from 'bluebird'
-import { open as openZipCB } from 'yauzl'
+import { open as openZip } from 'yauzl'
 
 import cruft from './cruft.js'
 import reader from '../metadata/reader.js'
@@ -15,7 +15,6 @@ import { Archive } from '@packard/model'
 import { promisify } from 'bluebird'
 const stat = promisify(statCB)
 const mkdirp = promisify(mkdirpCB)
-const openZip = promisify(openZipCB)
 
 export function unpack (archivePath, progressGroups, targetPath) {
   validate('SOS', arguments)
@@ -28,88 +27,93 @@ export function unpack (archivePath, progressGroups, targetPath) {
   }
 
   const unpacked = join(targetPath, createHash('sha1').update(archivePath).digest('hex'))
-  gauge.verbose('unzip', 'unpacking', archivePath, 'to', unpacked)
 
   return Bluebird.join(
     mkdirp(unpacked),
-    stat(archivePath),
-    openZip(archivePath, { autoClose: false })
-  ).spread((p, stats, archive) => new Bluebird((resolve, reject) => {
-    let entryCount = archive.entryCount
-    gauge.verbose('unzip', 'extracting up to', entryCount, 'entries')
-    function examined (message, path) {
-      entryCount--
-      unzipGauge.completeWork(1)
-      gauge.verbose('unzip.enqueue', message, path, '(' + entryCount + ' entries remaining)')
-    }
+    stat(archivePath)
+  ).spread((p, stats) => new Bluebird((resolve, reject) => {
+    gauge.verbose('unzip', 'unpacking', archivePath, 'to', unpacked)
+    // openZip can't be promisified because the object stream it yields doesn't
+    // start paused.
+    openZip(archivePath, { autoClose: false }, (err, archive) => {
+      if (err) return reject(err)
 
-    const sourceArchive = new Archive(archivePath, stats, { info: archive })
-    const unzipGauge = gauge.newItem('scanning: ' + name, archive.entryCount, 1)
-    const entries = []
-
-    archive.on('error', reject)
-    archive.on('entry', enqueue)
-
-    function enqueue (entry) {
-      const filename = basename(entry.fileName)
-      if (/\/$/.test(entry.fileName)) {
-        examined('skipped directory', entry.fileName)
-      } else if (cruft.has(filename) || cruft.has(entry.fileName.split('/')[0])) {
-        examined('skipped cruft', entry.fileName)
-      } else {
-        progressGroups.set(filename, gauge.newGroup('extract: ' + entry.fileName))
-        entries.push(extract(entry))
-        examined('extracting', basename(entry.fileName))
+      let entryCount = archive.entryCount
+      gauge.verbose('unzip', 'extracting up to', entryCount, 'entries')
+      function examined (message, path) {
+        entryCount--
+        unzipGauge.completeWork(1)
+        gauge.verbose('unzip.enqueue', message, path, '(' + entryCount + ' entries remaining)')
       }
 
-      if (entryCount < 1) {
+      const sourceArchive = new Archive(archivePath, stats, { info: archive })
+      const unzipGauge = gauge.newItem('scanning: ' + name, archive.entryCount, 1)
+      const entries = []
+
+      archive.on('error', reject)
+      archive.on('entry', enqueue)
+      archive.on('end', () => {
         gauge.verbose('unzip.enqueue', 'finished scanning archive table of contents')
         Bluebird.all(entries).then(extracted => {
           gauge.verbose('unzip', 'extracted', extracted.length, 'files from', archivePath)
           resolve(extracted)
         })
+      })
+
+      function enqueue (entry) {
+        gauge.silly('unzip.enqueue', 'examining', entry.fileName)
+        const filename = basename(entry.fileName)
+        if (/\/$/.test(entry.fileName)) {
+          examined('skipped directory', entry.fileName)
+        } else if (cruft.has(filename) || cruft.has(entry.fileName.split('/')[0])) {
+          examined('skipped cruft', entry.fileName)
+        } else {
+          progressGroups.set(filename, gauge.newGroup('extract: ' + entry.fileName))
+          entries.push(extract(entry))
+          examined('extracting', basename(entry.fileName))
+        }
       }
-    }
 
-    function extract (metadata) {
-      const path = join(unpacked, metadata.fileName)
-      const directory = dirname(path)
-      return mkdirp(directory).then(() => new Bluebird((resolve, reject) => {
-        gauge.silly('unzip.extract', 'created directory', directory)
+      function extract (metadata) {
+        const path = join(unpacked, metadata.fileName)
+        const directory = dirname(path)
+        return mkdirp(directory).then(() => new Bluebird((resolve, reject) => {
+          gauge.silly('unzip.extract', 'created directory', directory)
 
-        archive.openReadStream(metadata, function (err, zipStream) {
-          if (err) {
-            gauge.error('unzip.extract', 'reading stream', metadata)
-            return reject(err)
-          }
-
-          const notFlac = {} // sentinel
-          const scanned = { sourceArchive }
-          function both ({ track, path }) {
-            if (track) scanned.extractedTrack = track
-            if (path) scanned.path = path
-
-            if (scanned.extractedTrack && scanned.path) {
-              if (scanned.extractedTrack === notFlac) delete scanned.extractedTrack
-              gauge.silly(
-                'unzip.extract.both', scanned.path, 'written',
-                scanned.extractedTrack ? 'and tags read' : ''
-              )
-              resolve(scanned)
+          archive.openReadStream(metadata, function (err, zipStream) {
+            if (err) {
+              gauge.error('unzip.extract', 'reading stream', metadata)
+              return reject(err)
             }
-          }
 
-          const type = extname(path)
-          if (type === '.flac' || type === '.mp3' || type === '.m4a') {
-            zipStream.pipe(toMetadataReader(metadata, path, both, reject))
-          } else {
-            both({ track: notFlac })
-          }
+            const notFlac = {} // sentinel
+            const scanned = { sourceArchive }
+            function both ({ track, path }) {
+              if (track) scanned.extractedTrack = track
+              if (path) scanned.path = path
 
-          zipStream.pipe(toUncompressedFile(metadata, path, both, reject))
-        })
-      }))
-    }
+              if (scanned.extractedTrack && scanned.path) {
+                if (scanned.extractedTrack === notFlac) delete scanned.extractedTrack
+                gauge.silly(
+                  'unzip.extract.both', scanned.path, 'written',
+                  scanned.extractedTrack ? 'and tags read' : ''
+                )
+                resolve(scanned)
+              }
+            }
+
+            const type = extname(path)
+            if (type === '.flac' || type === '.mp3' || type === '.m4a') {
+              zipStream.pipe(toMetadataReader(metadata, path, both, reject))
+            } else {
+              both({ track: notFlac })
+            }
+
+            zipStream.pipe(toUncompressedFile(metadata, path, both, reject))
+          })
+        }))
+      }
+    })
   }))
 
   function toUncompressedFile (md, path, onFinish, onError) {
