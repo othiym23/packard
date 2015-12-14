@@ -109,18 +109,19 @@ test('unpacking two albums and ensuring sort', function (t) {
   var _log
 
   var makeAlbums = rimraf(root).then(function () {
-    return Bluebird.all([
-      metadata.makeAlbum(
-        secondRoot,
-        '2014-07-03',
-        'Demdike Stare',
-        'Testpressing #005',
-        [
-          { name: 'Procrastination' },
-          { name: 'Past Majesty' }
-        ]
-      ),
-      metadata.makeAlbum(
+    // oh god these have to be done in sequence because of the statefulness of
+    // FLACProcessor
+    return metadata.makeAlbum(
+      secondRoot,
+      '2014-07-03',
+      'Demdike Stare',
+      'Testpressing #005',
+      [
+        { name: 'Procrastination' },
+        { name: 'Past Majesty' }
+      ]
+    ).then(function (secondPaths) {
+      return metadata.makeAlbum(
         firstRoot,
         '2014-04-17',
         'Demdike Stare',
@@ -129,12 +130,11 @@ test('unpacking two albums and ensuring sort', function (t) {
           { name: 'Grows Without Bound' },
           { name: 'Primitive Equations' }
         ]
-      )
-    ])
+      ).then(function (firstPaths) { return firstPaths.concat(secondPaths) })
+    })
   })
 
   var makeZip = makeAlbums.then(function (paths) {
-    paths = paths[0].concat(paths[1])
     t.equal(paths.length, 4, 'all 4 FLAC files written')
     return zip.pack(join(root, 'Testpressings.zip'), paths)
   })
@@ -163,18 +163,19 @@ test('unpacking two albums and ensuring sort with same date', function (t) {
   var _log
 
   var makeAlbums = rimraf(root).then(function () {
-    return Bluebird.all([
-      metadata.makeAlbum(
-        secondRoot,
-        '2014',
-        'Demdike Stare',
-        'Testpressing #005',
-        [
-          { name: 'Procrastination' },
-          { name: 'Past Majesty' }
-        ]
-      ),
-      metadata.makeAlbum(
+    // oh god these have to be done in sequence because of the statefulness of
+    // FLACProcessor
+    return metadata.makeAlbum(
+      secondRoot,
+      '2014',
+      'Demdike Stare',
+      'Testpressing #005',
+      [
+        { name: 'Procrastination' },
+        { name: 'Past Majesty' }
+      ]
+    ).then(function (secondPaths) {
+      return metadata.makeAlbum(
         firstRoot,
         '2014',
         'Demdike Stare',
@@ -183,12 +184,11 @@ test('unpacking two albums and ensuring sort with same date', function (t) {
           { name: 'Grows Without Bound' },
           { name: 'Primitive Equations' }
         ]
-      )
-    ])
+      ).then(function (firstPaths) { return firstPaths.concat(secondPaths) })
+    })
   })
 
   var makeZip = makeAlbums.then(function (paths) {
-    paths = paths[0].concat(paths[1])
     t.equal(paths.length, 4, 'all 4 FLAC files written')
     return zip.pack(join(root, 'Testpressings.zip'), paths)
   })
