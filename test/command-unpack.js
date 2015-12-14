@@ -111,7 +111,7 @@ test('unpacking two albums and ensuring sort', function (t) {
   var makeAlbums = rimraf(root).then(function () {
     return Bluebird.all([
       metadata.makeAlbum(
-        firstRoot,
+        secondRoot,
         '2014-07-03',
         'Demdike Stare',
         'Testpressing #005',
@@ -121,7 +121,7 @@ test('unpacking two albums and ensuring sort', function (t) {
         ]
       ),
       metadata.makeAlbum(
-        secondRoot,
+        firstRoot,
         '2014-04-17',
         'Demdike Stare',
         'Testpressing #002',
@@ -165,7 +165,7 @@ test('unpacking two albums and ensuring sort with same date', function (t) {
   var makeAlbums = rimraf(root).then(function () {
     return Bluebird.all([
       metadata.makeAlbum(
-        firstRoot,
+        secondRoot,
         '2014',
         'Demdike Stare',
         'Testpressing #005',
@@ -175,7 +175,7 @@ test('unpacking two albums and ensuring sort with same date', function (t) {
         ]
       ),
       metadata.makeAlbum(
-        secondRoot,
+        firstRoot,
         '2014',
         'Demdike Stare',
         'Testpressing #002',
