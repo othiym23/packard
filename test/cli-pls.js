@@ -72,7 +72,7 @@ test('packard pls ' + root + '/**/*.flac', function (t) {
     cli.pnixt()
       .run('node ' + p + ' pls -R ' + root)
       .expect(function (r) {
-        t.match(r.stderr, 'playlist generated with 3 entries')
+        t.match(r.stderr, 'created playlist with 3 tracks')
         t.match(r.stdout, '[playlist]')
         t.match(r.stdout, 'Title1=Feel It')
         t.match(r.stdout, 'Title2=Paid Out')

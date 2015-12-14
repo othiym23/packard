@@ -15,6 +15,6 @@ export default function makePlaylist (albums) {
   }
   playlist['NumberOfEntries'] = index
   playlist['Version'] = 2
-  log.info('makePlaylist', 'playlist generated with', index, 'entries')
+  log.info('makePlaylist', 'created playlist with', index, 'tracks')
   return inify(playlist, {section: 'playlist'})
 }
