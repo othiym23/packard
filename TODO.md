@@ -4,11 +4,11 @@ packard.todo
 	- fix unpack via testing @done(2015-03-16)
 	- set up for Travis @done(2015-03-16)
 	- report coverage to coveralls.io @done(2015-03-16)
-	- write my own framework
+	- figure out how to measure coverage against ES6 source
 
-* metadata
-	- ID3v2 reading
-	- m4a QT atom reading
+* metadata @done(2015-12-13)
+	- ID3v2 reading @done(2015-12-06)
+	- m4a QT atom reading @done(2015-12-07)
 	- extract MusicBrainz info into a MB metadata object @done(2015-11-27)
 
 * place
@@ -24,7 +24,7 @@ packard.todo
 	- split models out into separate package for use with `nothingness` @done(2015-09-07)
 
 * artists
-	- add cue sheet handling
+	- cue sheet handling
 	- single-track album handling @done(2015-09-07)
 	- fix progress
 	- tracks should be on albums, or in loose tracks, but not both for report
@@ -53,6 +53,7 @@ packard.todo
 * pls
 	- flatten multiple roots and sort the whole thing @done(2015-03-25)
 	- get album artist from flacTrack when possible @done(2015-08-24)
+        - output to file instead of stdout
 
 * audit
 	- top-level command to audit files or albums @done(2015-11-27)
