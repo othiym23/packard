@@ -19,9 +19,9 @@ export default function reader (info, progressGroups, onFinish, onError) {
   const streamData = info.streamData = {}
   const tags = info.tags = {}
   const musicbrainzTags = info.musicbrainzTags = {}
-  const throughWatcher = gauge.newStream('FLAC tags: ' + name, info.stats.size)
+  const parserGauge = gauge.newStream('FLAC tags: ' + name, info.stats.size)
 
-  return throughWatcher
+  return parserGauge
     .pipe(new FLACParser())
     .on('data', ({ type, value }) => {
       if (typeToTag.get(type)) {
@@ -36,8 +36,8 @@ export default function reader (info, progressGroups, onFinish, onError) {
     })
     .on('error', onError)
     .on('finish', () => {
-      throughWatcher.end()
-      gauge.verbose('flac.read', 'finished scanning', path)
+      parserGauge.end()
+      gauge.verbose('flac.read', 'scanned', path)
       info.file = new AudioFile(path, info.stats, info.streamData)
 
       gauge.silly('flac.read', path, 'streamData', streamData)

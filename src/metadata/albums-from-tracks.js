@@ -25,10 +25,10 @@ function findCovers (list) {
       .forEach(c => {
         const directory = dirname(c.path)
         if (!covers.get(directory)) {
-          log.silly('populateImages', 'creating image list for', directory)
+          log.silly('findCovers', 'creating image list for', directory)
           covers.set(directory, [])
         }
-        log.silly('populateImages', 'cover', c)
+        log.silly('findCovers', 'cover', c.path)
         covers.get(directory).push(c)
       })
 
@@ -50,7 +50,7 @@ export default function albumsFromTracks (metadata) {
   }
 
   const finished = new Set()
-  log.verbose('albumsFromTracks', [...albums.keys()].length, 'albums', [...albums.keys()])
+  log.silly('albumsFromTracks', '' + [...albums.keys()].length, 'albums', [...albums.keys()])
   for (let album of albums.keys()) {
     let names = new Set()
     let artists = new Set()
@@ -104,7 +104,7 @@ export default function albumsFromTracks (metadata) {
         break
       case 1:
         artistName = minArtists[0]
-        log.verbose('albumsFromTracks', '1 artist found:', artistName)
+        log.silly('albumsFromTracks', '1 artist found:', artistName)
         break
       case 2:
         let [first, second] = minArtists
@@ -120,22 +120,22 @@ export default function albumsFromTracks (metadata) {
             artistName = second + ' / ' + first
           }
         }
-        log.warn('albumsFromTracks', '2 artists found; assuming split', artistName)
+        log.info('albumsFromTracks', '2 artists found; assuming split', artistName)
         break
       default:
-        log.warn('albumsFromTracks', 'many artists found; assuming compilation', minArtists)
+        log.info('albumsFromTracks', 'many artists found; assuming compilation', minArtists)
         artistName = 'Various Artists'
     }
     const artist = new Artist(artistName)
     const a = new Album(minNames[0], artist, { path: minDirs[0], tracks: [...tracks] })
     a.sourceArchive = archives.get(minArchism[0])
     a.date = minDates[0]
-    log.verbose('albumsFromTracks', 'looking up cover for', a.path, minDirs)
+    log.silly('albumsFromTracks', 'looking up cover for', a.path, minDirs)
     if (covers.get(a.path)) a.pictures = covers.get(a.path)
     for (let track of tracks) {
       track.album = a
     }
-    log.silly('albumsFromTracks', 'finished album', a)
+    log.silly('albumsFromTracks', 'finished album', a.dump ? a.dump() : a.name)
     finished.add(a)
   }
 

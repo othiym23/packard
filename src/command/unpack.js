@@ -25,9 +25,10 @@ const tmp = join(tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 
 export default function unpack (target = {}, staging, archiveRoot, playlist) {
   log.enableProgress()
-  log.silly('unpack', 'initial files', files)
 
   const { roots = [], pattern, files = [] } = target
+  log.silly('unpack', 'initial files', files)
+
   let paths
   if (roots.length && pattern) {
     paths = Bluebird.map(
@@ -78,7 +79,7 @@ export default function unpack (target = {}, staging, archiveRoot, playlist) {
     log.disableProgress()
     report(albums, staging)
     if (archiveRoot) reportArchived(albums)
-    log.verbose('removing', tmp)
+    log.silly('unpack', 'removing', tmp)
     return rimraf(tmp).return(albums)
   })
 
