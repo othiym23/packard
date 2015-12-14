@@ -104,14 +104,19 @@ function eye (path, tags) {
     findBin = findBin.then(function (bin) {
       return new Bluebird(function (resolve, reject) {
         exec(bin + ' --version', function (err, stdout, stderr) {
-          if (!err) return reject(new Error('expected error'))
-          if (err && err.code !== 1) return reject(err)
+          if (stderr.match(/^eyeD3 0\.7/) || stdout.match(/^eyeD3 0\.7/)) {
+            eyeV = 'v7'
+            return resolve(eyeV)
+          } else if (stderr.match(/^eyeD3 0\.6/) || stdout.match(/^eyeD3 0\.6/)) {
+            eyeV = 'v6'
+            return resolve(eyeV)
+          }
 
-          if (stderr.match(/^eyeD3 0\.7/)) eyeV = 'v7'
-          else eyeV = 'v6'
-          resolve(bin)
+          if (err) return reject(new Error('got unexpected result:', stderr))
+
+          reject(new Error("Don't know how to interpret: " + stdout + stderr))
         })
-      })
+      }).return(bin)
     })
   }
 
