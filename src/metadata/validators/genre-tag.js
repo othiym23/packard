@@ -7,6 +7,7 @@ const genres = new Set([
   'Ambient',
   'Avant-Garde',
   'Black Metal',
+  'Blues',
   'Death Metal',
   'Doom Metal',
   'Disco',
@@ -26,9 +27,11 @@ const genres = new Set([
   'IDM',
   'Indie',
   'Industrial',
+  'Jazz',
   'Jungle',
   'Juke',
   'Metal',
+  'Metalcore',
   'Noise',
   'Pop',
   'Post Rock',
@@ -44,7 +47,8 @@ const genres = new Set([
   'Spoken Word',
   'Techno',
   'UK Garage',
-  'UK Hardcore'
+  'UK Hardcore',
+  'Witch House'
 ])
 
 export default function validateGenreTag (track, warnings) {
