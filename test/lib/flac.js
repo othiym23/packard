@@ -20,7 +20,8 @@ var VENDOR = 'testing packard ' + version + ' ' + nowish
 var EMPTY_TRACK = join(__dirname, '../fixtures/empty.flac')
 
 function makeAlbum (root, tracks) {
-  return Bluebird.map(tracks, function (track) {
+  // FLACProcessor has internal state confused by concurrency
+  return Bluebird.mapSeries(tracks, function (track) {
     return mkdirp(dirname(track.file.path)).then(function () {
       return new Bluebird(function (resolve, reject) {
         var source = createReadStream(EMPTY_TRACK)
@@ -57,7 +58,7 @@ function makeAlbum (root, tracks) {
           .on('finish', function () { resolve(track.file.path) })
       })
     })
-  }, { concurrency: 1 }) // FLACProcessor has internal state confused by concurrency
+  })
 }
 
 module.exports = { makeAlbum: makeAlbum }

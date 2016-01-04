@@ -65,7 +65,7 @@ function tracksToArtists (tracks) {
 
 export default function scanArtists (roots, progressGroups = new Map()) {
   log.enableProgress()
-  return Bluebird.map(
+  return Bluebird.mapSeries(
     roots,
     root => {
       log.verbose('scanArtists', 'processing', root)
@@ -76,8 +76,7 @@ export default function scanArtists (roots, progressGroups = new Map()) {
       ).then(tracksToArtists)
 
       return artists.then(artists => [root, artists])
-    },
-    { concurrency: 1 }
+    }
   ).then(report)
 }
 
