@@ -5,8 +5,7 @@ node_js:
   - "iojs"
   - "4"
   - "5"
-# SIGH need sudo for APT installs, for now
-sudo: true
+sudo: false
 compiler: clang-3.6
 env:
   - CXX=g++-4.8
@@ -16,9 +15,9 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-4.8
+      - atomicparsley
+      - eyed3
 before_install:
-  - sudo apt-get install atomicparsley
-  - sudo apt-get install eyed3
   - eyeD3 --version
   - npm install -g npm@latest
 script: npm run-script coverage
