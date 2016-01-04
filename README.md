@@ -16,6 +16,7 @@ Usage: packard [options] <command>
 Commands:
   albums    generate a list of albums from roots
   artists   generate a list of artists from roots
+  audit     check metadata for inconsistencies
   inspect   dump all the metadata from a track or album
   optimize  find the best set of albums to pack a given capacity
   pls       print a list of albums as a .pls file, sorted by date
