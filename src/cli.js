@@ -53,8 +53,8 @@ switch (yargs.argv._[0]) {
                   return 'Must pass 1 or more audio files or directory trees.'
                 })
                 .argv
-    files = argv._.slice(1).map(f => untildify(f))
-    roots = (argv.R || []).map(r => untildify(r))
+    files = argv._.slice(1).map(untildify)
+    roots = (argv.R || []).map(untildify)
     log.silly('albums', 'argv', argv)
 
     command = albums(files, roots)
@@ -67,7 +67,7 @@ switch (yargs.argv._[0]) {
                   R: options.R
                 })
                 .argv
-    roots = argv.R.map(r => untildify(r))
+    roots = argv.R.map(untildify)
     log.silly('artists', 'argv', argv)
 
     command = artists(roots)
@@ -81,7 +81,7 @@ switch (yargs.argv._[0]) {
                   return 'must pass either 1 or more files containing metadata'
                 })
                 .argv
-    files = argv._.slice(1).map(f => untildify(f))
+    files = argv._.slice(1).map(untildify)
     log.silly('audit', 'argv', argv)
 
     command = audit(files)
@@ -92,7 +92,7 @@ switch (yargs.argv._[0]) {
                 .demand(2)
                 .argv
 
-    files = argv._.slice(1).map(f => untildify(f))
+    files = argv._.slice(1).map(untildify)
     log.silly('audit', 'argv', argv)
 
     command = inspect(files)
@@ -111,8 +111,8 @@ switch (yargs.argv._[0]) {
                   return 'Must pass 1 or more audio files or directory trees.'
                 })
                 .argv
-    files = argv._.slice(1).map(f => untildify(f))
-    roots = (argv.R || []).map(r => untildify(r))
+    files = argv._.slice(1).map(untildify)
+    roots = (argv.R || []).map(untildify)
     log.silly('optimize argv', argv)
 
     command = optimize(files, roots, argv.B, argv.O)
@@ -148,8 +148,8 @@ switch (yargs.argv._[0]) {
                   return 'Must pass either 1 or more zipfiles, or root and glob pattern.'
                 })
                 .argv
-    files = argv._.slice(1).map(f => untildify(f))
-    roots = (argv.R || []).map(r => untildify(r))
+    files = argv._.slice(1).map(untildify)
+    roots = (argv.R || []).map(untildify)
     log.silly('unpack argv', argv)
 
     command = unpack(
