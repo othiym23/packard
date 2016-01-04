@@ -5,6 +5,7 @@ var Bluebird = require('bluebird')
 var promisify = Bluebird.promisify
 var readFile = promisify(require('graceful-fs').readFile)
 var rimraf = promisify(require('rimraf'))
+var sprintf = require('sprintf')
 var test = require('tap').test
 
 var unpack = require('../lib/command/unpack.js').default
@@ -150,7 +151,7 @@ test('unpacking two albums and ensuring sort', function (t) {
   return unpackZip.then(function (albums) {
     console.log = _log
     t.equal(albums.size, 2, 'got 2 albums back')
-    t.match(output, /Testpressing 002.+Testpressing 005/)
+    t.match(output, /Testpressing #002.+Testpressing #005/)
   })
 })
 
@@ -204,7 +205,7 @@ test('unpacking two albums and ensuring sort with same date', function (t) {
   return unpackZip.then(function (albums) {
     console.log = _log
     t.equal(albums.size, 2, 'got 2 albums back')
-    t.match(output, /Testpressing 002.+Testpressing 005/)
+    t.match(output, /Testpressing #002.+Testpressing #005/)
   })
 })
 
@@ -329,21 +330,26 @@ test('unpacking and archiving a single-artist album with cruft', function (t) {
     t.equal(album.pictures.length, 1, 'album has a cover')
 
     var stagedPath = join(staging, 'Low', '[2015-09-11] Ones and Sixes')
-    var prefix = 'Low - Ones and Sixes - '
+    var infix = 'Low - Ones and Sixes - '
     var tracks = [
-      '01 - Gentle',
-      '02 - No Comprende',
-      '03 - Spanish Translation',
-      '04 - Congregation',
-      '05 - No End',
-      '06 - Into You',
-      '07 - What Part of Me',
-      '08 - The Innocents',
-      '09 - Kid In the Corner',
-      '10 - Lies',
-      '11 - Landslide',
-      '12 - DJ'
-    ].map(function (t) { return join(stagedPath, prefix + t + '.flac') })
+      'Gentle',
+      'No Comprende',
+      'Spanish Translation',
+      'Congregation',
+      'No End',
+      'Into You',
+      'What Part of Me',
+      'The Innocents',
+      'Kid In the Corner',
+      'Lies',
+      'Landslide',
+      'DJ'
+    ].map(function (t, i) {
+      return join(
+        stagedPath,
+        sprintf('%02d - %s%s.flac', i + 1, infix, t)
+      )
+    })
     tracks.forEach(function (unpacked) {
       t.doesNotThrow(statSync.bind(null, unpacked), 'track staged')
     })

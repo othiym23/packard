@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/othiym23/packard",
   "dependencies": {
-    "@packard/model": "^3.0.0",
+    "@packard/model": "^3.0.1",
     "aproba": "^1.0.1",
     "babel-polyfill": "^6.3.14",
     "bluebird": "^3.0.6",
