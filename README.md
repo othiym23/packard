@@ -19,6 +19,7 @@ Commands:
   audit     check metadata for inconsistencies
   inspect   dump all the metadata from a track or album
   optimize  find the best set of albums to pack a given capacity
+  pack      fill a volume with releases, optimally
   pls       print a list of albums as a .pls file, sorted by date
   unpack    unpack a set of zipped files into a staging directory
 
@@ -28,6 +29,40 @@ Options:
   -h, --help         Show help
   --version          Show version number
 ```
+
+### pack a volume with audio files
+
+```
+$ packard pack --to dest --from src [-R dir [file...]]
+```
+
+example run:
+
+```
+$ packard pack --to /Volumes/NEWER --from ~/Downloads/flac
+packed:
+/Volumes/UNSEELIE/flac/Neurosis/[2007-08-15] Live at Roadburn {31414 blocks}
+314513 512-byte blocks used on device, 2700817 remaining
+```
+
+Fill the volume containing the destination path with as many full releases as
+will fit from the target roots. `packard pack` does many things for you,
+including figuring out the filesystem allocation size per block on the target
+volume, how many blocks are free on the target volume, and what kind of audio
+files are in each release. It uses the same knapsack algorithm as `packard
+optimize`, and will, if packing files onto the same volume, use hard links
+instead of copying files to save space.
+
+For now, it uses a hardcoded naming spec for the written audio files, which
+looks like
+
+```
+01 - Artist - Album Name - Track Name.format
+```
+
+This convention is meant to make it easy to see who performed what, while at
+the same time ensuring that simpleminded audio players that use lexical sorting
+of track names to determine playback order play compilations correctly.
 
 ### unpack a set of zip files containing audio files
 
@@ -46,13 +81,13 @@ new albums from this run:
 full details:
 
 SHXCXCHCXSH/[2013] STRGTHS/
-   SHXCXCHCXSH - STRGTHS - 01 - SLVRBBL.flac
-   SHXCXCHCXSH - STRGTHS - 02 - LTTLWLF.flac
-   SHXCXCHCXSH - STRGTHS - 03 - RSRRCTN.flac
-   SHXCXCHCXSH - STRGTHS - 04 - LDWGWTT.flac
-   SHXCXCHCXSH - STRGTHS - 05 - PCTSTSS.flac
-   SHXCXCHCXSH - STRGTHS - 06 - WHTLGHT.flac
-   SHXCXCHCXSH - STRGTHS - 07 - LLDTMPS.flac
+   01 - SHXCXCHCXSH - STRGTHS - SLVRBBL.flac
+   02 - SHXCXCHCXSH - STRGTHS - LTTLWLF.flac
+   03 - SHXCXCHCXSH - STRGTHS - RSRRCTN.flac
+   04 - SHXCXCHCXSH - STRGTHS - LDWGWTT.flac
+   05 - SHXCXCHCXSH - STRGTHS - PCTSTSS.flac
+   06 - SHXCXCHCXSH - STRGTHS - WHTLGHT.flac
+   07 - SHXCXCHCXSH - STRGTHS - LLDTMPS.flac
 c: SHXCXCHCXSH/[2013] STRGTHS/cover.jpg
 (unpacked to /var/folders/bf/1f70gl7x2_g0s1dchcrw97xm0000gn/T/packard-fecf5c346649efb4/49901c567bc9ae3ba1ffa13358beec2e9e525950)
 

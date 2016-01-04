@@ -40,6 +40,11 @@ const options = {
   archiveRoot: {
     describe: "where to archive zip files once they've been unpacked"
   },
+  from: {
+    alias: 'from',
+    array: true,
+    describe: 'where to move tracks and albums from'
+  },
   loglevel: {
     describe: 'logging level',
     default: config.loglevel
@@ -47,6 +52,11 @@ const options = {
   playlist: {
     describe: 'create a playlist containing all of the unpacked albums',
     string: true
+  },
+  to: {
+    alias: 'to',
+    describe: 'root relative to which to start packing',
+    required: '- Must have a root to move files to.'
   }
 }
 

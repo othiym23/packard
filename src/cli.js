@@ -15,6 +15,7 @@ import artists from './command/artists.js'
 import audit from './command/audit.js'
 import inspect from './command/inspect.js'
 import optimize from './command/optimize.js'
+import pack from './command/pack.js'
 import pls from './command/pls.js'
 import unpack from './command/unpack.js'
 
@@ -25,6 +26,7 @@ const yargs = require('yargs')
                 .command('audit', 'check metadata for inconsistencies')
                 .command('inspect', 'dump all the metadata from a track or album')
                 .command('optimize', 'find the best set of albums to pack a given capacity')
+                .command('pack', 'fill a volume with releases, optimally')
                 .command('pls', 'print a list of albums as a .pls file, sorted by date')
                 .command('unpack', 'unpack a set of zipped files into a staging directory')
                 .options({
@@ -116,6 +118,20 @@ switch (yargs.argv._[0]) {
     log.silly('optimize argv', argv)
 
     command = optimize(files, roots, argv.B, argv.O)
+    break
+  case 'pack':
+    argv = yargs.reset()
+                .usage('Usage: $0 [options] pack --to dest --from src [-R dir [file...]]')
+                .options({
+                  B: options.B,
+                  R: options.from,
+                  s: options.to
+                })
+                .argv
+    roots = (argv.R || []).map(untildify)
+    log.silly('optimize argv', argv)
+
+    command = pack(roots, argv.s, argv.B)
     break
   case 'pls':
     options.R.required = '- Must have at least one tree to scan.'

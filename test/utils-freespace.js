@@ -2,15 +2,15 @@ var test = require('tap').test
 
 var Bluebird = require('bluebird')
 
-var freespace = require('../lib/utils/free-space.js').default
+var freeBlocksFromPath = require('../lib/utils/free-space.js').default
 
 test('missing path', function (t) {
-  t.throws(freespace)
+  t.throws(freeBlocksFromPath)
   t.end()
 })
 
 test('basic contract', function (t) {
-  return freespace('.')
+  return freeBlocksFromPath('.')
     .then(function (f) {
       t.isa(f.dev, 'string')
       t.isa(f.total, 'number')
@@ -24,8 +24,22 @@ test('basic contract', function (t) {
     })
 })
 
+test('weird block size', function (t) {
+  // freeBlocksFromPath throws synchronously on unsupported input, so put the
+  // call in the promise box first
+  return Bluebird.resolve(['.', -1]).spread(freeBlocksFromPath)
+    .then(function () {
+      t.fail("shouldn't have worked")
+    })
+    .catch(function (err) {
+      t.match(err.message, 'expect confirmation of block size')
+    })
+})
+
 test('extra-universe platform', function (t) {
-  return Bluebird.resolve(['.', 'BeOS']).spread(freespace)
+  // freeBlocksFromPath throws synchronously on unsupported input, so put the call in
+  // the promise box first
+  return Bluebird.resolve(['.', undefined, 'BeOS']).spread(freeBlocksFromPath)
     .then(function () {
       t.fail("shouldn't have worked")
     })

@@ -17,6 +17,7 @@ Commands:
   audit     check metadata for inconsistencies
   inspect   dump all the metadata from a track or album
   optimize  find the best set of albums to pack a given capacity
+  pack      fill a volume with releases, optimally
   pls       print a list of albums as a .pls file, sorted by date
   unpack    unpack a set of zipped files into a staging directory
 
