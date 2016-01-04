@@ -42,6 +42,7 @@ export default function albumsFromTracks (metadata) {
   const albums = new Map()
   const tracks = metadata.filter(getID)
   const covers = findCovers(metadata)
+  log.silly('albumsFromTracks', 'covers', covers)
   log.silly('albumsFromTracks', tracks.length, 'tracks')
   for (let track of tracks) {
     const id = getID(track)
