@@ -4,8 +4,43 @@
 # packard
 
 Optimize the storage of media files on fixed-size storage volumes. Currently
-supports FLAC files with Vorbis comments, AAC files in QuickTime containers
-(`.m4a` files), and MP3 files with ID3v2 tags.
+supports MPEG 2, layer 3 files with ID3v2 tags (`.mp3` files), FLAC files with
+Vorbis comments (`.flac` files), and AAC files in QuickTime containers (`.m4a`
+files).
+
+## motivation
+
+About a year ago, I read about the then-new
+[Sony Walkman ZX2](http://www.sony.com/electronics/walkman/nw-zx2). It had just
+been announced at the 2015 CES expo, and as someone who's always had a pretty
+obsessive relationship with music, it was something that really interested me.
+However, the reviews of [its predecessor](http://www.amazon.com/dp/B00FF071I4)
+made clear that it didn't really live up to the hype – your money mostly is
+paying for a fancy Android skin with a slick display, and the audio components
+were no better than what you would find in an iPhone or high-end Android phone.
+
+Poking around on internet forums led me to believe that I could spend an
+equivalent amount of money (~US$1K) on a dedicated audio player with
+high-quality components that could natively play back high-resolution (24-bit /
+96KHz) lossless audio. _Orrrrrrrr_ I could spend under $100 for a
+[Sansa Clip Zip](http://www.amazon.com/dp/B005FVNGRS) and a couple
+[64GB micro SDXC cards](http://www.amazon.com/dp/B00IVPU7AO) and put
+[Rockbox](http://www.rockbox.org/) on it. The Sansa Clip Zip is tiny, it has an
+excellent SOC DAC and amplifier that can play back high-resolution FLAC files,
+and Rockbox is a powerful software suite and only a little gratuitously weird,
+in a Linuxy way. So I did that.
+
+The point of all this was high audio quality in a small package, so of course I
+was going to listen to FLACs on it. But FLAC files are big! And I listen to a
+lot of different stuff! So I needed a tool that understood what complete
+releases looked like, could read the various tagging and audio formats used by
+my audio files, and could move releases as units onto a device.
+
+That is what packard is for. Right now it's kind of a grab bag as I assemble
+the various pieces of the tool together, but the idea is that eventually it
+will be a full-fledged utility for slicing and dicing large audio collections
+and managing the interface between those collections and much smaller, portable
+devices.
 
 ## usage
 
@@ -120,7 +155,7 @@ Options:
 * `--archive-root`: Where to put zip files after extraction. Files in
   `archive-root` will not be unpacked or moved.
 
-### optimally pack a set of albums onto a storage device
+### display how a set of releases would be optimally packed
 
 ```
 $ packard [options] optimize -O blocks [-R dir [file...]]
