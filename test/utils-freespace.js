@@ -32,7 +32,7 @@ test('weird block size', function (t) {
       t.fail("shouldn't have worked")
     })
     .catch(function (err) {
-      t.match(err.message, 'expect confirmation of block size')
+      t.ok(err.message, 'complains about block size being invalid')
     })
 })
 
