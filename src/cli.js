@@ -36,6 +36,7 @@ const yargs = require('yargs')
                 .help('h')
                 .alias('h', 'help')
                 .version(() => require('../package').version)
+                .env('PACKARD')
                 .demand(1)
 
 log.level = yargs.argv.loglevel
@@ -49,6 +50,7 @@ switch (yargs.argv._[0]) {
                 .options({
                   R: options.R
                 })
+                .env('PACKARD')
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
@@ -68,6 +70,7 @@ switch (yargs.argv._[0]) {
                 .options({
                   R: options.R
                 })
+                .env('PACKARD')
                 .argv
     roots = argv.R.map(untildify)
     log.silly('artists', 'argv', argv)
@@ -77,6 +80,7 @@ switch (yargs.argv._[0]) {
   case 'audit':
     argv = yargs.reset()
                 .usage('Usage: $0 audit [file [file...]]')
+                .env('PACKARD')
                 .check(argv => {
                   if (argv._.length > 1) return true
 
@@ -91,6 +95,7 @@ switch (yargs.argv._[0]) {
   case 'inspect':
     argv = yargs.reset()
                 .usage('Usage: $0 [options] inspect [file [dir...]]')
+                .env('PACKARD')
                 .demand(2)
                 .argv
 
@@ -107,6 +112,7 @@ switch (yargs.argv._[0]) {
                   O: options.O,
                   R: options.R
                 })
+                .env('PACKARD')
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
@@ -127,6 +133,7 @@ switch (yargs.argv._[0]) {
                   R: options.from,
                   s: options.to
                 })
+                .env('PACKARD')
                 .argv
     roots = (argv.R || []).map(untildify)
     log.silly('optimize argv', argv)
@@ -140,6 +147,7 @@ switch (yargs.argv._[0]) {
                 .options({
                   R: options.R
                 })
+                .env('PACKARD')
                 .argv
     roots = argv.R.map(r => untildify(r))
     log.silly('pls', 'argv', argv)
@@ -158,6 +166,7 @@ switch (yargs.argv._[0]) {
                   'archive-root': options.archiveRoot,
                   playlist: options.playlist
                 })
+                .env('PACKARD')
                 .check(argv => {
                   if (argv._.length > 1 || (argv.R && argv.R.length && argv.P)) return true
 
