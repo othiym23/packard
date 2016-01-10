@@ -1,23 +1,26 @@
 language: node_js
 node_js:
-  - "0.10"
-  - "0.12"
-  - "iojs"
-  - "4"
-  - "5"
+- '0.10'
+- '0.12'
+- iojs
+- '4'
+- '5'
 sudo: false
 compiler: clang-3.6
 env:
-  - CXX=g++-4.8
+- CXX=g++-4.8
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
+    - ubuntu-toolchain-r-test
     packages:
-      - g++-4.8
-      - atomicparsley
-      - eyed3
+    - g++-4.8
+    - atomicparsley
+    - eyed3
 before_install:
-  - eyeD3 --version
-  - npm install -g npm@latest
+- eyeD3 --version
+- npm install -g npm@latest
 script: npm run-script coverage
+notifications:
+  slack:
+    secure: XAEjwL0z+Wp0CRiHqJhovCvIhe2rFePUJlSOtqKKsmN1tqLq5bw3uNwgbp0wuQA0313WpHhZCkv8Pic6VJMA9hmxGd2KnYbVGxTgAdl6px4mab9sMC8mTmHvG0qQ2g4YpqkLUY8F2yUjHjd9rR1qgFX8jxB8GKYXDX2/Ps6qYio=
