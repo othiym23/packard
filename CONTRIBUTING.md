@@ -9,12 +9,12 @@ what it can currently do.
 ## Prerequisites for developers
 
 - If you're using Node.js 4 or greater, you'll need a C++ compiler that
-  complies to C++11 in order to build the small number of native modules this
+  compiles to C++11 in order to build the small number of native modules this
   project uses. Right now, the only direct dependency is on @bnoordhuis's
   `buffertools`.
 - The MP3 tests require `eyeD3`, a python tool for inspecting and setting
   metadata, to be on your path. There isn't a reliable tool that I've found for
-  writing ID3v2 tags in pure JS, and long experience with `id3lib` has led me
+  writing ID3v2 tags in pure JS, and long experience with `id3lib` has left me
   disinclined to use anything that binds to it. I've tried to integrate it in
   such a way that it will Just Work if it's on your path on Windows, and you
   should be able to get away with any version of eyeD3 0.6 or higher.
