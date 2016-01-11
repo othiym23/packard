@@ -1,6 +1,6 @@
 {
   "name": "packard",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
   "description": "many music files onto few devices",
   "main": "lib/cli.js",
