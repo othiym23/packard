@@ -1,8 +1,8 @@
-### under development (????-??-??)
+### 3.2.0 (2016-01-10):
 
 #### `packard pack`
 
-This command is the whole reason I started writing this tool last February. You give it a set of files and file tree roots, and it finds the albums on those roots. Then it figures out the block size and the blocks free on the destination path you point it towards, and then figures how it can most efficiently pack a subset of the albums into the available space on that device. It uses a number of tricks, some of which are probably too tricky for its own good, but I'm using it now, and while it needs refinement, it's pretty much exactly what I hoped it would be. More complete docs are in the README.
+This command is the whole reason I started writing this tool last February. You give it a set of files and file tree roots, and it assembles all of the found files into albums. Then it figures out the block size and the blocks free on the destination path you point it towards, and then figures how it can most efficiently pack a subset of the albums into the available space on that device. It uses a number of tricks, some of which are probably too tricky for its own good, but I'm using it now, and while it needs refinement, it's pretty much exactly what I hoped it would be. More complete docs are in `README.md`.
 
 * [`f1f4a16`](https://github.com/othiym23/packard/commit/f1f4a1652debb8feeb767e078a1dc20e11fac5b2) `pack`: Add a command to fill a volume with releases, optimally. ([@othiym23](https://github.com/othiym23))
 * [`18db393`](https://github.com/othiym23/packard/commit/18db3931aa44865524794ba01a80f627de548663) Calculate the space free on a volume by calling `df` (TBD: figure out how to do this from the CLI on Windows). ([@othiym23](https://github.com/othiym23))
