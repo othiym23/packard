@@ -1,3 +1,12 @@
+### 3.2.1 (2016-04-02):
+
+* [`daae751`](https://github.com/othiym23/packard/commit/daae75194567a71e118b1a2f8069d1e85f0b4f6b) `yargs@4` now always includes `--help` and `--version` as options for subcommands. ([@bcoe](https://github.com/bcoe))
+
+#### `packard pack`
+
+* [`8f08595`](https://github.com/othiym23/packard/commit/8f0859591d31d51ce46efec0857f121913bd27fb) Move files when linking them fails on volumes that don't support hard links, and don't overwrite existing files. ([@othiym23](https://github.com/othiym23))
+* [`01c351a`](https://github.com/othiym23/packard/commit/01c351af0f20debf8da91363faa0e386bb509ec4) Use the correct capacity when optimizing the list of releases for the volume to be packed. ([@othiym23](https://github.com/othiym23))
+
 ### 3.2.0 (2016-01-10):
 
 #### `packard pack`
