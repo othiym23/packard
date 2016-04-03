@@ -54,7 +54,7 @@
     "rimraf": "^2.4.2",
     "sprintf": "^0.1.5",
     "untildify": "^2.1.0",
-    "yargs": "^3.31.0",
+    "yargs": "^4.3.2",
     "yauzl": "^2.3.1"
   },
   "devDependencies": {

@@ -18,6 +18,8 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
+  -h, --help      Show help  [boolean]
+  --version       Show version number  [boolean]
   -R, --root      root directory containing zipped files  [array]
   -P, --pattern   bash glob pattern used to match files under root
   -s, --staging   where to create the tree for unpacked artists  [required]

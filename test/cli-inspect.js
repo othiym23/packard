@@ -17,6 +17,10 @@ var r = relative(process.cwd(), p)
 
 var lines = function () { /*
 
+Options:
+  -h, --help  Show help  [boolean]
+  --version   Show version number  [boolean]
+
 Not enough non-option arguments: got 1, need at least 2
 */ }.toString().split('\n').slice(1, -1)
 

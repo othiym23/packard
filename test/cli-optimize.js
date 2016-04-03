@@ -17,6 +17,8 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
+  -h, --help              Show help  [boolean]
+  --version               Show version number  [boolean]
   -B, --block-size        size of blocks on target volume  [default: 512]
   -O, --optimal-capacity  size of target volume, in blocks  [required]
   -R, --root              directory root for an Artist/Album tree  [array]

@@ -17,6 +17,8 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
+  -h, --help  Show help  [boolean]
+  --version   Show version number  [boolean]
   -R, --root  directory root for an Artist/Album tree  [array] [required]
 
 Missing required argument: R

@@ -17,6 +17,10 @@ var r = relative(process.cwd(), p)
 
 var lines = function () { /*
 
+Options:
+  -h, --help  Show help  [boolean]
+  --version   Show version number  [boolean]
+
 must pass either 1 or more files containing metadata
 */ }.toString().split('\n').slice(1, -1)
 

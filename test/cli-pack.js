@@ -17,6 +17,8 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
+  -h, --help        Show help  [boolean]
+  --version         Show version number  [boolean]
   -B, --block-size  size of blocks on target volume  [default: 512]
   -R, --from        where to move tracks and albums from  [array]
   -s, --to          root relative to which to start packing  [required]

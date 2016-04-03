@@ -17,6 +17,8 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
+  -h, --help  Show help  [boolean]
+  --version   Show version number  [boolean]
   -R, --root  directory root for an Artist/Album tree  [array]
 
 Must pass 1 or more audio files or directory trees.
@@ -36,7 +38,7 @@ test('setup', function (t) {
   })
 })
 
-test('packard artists', function (t) {
+test('packard albums', function (t) {
   var expected = [prolog].concat(lines).join('\n')
   cli.pnixt()
     .run('node ' + p + ' albums')
@@ -54,7 +56,7 @@ test('packard artists', function (t) {
     })
 })
 
-test('packard artists -R ' + root, function (t) {
+test('packard albums -R ' + root, function (t) {
   rimraf(root).then(function () {
     return metadata.makeAlbum(
       albumRoot,
