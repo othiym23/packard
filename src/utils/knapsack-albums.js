@@ -2,6 +2,7 @@ import log from 'npmlog'
 import { resolve as optimize } from 'knapsack-js'
 
 export default function knapsackForAlbums (albums, capacity, blockSize) {
+  log.verbose('knapsackForAlbums', 'capacity', capacity, 'blockSize', blockSize)
   const albumList = [...albums]
   // used for displaying report
   const al = albumList.reduce((c, a) => c.set(a.path, a), new Map())

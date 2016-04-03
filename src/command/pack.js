@@ -30,7 +30,7 @@ export default function pack (sources, destination, blockSize) {
 
   return sizeDestination.spread((blockBytes, { available }) => {
     return scanAlbums(sources, progressGroups).then((albums) => {
-      const { included, discarded } = optimize(albums, available, blockSize)
+      const { included, discarded } = optimize(albums, available, blockBytes)
 
       let usedBlocks = 0
       for (let album of included.sort(bySize)) {
