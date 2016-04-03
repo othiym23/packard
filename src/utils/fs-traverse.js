@@ -1,15 +1,15 @@
 import fs from 'graceful-fs'
-import { basename, resolve } from 'path'
+import { resolve } from 'path'
 
 import { promisify } from 'bluebird'
 
-import cruft from './cruft.js'
+import isCruft from './cruft.js'
 
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
 
 export default function traverse (path, visit) {
-  if (cruft.has(basename(path))) return
+  if (isCruft(path)) return
 
   return stat(path).then((stats) => {
     if (stats.isDirectory()) {

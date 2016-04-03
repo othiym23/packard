@@ -1,5 +1,7 @@
 import 'babel-polyfill'
 
+import { basename } from 'path'
+
 const cruft = new Set([
   '.DS_Store',    // OS X metadata is very cluttery
   '.AppleDouble', // see above
@@ -9,4 +11,7 @@ const cruft = new Set([
   '.Parent'       // I have no idea
 ])
 
-export default cruft
+export default function isCruft (path) {
+  if (basename(path || '').indexOf('._') === 0) return true
+  return cruft.has(basename(path))
+}

@@ -8,7 +8,7 @@ import validate from 'aproba'
 import Bluebird from 'bluebird'
 import { open as openZip } from 'yauzl'
 
-import cruft from './cruft.js'
+import isCruft from './cruft.js'
 import reader from '../metadata/reader.js'
 import { Archive } from '@packard/model'
 
@@ -65,7 +65,7 @@ export function unpack (archivePath, progressGroups, targetPath) {
         const filename = basename(entry.fileName)
         if (/\/$/.test(entry.fileName)) {
           examined('skipped directory', entry.fileName)
-        } else if (cruft.has(filename) || cruft.has(entry.fileName.split('/')[0])) {
+        } else if (isCruft(filename) || isCruft(entry.fileName.split('/')[0])) {
           examined('skipped cruft', entry.fileName)
         } else {
           progressGroups.set(filename, gauge.newGroup('extract: ' + entry.fileName))
