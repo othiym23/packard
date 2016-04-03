@@ -3,6 +3,7 @@ import { createReadStream, createWriteStream, link as linkCB } from 'graceful-fs
 
 import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
+import mvCB from 'mv'
 import Bluebird from 'bluebird'
 
 import blockSizeFromPath from '../utils/block-size.js'
@@ -14,6 +15,7 @@ import { scanAlbums } from './albums.js'
 import { promisify } from 'bluebird'
 const link = promisify(linkCB)
 const mkdirp = promisify(mkdirpCB)
+const mv = Bluebird.promisify(mvCB)
 
 const progressGroups = new Map()
 
@@ -110,6 +112,12 @@ function copyTrack (track, destination) {
   })
 }
 
+function moveTrack (track, destination) {
+  return mv(track.file.path, destination).then(() => {
+    track.file.path = destination
+  })
+}
+
 function linkOrCopyTrack (track, folder) {
   const destination = join(folder, track.safeName())
   return link(
@@ -118,10 +126,21 @@ function linkOrCopyTrack (track, folder) {
   ).then(() => {
     log.verbose('linkOrCopyTrack', 'linked', track.file.path, 'to', destination)
   }).catch(
+    { code: 'EEXIST' },
+    () => {
+      log.warn('linkOrCopyTrack', 'not overwriting', destination)
+    }
+  ).catch(
     { code: 'EXDEV' },
     () => {
       log.silly('linkOrCopyTrack', "can't link", track.file.path, 'to', destination)
       return copyTrack(track, destination)
+    }
+  ).catch(
+    { code: 'ENOTSUP' },
+    () => {
+      log.silly('linkOrCopyTrack', "can't link", track.file.path, 'to', destination)
+      return moveTrack(track, destination)
     }
   )
 }
