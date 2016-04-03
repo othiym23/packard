@@ -9,7 +9,7 @@ var test = require('tap').test
 var p = resolve(__dirname, '../lib/cli.js')
 var r = relative(process.cwd(), p)
 
-var lines = function () {/*
+var lines = function () { /*
 
 Commands:
   albums    generate a list of albums from roots
@@ -28,7 +28,7 @@ Options:
   --version          Show version number  [boolean]
 
 Not enough non-option arguments: got 0, need at least 1
-*/}.toString().split('\n').slice(1, -1)
+*/ }.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: ' + r + ' [options] <command>'
 

@@ -9,10 +9,10 @@ import { byDate, bySize } from '../utils/sort.js'
 export function scanAlbums (roots, progressGroups = new Map()) {
   return Bluebird.map(
     roots,
-    root => {
+    (root) => {
       log.verbose('scanAlbums', 'processing', root)
       return readFSMetadata(root).map(
-        info => scan(info, progressGroups),
+        (info) => scan(info, progressGroups),
         { concurrency: 2 }
       )
     },
@@ -25,10 +25,10 @@ export default function showAlbums (files = [], roots = [], progressGroups) {
   roots = files.concat(roots)
   log.silly('showAlbums', 'scanning', roots)
 
-  const sorted = scanAlbums(roots, progressGroups).then(albums => {
+  const sorted = scanAlbums(roots, progressGroups).then((albums) => {
     log.silly('scanAlbums', 'albums', albums)
     const sorted = [...albums].sort(byDate)
-    log.silly('scanAlbums', 'sorted', sorted.map(a => '[' + a.date + '] ' + a.name))
+    log.silly('scanAlbums', 'sorted', sorted.map((a) => '[' + a.date + '] ' + a.name))
 
     log.disableProgress()
     return sorted

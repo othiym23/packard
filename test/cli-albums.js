@@ -14,13 +14,13 @@ var metadata = require('./lib/metadata.js')
 var p = join(__dirname, '../lib/cli.js')
 var r = relative(process.cwd(), p)
 
-var lines = function () {/*
+var lines = function () { /*
 
 Options:
   -R, --root  directory root for an Artist/Album tree  [array]
 
 Must pass 1 or more audio files or directory trees.
-*/}.toString().split('\n').slice(1, -1)
+*/ }.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: ' + r + ' [options] albums [-R dir [file...]]'
 

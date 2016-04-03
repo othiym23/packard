@@ -103,7 +103,7 @@ export default function reader (info, progressGroups, onFinish, onError) {
     return _emit.apply(this, arguments)
   }
   addTagListeners(parser, rawTags)
-  parser.on('TXXX', frame => textFrames.push(frame))
+  parser.on('TXXX', (frame) => textFrames.push(frame))
 
   return throughWatcher
 }
@@ -116,7 +116,9 @@ function chunkFramesIntoTags (frames, tags) {
 }
 
 function addTagListeners (parser, tags) {
-  for (let map of [typeToStreamData, typeToTag, typeToMB])
-    for (let [type] of map)
-      parser.on(type, v => tags.set(type, v))
+  for (let map of [typeToStreamData, typeToTag, typeToMB]) {
+    for (let [type] of map) {
+      parser.on(type, (v) => tags.set(type, v))
+    }
+  }
 }

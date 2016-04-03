@@ -10,10 +10,10 @@ export default function inspect (files) {
   log.silly('inspect', 'files', files)
 
   log.enableProgress()
-  return Bluebird.map(files, path => {
+  return Bluebird.map(files, (path) => {
     progressGroups.set(basename(path), log.newGroup(path))
     return scan({ path }, progressGroups)
-  }).then(track => {
+  }).then((track) => {
     log.disableProgress()
     console.log(JSON.stringify(track, null, 2))
   })

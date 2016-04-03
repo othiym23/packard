@@ -61,15 +61,15 @@ export default function freeBlocksFromPath (path, blockBytes, platform = process
   switch (platform) {
     case 'darwin':
       const env = Object.create(process.env)
-      return command.then(bytes => {
+      return command.then((bytes) => {
         env.BLOCKSIZE = bytes
         return exec('df ' + path, { env })
-          .then(output => parsePOSIX(output, bytes, platform))
+          .then((output) => parsePOSIX(output, bytes, platform))
       })
     case 'linux':
       return command
-        .then(bytes => exec('df -B ' + bytes + ' ' + path)
-          .then(blocks => parsePOSIX(blocks, bytes, platform)))
+        .then((bytes) => exec('df -B ' + bytes + ' ' + path)
+          .then((blocks) => parsePOSIX(blocks, bytes, platform)))
     default:
       throw new Error(
         'Not yet implemented for ' + platform +

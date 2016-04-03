@@ -15,10 +15,10 @@ var metadata = require('./lib/metadata.js')
 var p = join(__dirname, '../lib/cli.js')
 var r = relative(process.cwd(), p)
 
-var lines = function () {/*
+var lines = function () { /*
 
 must pass either 1 or more files containing metadata
-*/}.toString().split('\n').slice(1, -1)
+*/ }.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: ' + r + ' audit [file [file...]]'
 

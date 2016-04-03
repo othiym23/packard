@@ -15,7 +15,7 @@ var zip = require('./lib/zip.js')
 var p = join(__dirname, '../lib/cli.js')
 var r = relative(process.cwd(), p)
 
-var lines = function () {/*
+var lines = function () { /*
 
 Options:
   -R, --root      root directory containing zipped files  [array]
@@ -27,7 +27,7 @@ Options:
 
 Missing required argument: s
 - Must have a place to put unpacked files.
-*/}.toString().split('\n').slice(1, -1)
+*/ }.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: ' + r + ' [options] unpack [zipfile [zipfile...]]'
 

@@ -16,10 +16,13 @@ import {
 
 export function flatten (artists) {
   const info = new Set()
-  for (let fsArtist of artists)
-    for (let fsAlbum of fsArtist.albums)
-      for (let fsTrack of (fsAlbum.tracks || []))
+  for (let fsArtist of artists) {
+    for (let fsAlbum of fsArtist.albums) {
+      for (let fsTrack of (fsAlbum.tracks || [])) {
         info.add({ fsArtist, fsAlbum, fsTrack, path: fsTrack.file.path })
+      }
+    }
+  }
 
   return info
 }
@@ -44,13 +47,13 @@ function readAlbums (root) {
     extractTypeFromTree(
       Cover,
       tree,
-      e => covers.set(basename(e.path, extname(e.path)), e)
+      (e) => covers.set(basename(e.path, extname(e.path)), e)
     )
     log.silly('readAlbums', 'covers', covers)
     extractTypeFromTree(
       Cuesheet,
       tree,
-      e => cues.set(basename(e.path, extname(e.path)), e)
+      (e) => cues.set(basename(e.path, extname(e.path)), e)
     )
     log.silly('readAlbums', 'cuesheets', cues)
 
@@ -150,7 +153,7 @@ function readAlbums (root) {
 }
 
 export function readArtists (root) {
-  return readAlbums(root).then(albums => {
+  return readAlbums(root).then((albums) => {
     const artists = new Map()
 
     for (let album of albums) {

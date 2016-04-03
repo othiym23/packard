@@ -54,7 +54,7 @@ export function unpack (archivePath, progressGroups, targetPath) {
       archive.on('entry', enqueue)
       archive.on('end', () => {
         gauge.verbose('unzip.enqueue', 'finished scanning archive table of contents')
-        Bluebird.all(entries).then(extracted => {
+        Bluebird.all(entries).then((extracted) => {
           gauge.verbose('unzip', 'extracted', extracted.length, 'files from', archivePath)
           resolve(extracted)
         })

@@ -25,19 +25,9 @@ test('audit track with everything set', function (t) {
   var warnings = auditTrack(
     new Track(
       'A Name',
-      new Album(
-        'An Album',
-        new Artist('An Artist')
-      ),
-      new Artist(
-        'An Artist'
-      ),
-      {
-        tags: {
-          genre: 'Dubstep'
-        },
-        date: '2015-11-27'
-      }
+      new Album('An Album', new Artist('An Artist')),
+      new Artist('An Artist'),
+      { tags: { genre: 'Dubstep' }, date: '2015-11-27' }
     )
   )
   t.same(warnings, [], 'got no warnings')

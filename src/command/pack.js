@@ -23,13 +23,13 @@ export default function pack (sources, destination, blockSize) {
   const getBlockSize = blockSizeFromPath(destination)
 
   const sizeDestination = getBlockSize
-    .then(blockBytes => [
+    .then((blockBytes) => [
       blockBytes,
       freeBlocksFromPath(destination, blockBytes)
     ]).all()
 
   return sizeDestination.spread((blockBytes, { available }) => {
-    return scanAlbums(sources, progressGroups).then(albums => {
+    return scanAlbums(sources, progressGroups).then((albums) => {
       const { included, discarded } = optimize(albums, available, blockSize)
 
       let usedBlocks = 0
@@ -63,7 +63,7 @@ export default function pack (sources, destination, blockSize) {
       return partition(included)
         .mapSeries(([type, albums]) => copyTracks(destination, type, albums, blockBytes))
         .then(
-          byType => freeBlocksFromPath(destination, blockBytes)
+          (byType) => freeBlocksFromPath(destination, blockBytes)
             .then((sizes) => {
               log.disableProgress()
               log.verbose('pack', '%d blocks left over when done', sizes.available)
@@ -127,13 +127,13 @@ function linkOrCopyTrack (track, folder) {
 }
 
 function copyTracks (destination, type, albums) {
-  return Bluebird.mapSeries(albums, album => {
+  return Bluebird.mapSeries(albums, (album) => {
     const folder = join(destination, type, album.toSafePath())
     log.silly('copyTracks', 'creating folder', folder)
     return mkdirp(folder)
       .then(() => Bluebird.mapSeries(
         album.tracks,
-        track => linkOrCopyTrack(track, folder)
+        (track) => linkOrCopyTrack(track, folder)
       ))
   }).return({ type, albums })
 }
@@ -141,8 +141,9 @@ function copyTracks (destination, type, albums) {
 function report (root, byType, sizes, blockBytes) {
   console.log('packed:')
   const byPath = new Map()
-  for (let { type, albums } of [].concat(...byType))
+  for (let { type, albums } of [].concat(...byType)) {
     for (let album of albums) byPath.set(resolve(root, type, album.toSafePath()), album)
+  }
 
   for (let [path, album] of [...byPath].sort((a, b) => a[0].localeCompare(b[0]))) {
     console.log('%s {%d blocks}', path, album.getSize(blockBytes))

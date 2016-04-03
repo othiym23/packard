@@ -13,7 +13,7 @@ function safe (string) {
 
 function albumsIntoArtistTracks (albums) {
   const artistTracks = new Map()
-  for (let album of albums)
+  for (let album of albums) {
     for (let track of album.tracks) {
       let saved = safe(track.artist.name)
       if (saved !== album.artist) {
@@ -25,6 +25,7 @@ function albumsIntoArtistTracks (albums) {
         artistTracks.get(track.artist.name).add(track)
       }
     }
+  }
 
   log.verbose('albumsIntoArtistTracks', 'artists', [...artistTracks.keys()].sort(byLocale))
   return artistTracks
@@ -67,15 +68,15 @@ export default function scanArtists (roots, progressGroups = new Map()) {
   log.enableProgress()
   return Bluebird.mapSeries(
     roots,
-    root => {
+    (root) => {
       log.verbose('scanArtists', 'processing', root)
 
       const artists = readFSMetadata(root).map(
-        info => scan(info, progressGroups),
+        (info) => scan(info, progressGroups),
         { concurrency: 2 }
       ).then(tracksToArtists)
 
-      return artists.then(artists => [root, artists])
+      return artists.then((artists) => [root, artists])
     }
   ).then(report)
 }

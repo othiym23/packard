@@ -8,7 +8,7 @@ export default function audit (roots) {
 
   log.enableProgress()
   return scanAlbums(roots)
-    .then(albums => {
+    .then((albums) => {
       log.disableProgress()
       log.silly('audit', 'albums', albums)
       for (let album of albums) {

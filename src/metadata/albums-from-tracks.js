@@ -21,8 +21,8 @@ function getID ({ fsAlbum, tags, album }) {
 
 function findCovers (list) {
   const covers = new Map()
-  list.filter(e => e instanceof Cover)
-      .forEach(c => {
+  list.filter((e) => e instanceof Cover)
+      .forEach((c) => {
         const directory = dirname(c.path)
         if (!covers.get(directory)) {
           log.silly('findCovers', 'creating image list for', directory)

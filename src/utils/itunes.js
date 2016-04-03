@@ -1,5 +1,5 @@
 export function parseGapless (data) {
-  const parsed = data.trim().split(' ').map(v => parseInt(v, 16))
+  const parsed = data.trim().split(' ').map((v) => parseInt(v, 16))
   return {
     encoderDelaySamples: parsed[1],
     endPaddingSamples: parsed[2],
@@ -9,7 +9,7 @@ export function parseGapless (data) {
 }
 
 export function parseNormalization (data) {
-  const parsed = data.trim().split(' ').map(v => parseInt(v, 16))
+  const parsed = data.trim().split(' ').map((v) => parseInt(v, 16))
   return {
     adjustment1000L: parsed[0],
     adjustment1000R: parsed[1],

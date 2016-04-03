@@ -7,7 +7,7 @@ import { scanAlbums } from './albums.js'
 export default function pls (roots) {
   log.enableProgress()
   return scanAlbums(roots)
-    .then(albums => {
+    .then((albums) => {
       log.disableProgress()
       console.log(makePlaylist([...albums].sort(byDate)))
     })

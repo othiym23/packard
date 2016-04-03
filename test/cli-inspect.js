@@ -15,10 +15,10 @@ var metadata = require('./lib/metadata.js')
 var p = join(__dirname, '../lib/cli.js')
 var r = relative(process.cwd(), p)
 
-var lines = function () {/*
+var lines = function () { /*
 
 Not enough non-option arguments: got 1, need at least 2
-*/}.toString().split('\n').slice(1, -1)
+*/ }.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: ' + r + ' [options] inspect [file [dir...]]'
 

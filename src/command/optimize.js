@@ -13,7 +13,7 @@ export default function optimizeAlbums (
   log.enableProgress()
   log.silly('optimizeAlbums', 'entities', entities)
   return scanAlbums(entities)
-    .then(albums => {
+    .then((albums) => {
       log.disableProgress()
       calculate([...albums], blockSize, capacity)
     })

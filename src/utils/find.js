@@ -6,6 +6,6 @@ export default function find (entries) {
   const files = new Set()
   return Bluebird.map(
     entries,
-    e => traverse(e, p => files.add(p))
+    (e) => traverse(e, (p) => files.add(p))
   ).return(files)
 }

@@ -11,11 +11,11 @@ const stat = promisify(fs.stat)
 export default function traverse (path, visit) {
   if (cruft.has(basename(path))) return
 
-  return stat(path).then(stats => {
+  return stat(path).then((stats) => {
     if (stats.isDirectory()) {
       return readdir(path)
-               .map(e => traverse(resolve(path, e), visit))
-               .filter(e => e)
+               .map((e) => traverse(resolve(path, e), visit))
+               .filter((e) => e)
     } else if (stats.isFile()) {
       return visit(path, stats)
     } else {

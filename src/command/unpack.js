@@ -33,12 +33,12 @@ export default function unpack (target = {}, staging, archiveRoot, playlist) {
   if (roots.length && pattern) {
     paths = Bluebird.map(
       roots,
-      path => glob(join(path, pattern))
-    ).then(lists => lists.reduce((a, c) => a.concat(c), files))
+      (path) => glob(join(path, pattern))
+    ).then((lists) => lists.reduce((a, c) => a.concat(c), files))
   } else {
     paths = Bluebird.resolve(files)
   }
-  paths = paths.then(expanded => {
+  paths = paths.then((expanded) => {
     log.silly('unpack', 'expanded files', expanded)
     return expanded
   })
@@ -46,9 +46,9 @@ export default function unpack (target = {}, staging, archiveRoot, playlist) {
   let maybeFiltered = paths
   // don't reprocess stuff that's already been archived
   if (archiveRoot) {
-    maybeFiltered = paths.filter(f => resolve(f).indexOf(archiveRoot) === -1)
+    maybeFiltered = paths.filter((f) => resolve(f).indexOf(archiveRoot) === -1)
   }
-  maybeFiltered = maybeFiltered.then(culled => {
+  maybeFiltered = maybeFiltered.then((culled) => {
     if (culled.length === 0) {
       log.info('unpack', 'no archives to process! CU L8R SAILOR')
     } else {
@@ -58,24 +58,24 @@ export default function unpack (target = {}, staging, archiveRoot, playlist) {
   })
 
   const groups = new Map()
-  let albums = maybeFiltered.then(files => {
+  let albums = maybeFiltered.then((files) => {
     log.verbose('unpack', 'unpacking', files)
     // do this so that the progress bar accurately tracks the list of files
-    files.forEach(f => groups.set(f, log.newGroup('process: ' + f)))
+    files.forEach((f) => groups.set(f, log.newGroup('process: ' + f)))
     return files
   }).map(
-    f => unzip(f, groups, tmp).map(toType),
+    (f) => unzip(f, groups, tmp).map(toType),
     { concurrency: 2 }
   ).then(albumsFromTracks)
 
-  let placed = albums.then(albums => place(albums, staging, groups))
+  let placed = albums.then((albums) => place(albums, staging, groups))
   if (archiveRoot) {
     placed = placed.then(
-      archives => moveToArchive(archives, archiveRoot, groups).return(archives)
+      (archives) => moveToArchive(archives, archiveRoot, groups).return(archives)
     )
   }
 
-  let reported = placed.then(albums => {
+  let reported = placed.then((albums) => {
     log.disableProgress()
     report(albums, staging)
     if (archiveRoot) reportArchived(albums)
@@ -84,7 +84,7 @@ export default function unpack (target = {}, staging, archiveRoot, playlist) {
   })
 
   if (playlist) {
-    return reported.then(albums => {
+    return reported.then((albums) => {
       return writeFile(playlist, makePlaylist(albums), 'utf-8')
         .return(albums)
     })
@@ -110,7 +110,7 @@ function report (albums, root, archives, archiveRoot) {
 }
 
 function reportArchived (albums) {
-  const archived = [...albums].filter(a => a.destArchive)
+  const archived = [...albums].filter((a) => a.destArchive)
   if (archived.length === 0) return
 
   console.log('now archived:\n')
@@ -133,20 +133,20 @@ function toType ({ path, sourceArchive, extractedTrack }) {
     case '.jpg': case '.jpeg':
     case '.pdf':
     case '.png':
-      return stat(path).then(stats => {
+      return stat(path).then((stats) => {
         const cover = new Cover(path, stats)
         cover.sourceArchive = sourceArchive
         return cover
       })
     case '.cue':
-      return stat(path).then(stats => {
+      return stat(path).then((stats) => {
         const cuesheet = new Cuesheet(path, stats)
         cuesheet.sourceArchive = sourceArchive
         return cuesheet
       })
     default:
       log.warn('extractRelease', "don't recognize type of", path)
-      return stat(path).then(stats => {
+      return stat(path).then((stats) => {
         const file = new File(path, stats)
         file.sourceArchive = sourceArchive
         return file

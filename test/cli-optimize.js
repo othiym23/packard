@@ -14,7 +14,7 @@ var metadata = require('./lib/metadata.js')
 var p = join(__dirname, '../lib/cli.js')
 var r = relative(process.cwd(), p)
 
-var lines = function () {/*
+var lines = function () { /*
 
 Options:
   -B, --block-size        size of blocks on target volume  [default: 512]
@@ -23,7 +23,7 @@ Options:
 
 Missing required argument: O
 - Must have a target to optimize towards.
-*/}.toString().split('\n').slice(1, -1)
+*/ }.toString().split('\n').slice(1, -1)
 
 var prolog = 'Usage: ' + r + ' [options] optimize -O blocks [-R dir [file...]]'
 

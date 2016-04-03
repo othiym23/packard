@@ -15,7 +15,7 @@ const stat = Bluebird.promisify(fs.stat)
 export function place (albums, newRoot, groups) {
   return Bluebird.map(
     [...albums],
-    album => {
+    (album) => {
       const albumPath = join(newRoot, album.toSafePath())
       const trackerGroup = groups.get(album.sourceArchive.path)
       return mkdirp(albumPath).then(() => {
@@ -27,7 +27,7 @@ export function place (albums, newRoot, groups) {
 
         return Bluebird.map(
           album.tracks,
-          track => {
+          (track) => {
             const destination = resolve(newRoot, album.toSafePath(), track.safeName())
 
             return stat(destination).then(() => {
@@ -53,7 +53,7 @@ export function place (albums, newRoot, groups) {
 
         return Bluebird.map(
           album.pictures,
-          picture => {
+          (picture) => {
             const destination = resolve(
               newRoot,
               album.toSafePath(),
@@ -80,7 +80,7 @@ export function place (albums, newRoot, groups) {
 export function moveToArchive (albums, root, groups) {
   return mkdirp(root).then(() => Bluebird.map(
     [...albums],
-    album => {
+    (album) => {
       const archive = album.sourceArchive && album.sourceArchive.path
       if (!archive) {
         throw new Error(album.name + ' must have source archive path set.')

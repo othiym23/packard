@@ -24,5 +24,5 @@ export default function blockSizeFromPath (path) {
   return mkdirp(base)
     .then(() => writeFile(probe, 'lol'))
     .then(() => stat(probe))
-    .then(stats => rimraf(probe).return(stats.blksize))
+    .then((stats) => rimraf(probe).return(stats.blksize))
 }

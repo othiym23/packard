@@ -51,7 +51,7 @@ switch (yargs.argv._[0]) {
                   R: options.R
                 })
                 .env('PACKARD')
-                .check(argv => {
+                .check((argv) => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
                   return 'Must pass 1 or more audio files or directory trees.'
@@ -81,7 +81,7 @@ switch (yargs.argv._[0]) {
     argv = yargs.reset()
                 .usage('Usage: $0 audit [file [file...]]')
                 .env('PACKARD')
-                .check(argv => {
+                .check((argv) => {
                   if (argv._.length > 1) return true
 
                   return 'must pass either 1 or more files containing metadata'
@@ -113,7 +113,7 @@ switch (yargs.argv._[0]) {
                   R: options.R
                 })
                 .env('PACKARD')
-                .check(argv => {
+                .check((argv) => {
                   if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
                   return 'Must pass 1 or more audio files or directory trees.'
@@ -149,7 +149,7 @@ switch (yargs.argv._[0]) {
                 })
                 .env('PACKARD')
                 .argv
-    roots = argv.R.map(r => untildify(r))
+    roots = argv.R.map((r) => untildify(r))
     log.silly('pls', 'argv', argv)
 
     command = pls(roots)
@@ -167,7 +167,7 @@ switch (yargs.argv._[0]) {
                   playlist: options.playlist
                 })
                 .env('PACKARD')
-                .check(argv => {
+                .check((argv) => {
                   if (argv._.length > 1 || (argv.R && argv.R.length && argv.P)) return true
 
                   return 'Must pass either 1 or more zipfiles, or root and glob pattern.'
@@ -192,7 +192,7 @@ switch (yargs.argv._[0]) {
 if (argv.saveConfig) command = command.then(() => saveConfig(argv))
 command.then(() => {
   log.silly('packard', 'tracker debugging', log.tracker.debug())
-}).catch(e => {
+}).catch((e) => {
   log.disableProgress()
   log.error('packard', e.stack)
 })

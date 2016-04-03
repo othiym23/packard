@@ -11,17 +11,17 @@ export default function knapsackForAlbums (albums, capacity, blockSize) {
 
   // knapsack-js wants a list of object literals, which is hard to get directly
   // from a map
-  const sizes = albumList.map(a => ({ [a.path]: a.getSize(blockSize) }))
+  const sizes = albumList.map((a) => ({ [a.path]: a.getSize(blockSize) }))
   log.verbose('knapsackForAlbums', 'sizes', sizes)
   const optimized = optimize(capacity, sizes)
   log.verbose('knapsackForAlbums', 'optimized', optimized)
-  const keepers = new Set(optimized.map(i => Object.keys(i)[0]))
+  const keepers = new Set(optimized.map((i) => Object.keys(i)[0]))
   log.silly('knapsackForAlbums', 'keepers', keepers)
-  const leftovers = [...paths].filter(p => !keepers.has(p))
+  const leftovers = [...paths].filter((p) => !keepers.has(p))
   log.silly('knapsackForAlbums', 'leftovers', leftovers)
 
   return {
-    included: [...keepers].map(p => al.get(p)),
-    discarded: leftovers.map(p => al.get(p))
+    included: [...keepers].map((p) => al.get(p)),
+    discarded: leftovers.map((p) => al.get(p))
   }
 }
