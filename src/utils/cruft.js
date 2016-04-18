@@ -1,17 +1,23 @@
 import 'babel-polyfill'
 
-import { basename } from 'path'
+import { basename, dirname } from 'path'
 
-const cruft = new Set([
-  '.DS_Store',    // OS X metadata is very cluttery
-  '.AppleDouble', // see above
-  '.localized',   // OS X localization
-  'Thumbs.db',    // yes, I do run Windows sometimes
+const files = new Set([
+  '.DS_Store', // OS X metadata is very cluttery
+  'Thumbs.db'  // yes, I do run Windows sometimes
+])
+
+const directories = new Set([
   '__MACOSX',     // in OS X-created zipfiles
-  '.Parent'       // I have no idea
+  '.AppleDouble', // Samba or AFS, I think?
+  '.localized'    // OS X localization
 ])
 
 export default function isCruft (path) {
-  if (basename(path || '').indexOf('._') === 0) return true
-  return cruft.has(basename(path))
+  const entry = basename(path || '')
+  const contains = dirname(path || '')
+  const parent = basename(contains)
+  return (entry.indexOf('._') === 0 || files.has(entry) || directories.has(parent)) ? true
+       : (contains === '.' || contains === path) ? false
+       : isCruft(contains)
 }
