@@ -13,6 +13,7 @@ import reader from '../metadata/reader.js'
 import { Archive } from '@packard/model'
 
 import { promisify } from 'bluebird'
+
 const stat = promisify(statCB)
 const mkdirp = promisify(mkdirpCB)
 
@@ -65,7 +66,7 @@ export function unpack (archivePath, progressGroups, targetPath) {
         const filename = basename(entry.fileName)
         if (/\/$/.test(entry.fileName)) {
           examined('skipped directory', entry.fileName)
-        } else if (isCruft(filename) || isCruft(entry.fileName.split('/')[0])) {
+        } else if (isCruft(filename)) {
           examined('skipped cruft', entry.fileName)
         } else {
           progressGroups.set(filename, gauge.newGroup('extract: ' + entry.fileName))
