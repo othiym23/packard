@@ -2,6 +2,7 @@ import { basename, dirname, extname } from 'path'
 
 import log from 'npmlog'
 
+import isCruft from './utils/cruft.js'
 import toModel from './path-to-model.js'
 import traverse from './utils/fs-traverse.js'
 
@@ -39,7 +40,7 @@ function readAlbums (root) {
   const covers = new Map()
   const albums = new Set()
 
-  return traverse(root, toModel).then(postprocess)
+  return traverse(root, isCruft, toModel).then(postprocess)
 
   function postprocess (tree) {
     if (!Array.isArray(tree)) tree = [tree]
