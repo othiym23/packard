@@ -24,9 +24,10 @@ export default function toModel (path, stats) {
         filename,
         fsAlbum,
         fsArtist,
-        { path, stats, ext }
+        { path, stats, ext, fsAlbum, fsArtist }
       )
       parseName(fsTrack)
+      fsTrack.fsTrack = fsTrack
 
       return { fsArtist, fsAlbum, fsTrack, file: fsTrack, path }
 
