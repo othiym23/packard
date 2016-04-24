@@ -45,7 +45,7 @@
     "ini": "^1.3.4",
     "knapsack-js": "^1.0.1",
     "mkdirp": "^0.5.1",
-    "moment": "^2.12.0",
+    "moment": "^2.13.0",
     "mp4-parser": "^0.3.0",
     "musicmetadata": "^2.0.2",
     "mv": "^2.1.1",
@@ -58,7 +58,7 @@
     "yauzl": "^2.3.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.7.5",
+    "babel-cli": "^6.7.7",
     "babel-preset-es2015": "^6.5.0",
     "flac-metadata": "^0.1.1",
     "lodash": "^4.11.1",
