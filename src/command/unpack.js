@@ -1,5 +1,5 @@
 import { writeFile as writeFileCB, stat as statCB } from 'graceful-fs'
-import { extname, join, resolve } from 'path'
+import { join, resolve } from 'path'
 import { randomBytes } from 'crypto'
 import { tmpdir } from 'os'
 
@@ -8,11 +8,10 @@ import log from 'npmlog'
 import rimrafCB from 'rimraf'
 import Bluebird from 'bluebird'
 import { unpack as unzip } from '../utils/zip.js'
-import { Cover, Cuesheet, File } from '@packard/model'
 
 import albumsFromTracks from '../metadata/albums-from-tracks.js'
 import makePlaylist from '../utils/make-playlist.js'
-import toModel from '../path-to-model.js'
+import toModel from '../fs/to-model.js'
 import { moveToArchive, place } from '../mover.js'
 
 import { promisify } from 'bluebird'
@@ -120,36 +119,16 @@ function reportArchived (albums) {
 }
 
 function toType ({ path, sourceArchive, extractedTrack }) {
-  switch (extname(path).toLowerCase()) {
-    case '.flac':
-    case '.m4a':
-    case '.mp3':
-      extractedTrack.sourceArchive = sourceArchive
-      const track = toModel(path, extractedTrack.file.stats)
-      extractedTrack.fsTrack = track
-      extractedTrack.fsAlbum = track.album
-      extractedTrack.fsArtist = track.artist
-      return Bluebird.resolve(extractedTrack)
-    case '.jpg': case '.jpeg':
-    case '.pdf':
-    case '.png':
-      return stat(path).then((stats) => {
-        const cover = new Cover(path, stats)
-        cover.sourceArchive = sourceArchive
-        return cover
-      })
-    case '.cue':
-      return stat(path).then((stats) => {
-        const cuesheet = new Cuesheet(path, stats)
-        cuesheet.sourceArchive = sourceArchive
-        return cuesheet
-      })
-    default:
-      log.warn('extractRelease', "don't recognize type of", path)
-      return stat(path).then((stats) => {
-        const file = new File(path, stats)
-        file.sourceArchive = sourceArchive
-        return file
-      })
-  }
+  return stat(path).then((stats) => {
+    const fsModel = toModel(path, stats)
+    // this needs to close over the domain of types returned by toModel
+    const model = extractedTrack || fsModel.cover || fsModel.cuesheet || fsModel.file
+
+    model.sourceArchive = sourceArchive
+    if (fsModel.fsTrack) model.fsTrack = fsModel.fsTrack
+    if (fsModel.fsAlbum) model.fsAlbum = fsModel.fsAlbum
+    if (fsModel.fsArtist) model.fsArtist = fsModel.fsArtist
+
+    return model
+  })
 }

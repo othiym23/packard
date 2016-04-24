@@ -6,13 +6,13 @@ import { promisify } from 'bluebird'
 const readdir = promisify(fs.readdir)
 const stat = promisify(fs.stat)
 
-export default function traverse (path, prune, visit) {
+export default function find (path, prune, visit) {
   if (prune(path)) return
 
   return stat(path).then((stats) => {
     if (stats.isDirectory()) {
       return readdir(path)
-               .map((e) => traverse(resolve(path, e), prune, visit))
+               .map((e) => find(resolve(path, e), prune, visit))
                .filter((e) => e)
     } else if (stats.isFile()) {
       return visit(path, stats)

@@ -6,7 +6,8 @@ var Bluebird = require('bluebird')
 var promisify = Bluebird.promisify
 var rimraf = promisify(require('rimraf'))
 
-var find = require('../lib/utils/find.js').default
+var _find = require('../lib/fs/find.js').default
+var isCruft = require('../lib/utils/cruft.js').default
 
 var makeAlbum = require('./lib/metadata.js').makeAlbum
 var makeStubFiles = require('./lib/metadata.js').makeStubFiles
@@ -22,6 +23,14 @@ function contains (desired, paths) {
 
 function doesNotContain (unwanted, paths) {
   return !unwanted.some(function (u) { return paths.has(u) })
+}
+
+function find (entries) {
+  const files = new Set()
+  return Bluebird.map(
+    entries,
+    (e) => _find(e, isCruft, (p) => files.add(p))
+  ).return(files)
 }
 
 test('reject cruft', function (t) {

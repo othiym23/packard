@@ -2,7 +2,7 @@ import log from 'npmlog'
 import Bluebird from 'bluebird'
 
 import albumsFromTracks from '../metadata/albums-from-tracks.js'
-import readFSMetadata from '../read-fs-artists.js'
+import readFSMetadata from '../fs/read-metadata.js'
 import scan from '../metadata/scan.js'
 import { byDate, bySize } from '../utils/sort.js'
 

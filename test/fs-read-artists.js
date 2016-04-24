@@ -5,7 +5,7 @@ var mkdirp = require('mkdirp')
 var rimraf = require('rimraf')
 var test = require('tap').test
 
-var readArtists = require('../lib/read-fs-artists.js').readArtists
+var readArtists = require('../lib/fs/read-artists.js').readArtists
 
 var basedir = join(__dirname, 'test-read-tree')
 
@@ -24,7 +24,7 @@ test('setup', function (t) {
 })
 
 test('read empty root', function (t) {
-  readArtists(basedir).then(
+  return readArtists(basedir).then(
     function (artists) {
       t.same(artists.next().value, null, 'no artists found in empty directory')
     },
@@ -32,13 +32,12 @@ test('read empty root', function (t) {
       t.ifErr(err, "shouldn't crash on empty directory")
     }
   )
-  .finally(function () { t. end() })
 })
 
 test('read root with one empty artist directory', function (t) {
   setup()
   mkdirp.sync(join(basedir, 'eMPTy'))
-  readArtists(basedir).then(
+  return readArtists(basedir).then(
     function (artists) {
       t.same(artists.next().value, null, 'no albums found in empty directory')
     },
@@ -46,13 +45,12 @@ test('read root with one empty artist directory', function (t) {
       t.ifErr(err, "shouldn't crash on empty directory")
     }
   )
-  .finally(function () { t. end() })
 })
 
 test('read root with one empty album directory', function (t) {
   setup()
   mkdirp.sync(join(basedir, 'eMPTy', 'nOTHINg'))
-  readArtists(basedir).then(
+  return readArtists(basedir).then(
     function (artists) {
       t.same(artists.next().value, null, 'no tracks found in empty directory')
     },
@@ -60,7 +58,6 @@ test('read root with one empty album directory', function (t) {
       t.ifErr(err, "shouldn't crash on empty directory")
     }
   )
-  .finally(function () { t. end() })
 })
 
 test('read root with one one-track directory, no cue sheet', function (t) {
@@ -70,7 +67,7 @@ test('read root with one one-track directory, no cue sheet', function (t) {
   mkdirp.sync(albumDir)
   writeFileSync(join(albumDir, '1-Savage_Beatings_for_All.flac'), 'lol')
 
-  readArtists(basedir).then(
+  return readArtists(basedir).then(
     function (artists) {
       var artist = artists.next().value
       t.ok(artist, 'found artist')
@@ -89,7 +86,6 @@ test('read root with one one-track directory, no cue sheet', function (t) {
       t.ifErr(err, "shouldn't crash on empty directory")
     }
   )
-  .finally(function () { t. end() })
 })
 
 test('read root with one one-track directory, with cue sheet', function (t) {
@@ -102,7 +98,7 @@ test('read root with one one-track directory, with cue sheet', function (t) {
   var cuesheet = join(artistDir, 'Skiffle_Rumble.cue')
   writeFileSync(cuesheet, 'rofl')
 
-  readArtists(basedir).then(
+  return readArtists(basedir).then(
     function (artists) {
       var artist = artists.next().value
       t.ok(artist, 'found artist')
@@ -112,13 +108,12 @@ test('read root with one one-track directory, with cue sheet', function (t) {
       t.ok(album, 'found album')
       t.equal(album.name, 'Skiffle_Rumble', "name didn't change")
 
-      t.equal(album.cuesheet, cuesheet, 'found cue sheet')
+      t.equal(album.cuesheet.path, cuesheet, 'found cue sheet')
     },
     function (err) {
       t.ifErr(err, "shouldn't crash on empty directory")
     }
   )
-  .finally(function () { t. end() })
 })
 
 test('cleanup', function (t) {
