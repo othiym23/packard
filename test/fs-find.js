@@ -29,7 +29,7 @@ function find (entries) {
   const files = new Set()
   return Bluebird.map(
     entries,
-    (e) => _find(e, isCruft, (p) => files.add(p))
+    function (e) { return _find(e, isCruft, function (p) { files.add(p) }) }
   ).return(files)
 }
 
