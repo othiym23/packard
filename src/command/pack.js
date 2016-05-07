@@ -12,9 +12,8 @@ import optimize from '../utils/knapsack-albums.js'
 import { bySize } from '../utils/sort.js'
 import { scanAlbums } from './albums.js'
 
-import { promisify } from 'bluebird'
-const link = promisify(linkCB)
-const mkdirp = promisify(mkdirpCB)
+const link = Bluebird.promisify(linkCB)
+const mkdirp = Bluebird.promisify(mkdirpCB)
 const mv = Bluebird.promisify(mvCB)
 
 const progressGroups = new Map()

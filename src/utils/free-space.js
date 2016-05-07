@@ -5,8 +5,7 @@ import Bluebird from 'bluebird'
 
 import blockSizeFromPath from './block-size.js'
 
-import { promisify } from 'bluebird'
-const exec = promisify(execCB)
+const exec = Bluebird.promisify(execCB)
 
 function parsePOSIX (output, blockBytes, platform) {
   const [header, values] = output.split('\n')

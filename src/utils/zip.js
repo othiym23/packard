@@ -12,10 +12,8 @@ import isCruft from './cruft.js'
 import reader from '../metadata/reader.js'
 import { Archive } from '@packard/model'
 
-import { promisify } from 'bluebird'
-
-const stat = promisify(statCB)
-const mkdirp = promisify(mkdirpCB)
+const stat = Bluebird.promisify(statCB)
+const mkdirp = Bluebird.promisify(mkdirpCB)
 
 export function unpack (archivePath, progressGroups, targetPath) {
   validate('SOS', arguments)

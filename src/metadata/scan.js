@@ -5,8 +5,7 @@ import log from 'npmlog'
 
 import reader from './reader.js'
 
-import { promisify } from 'bluebird'
-const stat = promisify(statCB)
+const stat = Bluebird.promisify(statCB)
 
 export default function scan (info, progressGroups) {
   const path = info.path

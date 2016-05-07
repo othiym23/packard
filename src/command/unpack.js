@@ -14,11 +14,10 @@ import makePlaylist from '../utils/make-playlist.js'
 import toModel from '../fs/to-model.js'
 import { moveToArchive, place } from '../mover.js'
 
-import { promisify } from 'bluebird'
-const glob = promisify(globCB)
-const rimraf = promisify(rimrafCB)
-const stat = promisify(statCB)
-const writeFile = promisify(writeFileCB)
+const glob = Bluebird.promisify(globCB)
+const rimraf = Bluebird.promisify(rimrafCB)
+const stat = Bluebird.promisify(statCB)
+const writeFile = Bluebird.promisify(writeFileCB)
 
 const tmp = join(tmpdir(), 'packard-' + randomBytes(8).toString('hex'))
 
