@@ -49,7 +49,9 @@ export function unpack (archivePath, progressGroups, targetPath) {
       const unzipGauge = gauge.newItem('scanning: ' + name, archive.entryCount, 1)
       const entries = []
 
-      archive.on('error', reject)
+      archive.on('error', function (err) {
+        reject(new Error('Problem unpacking ' + archivePath + ': ' + err.message))
+      })
       archive.on('entry', enqueue)
       archive.on('end', () => {
         gauge.verbose('unzip.enqueue', 'finished scanning archive table of contents')
