@@ -9,6 +9,7 @@ export const typeToStreamData = new Map([
   ['minFrameSize', 'minFrameSize'],
   ['sampleRate', 'sampleRate'],
   ['samplesInStream', 'samplesInStream'],
+  ['md5sum', 'md5sum'],
   ['TRAKTOR4', 'traktor4']
 ])
 
