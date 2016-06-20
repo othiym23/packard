@@ -1,4 +1,3 @@
-
 var createReadStream = require('fs').createReadStream
 var createWriteStream = require('fs').createWriteStream
 var dirname = require('path').dirname
