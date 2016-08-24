@@ -63,7 +63,7 @@
     "flac-metadata": "^0.1.1",
     "lodash": "^4.13.1",
     "nixt": "^0.5.0",
-    "standard": "^7.1.2",
+    "standard": "^8.0.0",
     "tap": "^5.7.2",
     "which": "^1.2.10",
     "yazl": "^2.3.1"
