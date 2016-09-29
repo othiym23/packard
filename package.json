@@ -36,7 +36,7 @@
   "dependencies": {
     "@packard/model": "^3.0.1",
     "aproba": "^1.0.3",
-    "babel-polyfill": "^6.9.1",
+    "babel-polyfill": "^6.16.0",
     "bluebird": "^3.4.1",
     "buffertools": "^2.1.4",
     "flac-parser": "othiym23/flac-info-parser#master",
