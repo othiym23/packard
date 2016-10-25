@@ -55,7 +55,7 @@
     "sprintf": "^0.1.5",
     "untildify": "^3.0.2",
     "yargs": "^4.7.1",
-    "yauzl": "^2.6.0"
+    "yauzl": "^2.7.0"
   },
   "devDependencies": {
     "babel-cli": "^6.10.1",
