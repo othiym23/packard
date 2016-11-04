@@ -16,6 +16,7 @@ const genres = new Set([
   'Dubstep',
   'Electro',
   'Electronic',
+  'Emo',
   'Experimental',
   'Field Recordings',
   'Folk',
@@ -46,11 +47,13 @@ const genres = new Set([
   'Slowcore',
   'Shoegazer',
   'Soundtrack',
-  'Space Rock',
   'Spoken Word',
+  'Stoner Metal',
   'Techno',
+  'Trap',
   'UK Garage',
   'UK Hardcore',
+  'Vaporwave',
   'Witch House'
 ])
 
