@@ -6,11 +6,10 @@
   "main": "lib/cli.js",
   "bin": "lib/cli.js",
   "scripts": {
-    "transpile": "rimraf lib && babel src -d lib",
-    "prepare": "npm run transpile",
-    "test": "standard && npm run transpile && tap test/*.js",
-    "coverage": "standard && npm run transpile && tap test/*.js --coverage",
-    "standard": "standard"
+    "coverage": "standard && npm run prepare && tap test/*.js --coverage",
+    "test": "standard && npm run prepare && tap test/*.js",
+    "prepare": "rimraf lib && babel src -d lib",
+    "preversion": "npm run test"
   },
   "standard": {
     "ignore": [
