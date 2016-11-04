@@ -36,7 +36,7 @@
   "dependencies": {
     "@packard/model": "^3.0.1",
     "aproba": "^1.0.3",
-    "babel-polyfill": "^6.9.1",
+    "babel-polyfill": "^6.16.0",
     "bluebird": "^3.4.1",
     "buffertools": "^2.1.4",
     "flac-parser": "othiym23/flac-info-parser#master",
@@ -58,8 +58,8 @@
     "yauzl": "^2.6.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.10.1",
-    "babel-preset-es2015": "^6.9.0",
+    "babel-cli": "^6.18.0",
+    "babel-preset-es2015": "^6.18.0",
     "flac-metadata": "^0.1.1",
     "lodash": "^4.13.1",
     "nixt": "^0.5.0",
