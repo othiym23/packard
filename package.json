@@ -7,7 +7,7 @@
   "bin": "lib/cli.js",
   "scripts": {
     "transpile": "rimraf lib && babel src -d lib",
-    "prepublish": "npm run transpile",
+    "prepare": "npm run transpile",
     "test": "standard && npm run transpile && tap test/*.js",
     "coverage": "standard && npm run transpile && tap test/*.js --coverage",
     "standard": "standard"
