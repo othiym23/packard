@@ -69,7 +69,8 @@ export default function albumsFromTracks (metadata) {
         artists.add(track.artist.name)
       }
       dirs.add(dirname(track.file.path))
-      dates.add(track.date)
+      // prefer original release date, if set
+      dates.add((track.musicbrainzTags && track.musicbrainzTags.originalDate) || track.date)
       if (track.sourceArchive) archives.set(track.sourceArchive.path, track.sourceArchive)
       tracks.add(track)
     }
