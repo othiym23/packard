@@ -23,13 +23,16 @@ export default function reader (info, progressGroups, onFinish, onError) {
 
   return parserGauge
     .pipe(new FLACParser())
-    .on('data', ({ type, value }) => {
+    .on('data', ({ type = '', value }) => {
       if (typeToTag.get(type)) {
         tags[typeToTag.get(type)] = value
       } else if (typeToMB.get(type)) {
         musicbrainzTags[typeToMB.get(type)] = value
       } else if (typeToStreamData.get(type)) {
         streamData[typeToStreamData.get(type)] = value
+      // some encoders don't follow all-upper-case convention
+      } else if (typeToTag.get(type.toUpperCase())) {
+        tags[typeToTag.get(type.toUpperCase())] = value
       } else {
         gauge.warn('flac.read', 'unknown type', type, 'value', value)
       }
