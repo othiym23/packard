@@ -49,12 +49,13 @@ function parsePOSIX (output, blockBytes, platform) {
 
 export default function freeBlocksFromPath (path, blockBytes, platform = process.platform) {
   assert(typeof path === 'string', 'must include path')
+  const escaped = path.replace(/ /g, '\\ ')
 
   let command
   if (blockBytes) {
     command = Bluebird.resolve(blockBytes)
   } else {
-    command = blockSizeFromPath(path)
+    command = blockSizeFromPath(escaped)
   }
 
   switch (platform) {
@@ -62,12 +63,12 @@ export default function freeBlocksFromPath (path, blockBytes, platform = process
       const env = Object.create(process.env)
       return command.then((bytes) => {
         env.BLOCKSIZE = bytes
-        return exec('df ' + path, { env })
+        return exec('df ' + escaped, { env })
           .then((output) => parsePOSIX(output, bytes, platform))
       })
     case 'linux':
       return command
-        .then((bytes) => exec('df -B ' + bytes + ' ' + path)
+        .then((bytes) => exec('df -B ' + bytes + ' ' + escaped)
           .then((blocks) => parsePOSIX(blocks, bytes, platform)))
     default:
       throw new Error(
