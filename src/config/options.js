@@ -22,6 +22,11 @@ const options = {
     array: true,
     describe: 'directory root for an Artist/Album tree'
   },
+  RZ: {
+    alias: 'root',
+    array: true,
+    describe: 'root directory containing zipped files'
+  },
   S: {
     alias: 'save-config',
     describe: "save this run's configuration to ~/.packardrc",

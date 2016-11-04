@@ -17,6 +17,8 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
+  -S, --save-config       save this run's configuration to ~/.packardrc  [boolean] [default: false]
+  --loglevel              logging level  [default: "info"]
   -h, --help              Show help  [boolean]
   --version               Show version number  [boolean]
   -B, --block-size        size of blocks on target volume  [default: 512]

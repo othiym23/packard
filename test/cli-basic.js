@@ -12,14 +12,14 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Commands:
-  albums    generate a list of albums from roots
-  artists   generate a list of artists from roots
-  audit     check metadata for inconsistencies
-  inspect   dump all the metadata from a track or album
-  optimize  find the best set of albums to pack a given capacity
-  pack      fill a volume with releases, optimally
-  pls       print a list of albums as a .pls file, sorted by date
-  unpack    unpack a set of zipped files into a staging directory
+  albums [files...]    generate a list of albums from roots
+  artists              generate a list of artists from roots
+  audit [files...]     check metadata for inconsistencies
+  inspect [files...]   dump all the metadata from a track or album
+  optimize [files...]  find the best set of albums to pack a given capacity
+  pack                 fill a volume with releases, optimally
+  pls                  print a list of albums as a .pls file, sorted by date
+  unpack [files...]    unpack a set of zipped files into a staging directory
 
 Options:
   -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]
@@ -62,7 +62,9 @@ test('packard', function (t) {
 })
 
 test('packard unknown', function (t) {
-  var unknown = [prolog].concat(lines.slice(0, -1)).join('\n')
+  var unknown =
+    [prolog].concat(lines.slice(0, -1)).join('\n') +
+    '\nUnknown argument: unknown'
   nixt()
     .env('packard_loglevel', 'info')
     .run('node ' + p + ' unknown')

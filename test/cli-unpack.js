@@ -18,14 +18,16 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
-  -h, --help      Show help  [boolean]
-  --version       Show version number  [boolean]
-  -R, --root      root directory containing zipped files  [array]
-  -P, --pattern   bash glob pattern used to match files under root
-  -s, --staging   where to create the tree for unpacked artists  [required]
-  --archive       after other operations, archive original files  [boolean]
-  --archive-root  where to archive zip files once they've been unpacked
-  --playlist      create a playlist containing all of the unpacked albums  [string]
+  -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]
+  --loglevel         logging level  [default: "info"]
+  -h, --help         Show help  [boolean]
+  --version          Show version number  [boolean]
+  -R, --root         root directory containing zipped files  [array]
+  -P, --pattern      bash glob pattern used to match files under root
+  -s, --staging      where to create the tree for unpacked artists  [required]
+  --archive          after other operations, archive original files  [boolean]
+  --archive-root     where to archive zip files once they've been unpacked
+  --playlist         create a playlist containing all of the unpacked albums  [string]
 
 Missing required argument: s
 - Must have a place to put unpacked files.
