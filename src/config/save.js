@@ -21,6 +21,10 @@ export default function saveConfig (argv) {
       'enabled-by-default': argv.archive,
       'glob-pattern': argv.pattern,
       root: argv.archiveRoot
+    },
+    transcode: {
+      'encoder': argv.mp3Encoder,
+      'profile': argv.encodingProfile
     }
   }))
   log.verbose('saveConfig', 'config', toSave)

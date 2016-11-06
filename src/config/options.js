@@ -38,12 +38,21 @@ const options = {
     describe: 'where to create the tree for unpacked artists',
     required: '- Must have a place to put unpacked files.'
   },
+  T: {
+    alias: 'transcode',
+    describe: 'transcode FLACs to MP3',
+    boolean: false
+  },
   archive: {
     describe: 'after other operations, archive original files',
     boolean: true
   },
   archiveRoot: {
     describe: "where to archive zip files once they've been unpacked"
+  },
+  encodingProfile: {
+    describe: 'preset to use for encoding settings',
+    default: config.transcode.profile
   },
   from: {
     alias: 'from',
@@ -53,6 +62,10 @@ const options = {
   loglevel: {
     describe: 'logging level',
     default: config.loglevel
+  },
+  mp3Encoder: {
+    describe: 'preferred MP3 encoder',
+    default: config.transcode.encoder
   },
   playlist: {
     describe: 'create a playlist containing all of the unpacked albums',

@@ -114,7 +114,10 @@ const commands = {
                            .options({
                              B: options.B,
                              R: options.from,
-                             s: options.to
+                             s: options.to,
+                             T: options.T,
+                             'mp3-encoder': options.mp3Encoder,
+                             'encoding-profile': options.encodingProfile
                            }),
     handler: argv => {
       const roots = (argv.R || []).map(untildify)

@@ -9,7 +9,11 @@ const config = rc(
     archive: {
       'enabled-by-default': false,
       'glob-pattern': undefined,
-      'root': undefined
+      root: undefined
+    },
+    transcode: {
+      encoder: 'lame',
+      profile: '-V0'
     },
     playlist: undefined
   },

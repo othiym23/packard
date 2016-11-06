@@ -78,6 +78,9 @@ of track names to determine playback order play compilations correctly.
 * `-R` / `--from`: One or more directory trees in which files to be packed are
   found.
 * `-s` / `--to`: The directory root to pack files into.
+* `-T` / `--transcode`: Transcode FLAC files to MP3 before moving them into
+  place. Uses the value of `--mp3-encoder` (defaults to `lame`), with the
+  encoding profile set by `--encoding-profile` (defaults to `-V0`).
 * `-B` / `--block-size`: `packard` will try to automatically detect the
   blocksize of the destination volume so that it can optimally fill the volume.
   If, for whatever reason, it gets this wrong (say, on Windows, where `df` is
