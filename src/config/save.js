@@ -3,8 +3,8 @@ import fs from 'graceful-fs'
 import log from 'npmlog'
 import { stringify as inify } from 'ini'
 import untildify from 'untildify'
-
 import { promisify } from 'bluebird'
+
 const writeFile = promisify(fs.writeFile)
 
 const configPath = untildify('~/.packardrc')
@@ -23,9 +23,10 @@ export default function saveConfig (argv) {
       root: argv.archiveRoot
     },
     transcode: {
-      'encoder': argv.mp3Encoder,
-      'profile': argv.encodingProfile
-    }
+      encoder: argv.mp3Encoder,
+      profile: argv.encodingProfile
+    },
+    playlist: argv.playlist
   }))
   log.verbose('saveConfig', 'config', toSave)
   return writeFile(configPath, inify(toSave))
