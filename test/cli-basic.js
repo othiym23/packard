@@ -13,7 +13,7 @@ var lines = function () { /*
 
 Commands:
   albums [files...]    generate a list of albums from roots
-  artists              generate a list of artists from roots
+  artists [files...]   generate a list of artists from roots
   audit [files...]     check metadata for inconsistencies
   inspect [files...]   dump all the metadata from a track or album
   optimize [files...]  find the best set of albums to pack a given capacity

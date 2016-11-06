@@ -64,8 +64,10 @@ function tracksToArtists (tracks) {
   return albumsAndTracksToArtists(albums, artistTracks)
 }
 
-export default function scanArtists (roots, progressGroups = new Map()) {
+export default function scanArtists (files = [], roots = [], progressGroups = new Map()) {
   log.enableProgress()
+  roots = files.concat(roots)
+
   return Bluebird.mapSeries(
     roots,
     (root) => {

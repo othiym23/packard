@@ -21,13 +21,12 @@ Options:
   --loglevel         logging level  [default: "info"]
   -h, --help         Show help  [boolean]
   --version          Show version number  [boolean]
-  -R, --root         directory root for an Artist/Album tree  [array] [required]
+  -R, --root         directory root for an Artist/Album tree  [array]
 
-Missing required argument: R
-- Must have at least one tree to scan.
+Must pass 1 or more audio files or directory trees.
 */ }.toString().split('\n').slice(1, -1)
 
-var prolog = 'Usage: ' + r + ' artists [-R dir [-R dir...]]'
+var prolog = 'Usage: ' + r + ' artists [-R dir [file...]]'
 
 var root = join(__dirname, 'cli-artists')
 var flacRoot = join(root, 'flac')

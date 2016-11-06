@@ -21,7 +21,7 @@ const commands = {
                            .options({
                              R: options.R
                            })
-                           .check((argv) => {
+                           .check(argv => {
                              if (argv._.length > 1 || (argv.R && argv.R.length)) return true
 
                              return 'Must pass 1 or more audio files or directory trees.'
@@ -36,18 +36,24 @@ const commands = {
     }
   },
   artists: {
-    command: 'artists',
+    command: 'artists [files...]',
     description: 'generate a list of artists from roots',
-    builder: yargs => yargs.usage('Usage: $0 artists [-R dir [-R dir...]]')
+    builder: yargs => yargs.usage('Usage: $0 artists [-R dir [file...]]')
                            .options({
                              R: options.R
                            })
-                           .required('R', '- Must have at least one tree to scan.'),
+                           .check(argv => {
+                             if (argv._.length > 1 || (argv.R && argv.R.length)) return true
+
+                             return 'Must pass 1 or more audio files or directory trees.'
+                           }),
     handler: argv => {
-      const roots = argv.R.map(untildify)
+      const files = argv.files.map(untildify)
+      const roots = (argv.R || []).map(untildify)
+      log.silly('artists', 'files', files)
       log.silly('artists', 'roots', roots)
 
-      commands.active = artists(roots)
+      commands.active = artists(files, roots)
     }
   },
   audit: {
