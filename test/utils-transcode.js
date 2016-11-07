@@ -1,9 +1,14 @@
 var join = require('path').join
+var spawn = require('child_process').spawn
 
-var rimrafCB = require('rimraf')
+var concat = require('mississippi').concat
+var log = require('npmlog')
+var pipe = require('mississippi').pipe
 var test = require('tap').test
 var Bluebird = require('bluebird')
-var rimraf = Bluebird.promisify(rimrafCB)
+
+var rimraf = Bluebird.promisify(require('rimraf'))
+var which = Bluebird.promisify(require('which'))
 
 var scan = require('../lib/metadata/scan.js').default
 var transcode = require('../lib/utils/transcode.js').default
@@ -51,6 +56,7 @@ test('simple transcoding', function (t) {
   })
 
   var readTrack = makeAlbum.then(function (paths) {
+    log.silly('simpleTest', 'encoded', paths)
     return scan({ path: paths[0] }, new Map())
   })
 
@@ -59,7 +65,39 @@ test('simple transcoding', function (t) {
   })
 
   return runTranscode.then(function (path) {
-    console.error('path is', path)
-    t.end()
+    var ensureMp3val = which('mp3val')
+
+    return ensureMp3val.then(function (mp3val) {
+      return new Bluebird(function (resolve, reject) {
+        var verifier = spawn(
+          mp3val,
+          [ path ],
+          {}
+        )
+
+        pipe(verifier.stdout, concat({ encoding: 'string' }, function (output) {
+          t.notMatch(output, /WARNING/m, 'no warnings from mp3val')
+          t.match(
+            output,
+            /INFO.+166 MPEG frames \(MPEG 1 Layer III\), \+ID3v2, Xing header/m,
+            'found expected stream content'
+          )
+        }))
+
+        pipe(verifier.stderr, concat({ encoding: 'string' }, function (output) {
+          t.notOk(output, 'no error output from mp3val')
+        }))
+
+        verifier.on('error', reject)
+        verifier.on('close', function (code) {
+          t.equal(code, 0, 'exited without issue')
+          resolve()
+        })
+      })
+    })
   })
+})
+
+test('cleanup', function (t) {
+  return rimraf(root)
 })

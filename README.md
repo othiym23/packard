@@ -48,15 +48,19 @@ MP3s (although that can be configured via `--mp3-encoder`). I've encoded
 thousands of files using LAME, going all the way back to the days of
 `--alt-preset standard`, and think it's the best encoder for variable bitrate
 MP3s available (and maybe the best lossy audio encoder, period). Transcoding
-also uses [eyeD3](http://eyed3.nicfit.net/) to set tags, for the simple reason
-that there isn't an ID3v2.4 tag writer available for Node.js that I trust.
+also uses [eyeD3](http://eyed3.nicfit.net/) to create ID3v2.4 tags.
 
 To run its tests, `packard` uses eyeD3 to write tags to MP3 files,
 [`mp3val`](http://mp3val.sourceforge.net/) to validate that files have been
-transcoded correctly, and [Atomic Parsley](https://github.com/wez/atomicparsley)
-to write tags to M4A files. It's weird how many of these projects have
-Sourceforge pages, but I guess there hasn't been much innovation in laossy
-audio tooling over the last 5 (10) years.
+transcoded correctly, `metaflac` (from the same distribution as `flac`) to set
+FLAC tags, and [Atomic Parsley](https://github.com/wez/atomicparsley) to write
+tags to M4A files.
+
+It's weird how many of these projects have Sourceforge pages, but I guess there
+hasn't been much innovation in lossy audio tooling over the last 5 (10) years.
+I use command-line programs to create metadata tags because it turns out that
+none of the packages I've found on npm are reliable enough for testing, much
+less production.
 
 ## commands
 
