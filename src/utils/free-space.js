@@ -4,6 +4,7 @@ import assert from 'assert'
 import Bluebird from 'bluebird'
 
 import blockSizeFromPath from './block-size.js'
+import escapePath from './escape-path.js'
 
 const exec = Bluebird.promisify(execCB)
 
@@ -49,7 +50,7 @@ function parsePOSIX (output, blockBytes, platform) {
 
 export default function freeBlocksFromPath (path, blockBytes, platform = process.platform) {
   assert(typeof path === 'string', 'must include path')
-  const escaped = path.replace(/ /g, '\\ ')
+  const escaped = escapePath(path)
 
   let command
   if (blockBytes) {
