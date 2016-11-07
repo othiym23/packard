@@ -20,7 +20,7 @@ addons:
 before_install:
 - pip install --user eyeD3
 - "export PATH=$PATH:/home/travis/.local/bin"
-- eyeD3 --version
+- eyeD3 --version || echo "it's fine"
 - npm install -g npm@latest
 script: npm run-script coverage
 notifications:
