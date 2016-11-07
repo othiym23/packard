@@ -15,6 +15,8 @@ addons:
     - g++-4.8
     - atomicparsley
     - eyed3
+    - flac
+    - mp3val
 before_install:
 - eyeD3 --version
 - npm install -g npm@latest
