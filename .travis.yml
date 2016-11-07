@@ -19,6 +19,7 @@ addons:
     - mp3val
 before_install:
 - pip install --user eyeD3
+- "export PATH=$PATH:/home/travis/.local/bin"
 - eyeD3 --version
 - npm install -g npm@latest
 script: npm run-script coverage
