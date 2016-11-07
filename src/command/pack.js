@@ -5,6 +5,7 @@ import log from 'npmlog'
 import mkdirpCB from 'mkdirp'
 import mvCB from 'mv'
 import Bluebird from 'bluebird'
+import { pipe } from 'mississippi'
 
 import blockSizeFromPath from '../utils/block-size.js'
 import freeBlocksFromPath from '../utils/free-space.js'
@@ -99,15 +100,17 @@ export function partition (albums) {
 function copyTrack (track, destination) {
   const gauge = progressGroups.get(basename(track.file.path))
   return new Bluebird((resolve, reject) => {
-    createReadStream(track.file.path)
-      .on('error', reject)
-      .pipe(gauge.newStream('copying: ' + track.safeName(), track.file.stats.size))
-      .pipe(createWriteStream(destination))
-      .on('error', reject)
-      .on('finish', () => {
+    pipe(
+      createReadStream(track.file.path),
+      gauge.newStream('copying: ' + track.safeName(), track.file.stats.size),
+      createWriteStream(destination),
+      function (err) {
+        if (err) return reject(err)
+
         gauge.verbose('copyTrack', 'copied', track.file.path, 'to', destination)
         resolve()
-      })
+      }
+    )
   })
 }
 
