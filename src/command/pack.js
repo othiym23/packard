@@ -47,7 +47,7 @@ export default function pack (sources, destination, blockSize) {
 
       let overflowBlocks = 0
       for (let album of discarded.sort(bySize)) {
-        log.silly(
+        log.verbose(
           'pack',
           'discarding %s [%s %s-blocks]',
           album.path, album.getSize(blockBytes), blockBytes
