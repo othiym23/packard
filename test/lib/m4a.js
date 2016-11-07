@@ -10,8 +10,6 @@ var promisify = Bluebird.promisify
 var mkdirp = promisify(require('mkdirp'))
 var which = promisify(whichCB)
 
-var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.m4a')
-
 // I'm _definitely_ not writing a JS QT atom editor this year
 function atomify (path, tags) {
   var args = [path]
@@ -74,14 +72,15 @@ function atomify (path, tags) {
   })
 }
 
-function makeAlbum (root, tracks) {
-  return Bluebird.map(tracks, makeTrack.bind(null, root))
+function makeAlbum (root, tracks, source) {
+  if (!source) source = path.resolve(__dirname, '../fixtures/empty.m4a')
+  return Bluebird.map(tracks, makeTrack.bind(null, root, source))
 }
 
-function makeTrack (root, track) {
+function makeTrack (root, source, track) {
   return mkdirp(path.dirname(track.file.path)).then(function () {
     return new Bluebird(function (resolve, reject) {
-      createReadStream(EMPTY_TRACK)
+      createReadStream(source)
         .on('error', reject)
         .pipe(createWriteStream(track.file.path))
         .on('error', reject)
@@ -101,4 +100,4 @@ function makeTrack (root, track) {
   })
 }
 
-module.exports = { makeAlbum: makeAlbum, makeTrack: makeTrack }
+module.exports = { makeAlbum: makeAlbum }

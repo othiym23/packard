@@ -16,12 +16,13 @@ var flac = require('./flac.js')
 var m4a = require('./m4a.js')
 var mp3 = require('./mp3.js')
 
-var EMPTY_TRACK = path.join(__dirname, '../fixtures/empty.flac')
-
-function makeAlbum (root, date, artistName, albumName, trackTemplates, ext) {
+function makeAlbum (root, date, artistName, albumName, trackTemplates, ext, source) {
+  if (!source) source = 'empty'
   if (!ext) ext = '.flac'
 
-  return stat(EMPTY_TRACK).then(function (stats) {
+  var blank = path.resolve(__dirname, '../fixtures/' + source + ext)
+
+  return stat(blank).then(function (stats) {
     var artist = new Artist(artistName)
     var album = new Album(albumName, artist)
     var prepared = trackTemplates.map(function (template, index) {
@@ -31,7 +32,7 @@ function makeAlbum (root, date, artistName, albumName, trackTemplates, ext) {
         album,
         trackArtist,
         {
-          path: EMPTY_TRACK,
+          path: blank,
           stats: stats,
           ext: ext,
           index: index + 1,
@@ -44,9 +45,9 @@ function makeAlbum (root, date, artistName, albumName, trackTemplates, ext) {
       return track
     })
 
-    if (ext === '.flac') return flac.makeAlbum(root, prepared)
-    else if (ext === '.m4a') return m4a.makeAlbum(root, prepared)
-    else if (ext === '.mp3') return mp3.makeAlbum(root, prepared)
+    if (ext === '.flac') return flac.makeAlbum(root, prepared, blank)
+    else if (ext === '.m4a') return m4a.makeAlbum(root, prepared, blank)
+    else if (ext === '.mp3') return mp3.makeAlbum(root, prepared, blank)
     else throw new TypeError("Can't create album for " + ext)
   })
 }

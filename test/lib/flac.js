@@ -1,7 +1,7 @@
 var createReadStream = require('fs').createReadStream
 var createWriteStream = require('fs').createWriteStream
 var dirname = require('path').dirname
-var join = require('path').join
+var resolve = require('path').resolve
 
 var log = require('npmlog')
 var moment = require('moment')
@@ -16,14 +16,14 @@ var version = require('../../package.json').version
 var nowish = moment().format('YYYYMMDD')
 
 var VENDOR = 'testing packard ' + version + ' ' + nowish
-var EMPTY_TRACK = join(__dirname, '../fixtures/empty.flac')
 
-function makeAlbum (root, tracks) {
+function makeAlbum (root, tracks, sourceFile) {
+  if (!sourceFile) sourceFile = resolve(__dirname, '../fixtures/empty.flac')
   // FLACProcessor has internal state confused by concurrency
   return Bluebird.mapSeries(tracks, function (track) {
     return mkdirp(dirname(track.file.path)).then(function () {
       return new Bluebird(function (resolve, reject) {
-        var source = createReadStream(EMPTY_TRACK)
+        var source = createReadStream(sourceFile)
         var processor = new FLACProcessor()
         var sink = createWriteStream(track.file.path)
 

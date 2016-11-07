@@ -38,6 +38,7 @@
     "babel-polyfill": "^6.16.0",
     "bluebird": "^3.4.6",
     "buffertools": "^2.1.4",
+    "farmhash": "^1.2.1",
     "flac-parser": "othiym23/flac-info-parser#master",
     "glob": "^7.1.1",
     "graceful-fs": "^4.1.10",
@@ -53,6 +54,7 @@
     "rimraf": "^2.5.2",
     "sprintf": "^0.1.5",
     "untildify": "^3.0.2",
+    "which": "^1.2.11",
     "yargs": "^6.3.0",
     "yauzl": "^2.7.0"
   },
@@ -64,7 +66,6 @@
     "nixt": "^0.5.0",
     "standard": "^8.5.0",
     "tap": "^8.0.0",
-    "which": "^1.2.11",
     "yazl": "^2.4.2"
   },
   "license": "MIT"

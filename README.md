@@ -39,6 +39,27 @@ Options:
   probably takes `http`, but there's no use for that. Yet.
 * `-S` / `--save-config`: Save this run's configuration to `~/.packardrc`.
 
+## external dependencies
+
+For transcoding, `packard` requires the installation of the standard
+[`flac`](https://xiph.org/flac/download.html) executable for decoding and
+defaults to using [LAME](http://lame.sourceforge.net/download.php) to encode
+MP3s (although that can be configured via `--mp3-encoder`). I've encoded
+thousands of files using LAME, going all the way back to the days of
+`--alt-preset standard`, and think it's the best encoder for variable bitrate
+MP3s available (and maybe the best lossy audio encoder, period). Transcoding
+also uses [eyeD3](http://eyed3.nicfit.net/) to set tags, for the simple reason
+that there isn't an ID3v2.4 tag writer available for Node.js that I trust.
+
+To run its tests, `packard` uses eyeD3 to write tags to MP3 files,
+[`mp3val`](http://mp3val.sourceforge.net/) to validate that files have been
+transcoded correctly, and [Atomic Parsley](https://github.com/wez/atomicparsley)
+to write tags to M4A files. It's weird how many of these projects have
+Sourceforge pages, but I guess there hasn't been much innovation in laossy
+audio tooling over the last 5 (10) years.
+
+## commands
+
 ### pack a volume with audio files
 
 ```
@@ -48,7 +69,7 @@ $ packard pack --to dest --from src [-R dir [file...]]
 example run:
 
 ```
-$ packard pack --to /Volumes/NEWER --from ~/Downloads/flac
+$ packard pack --to /Volumes/UNSEELIE --from ~/Downloads/flac
 packed:
 /Volumes/UNSEELIE/flac/Neurosis/[2007-08-15] Live at Roadburn {31414 blocks}
 314513 512-byte blocks used on device, 2700817 remaining

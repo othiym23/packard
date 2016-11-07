@@ -11,8 +11,6 @@ var promisify = Bluebird.promisify
 var mkdirp = promisify(require('mkdirp'))
 var which = promisify(whichCB)
 
-var EMPTY_TRACK = path.resolve(__dirname, '../fixtures/empty.mp3')
-
 var eyeV
 
 function v6itialize (path, tags) {
@@ -151,14 +149,15 @@ function eye (path, tags) {
   })
 }
 
-function makeAlbum (root, tracks) {
-  return Bluebird.map(tracks, makeTrack.bind(null, root))
+function makeAlbum (root, tracks, source) {
+  if (!source) source = path.resolve(__dirname, '../fixtures/empty.mp3')
+  return Bluebird.map(tracks, makeTrack.bind(null, root, source))
 }
 
-function makeTrack (root, track) {
+function makeTrack (root, source, track) {
   return mkdirp(path.dirname(track.file.path)).then(function () {
     return new Bluebird(function (resolve, reject) {
-      createReadStream(EMPTY_TRACK)
+      createReadStream(source)
         .on('error', reject)
         .pipe(createWriteStream(track.file.path))
         .on('error', reject)
@@ -178,4 +177,4 @@ function makeTrack (root, track) {
   })
 }
 
-module.exports = { makeAlbum: makeAlbum, makeTrack: makeTrack }
+module.exports = { makeAlbum: makeAlbum }
