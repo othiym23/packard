@@ -56,7 +56,7 @@
     "sprintf": "^0.1.5",
     "untildify": "^3.0.2",
     "which": "^1.2.11",
-    "yargs": "^6.3.0",
+    "yargs": "^6.4.0",
     "yauzl": "^2.7.0"
   },
   "devDependencies": {
