@@ -48,7 +48,7 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.15.2",
     "mp4-parser": "^0.3.0",
-    "musicmetadata": "^2.0.4",
+    "musicmetadata": "^2.0.5",
     "mv": "^2.1.1",
     "npmlog": "^4.0.0",
     "rc": "^1.1.0",
