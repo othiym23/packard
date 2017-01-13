@@ -91,7 +91,7 @@ test('unpacking album and making a playlist', function (t) {
     t.equal(albums.size, 1, 'got 1 album back')
     return readFile(playlist, { encoding: 'utf8' })
       .then(function (contents) {
-        t.matches(contents, /^\[playlist\]/)
+        t.matches(contents, /^\[playlist]/)
         t.matches(contents, /NumberOfEntries=2/)
         t.matches(contents, /File1.+40 Years/)
         t.matches(contents, /Title1=40 Years Under the Cosh/)

@@ -8,7 +8,7 @@ import { Artist } from '@packard/model'
 import { byLocale, bySize } from '../utils/sort.js'
 
 function safe (string) {
-  return string.replace(/[^ \]\[A-Za-z0-9-]/g, '')
+  return string.replace(/[^ ]\[A-Za-z0-9-]/g, '')
 }
 
 function albumsIntoArtistTracks (albums) {

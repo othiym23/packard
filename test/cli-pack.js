@@ -101,11 +101,11 @@ test('packard pack --to ' + to + ' --from ' + from, function (t) {
           t.match(r.stdout, /^packed:/gm)
           t.match(
             r.stdout,
-            /target\/flac\/Gary Beck\/\[2012\] Algoreal 12 inch mix {2}Naptha \{6 blocks\}/gm
+            /target\/flac\/Gary Beck\/\[2012] Algoreal 12 inch mix {2}Naptha \{6 blocks\}/gm
           )
           t.match(
             r.stdout,
-            /target\/flac\/Gary Beck\/\[2012\] Bring a Friend \{30 blocks\}/gm
+            /target\/flac\/Gary Beck\/\[2012] Bring a Friend \{30 blocks\}/gm
           )
           t.match(r.stdout, /\d+ \d+-byte blocks used on device, \d+ remaining$/gm)
         })
