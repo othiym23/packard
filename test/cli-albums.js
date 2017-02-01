@@ -17,11 +17,12 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
-  -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]
-  --loglevel         logging level  [default: "info"]
-  -h, --help         Show help  [boolean]
-  --version          Show version number  [boolean]
-  -R, --root         directory root for an Artist/Album tree  [array]
+  -S, --save-config  save this run's configuration to ~/.packardrc
+                                                      [boolean] [default: false]
+  --loglevel         logging level                             [default: "info"]
+  -h, --help         Show help                                         [boolean]
+  --version          Show version number                               [boolean]
+  -R, --root         directory root for an Artist/Album tree             [array]
 
 Must pass 1 or more audio files or directory trees.
 */ }.toString().split('\n').slice(1, -1)

@@ -18,10 +18,11 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
-  -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]
-  --loglevel         logging level  [default: "info"]
-  -h, --help         Show help  [boolean]
-  --version          Show version number  [boolean]
+  -S, --save-config  save this run's configuration to ~/.packardrc
+                                                      [boolean] [default: false]
+  --loglevel         logging level                             [default: "info"]
+  -h, --help         Show help                                         [boolean]
+  --version          Show version number                               [boolean]
 
 Not enough non-option arguments: got 0, need at least 1
 */ }.toString().split('\n').slice(1, -1)

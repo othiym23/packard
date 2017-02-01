@@ -17,10 +17,11 @@ var r = relative(process.cwd(), p)
 var lines = function () { /*
 
 Options:
-  -S, --save-config  save this run's configuration to ~/.packardrc  [boolean] [default: false]
-  --loglevel         logging level  [default: "info"]
-  -h, --help         Show help  [boolean]
-  --version          Show version number  [boolean]
+  -S, --save-config  save this run's configuration to ~/.packardrc
+                                                      [boolean] [default: false]
+  --loglevel         logging level                             [default: "info"]
+  -h, --help         Show help                                         [boolean]
+  --version          Show version number                               [boolean]
   -R, --root         directory root for an Artist/Album tree  [array] [required]
 
 Missing required argument: R
