@@ -44,7 +44,7 @@
     "graceful-fs": "^4.1.11",
     "ini": "^1.3.4",
     "knapsack-js": "^1.0.1",
-    "mississippi": "^1.2.0",
+    "mississippi": "^1.3.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.17.1",
     "mp4-parser": "^0.3.0",
