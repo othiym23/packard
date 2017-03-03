@@ -36,7 +36,7 @@
     "@packard/model": "^3.0.2",
     "aproba": "^1.0.3",
     "babel-polyfill": "^6.22.0",
-    "bluebird": "^3.4.6",
+    "bluebird": "^3.5.0",
     "buffertools": "^2.1.4",
     "farmhash": "^1.2.1",
     "flac-parser": "othiym23/flac-info-parser#master",
