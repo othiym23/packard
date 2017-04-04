@@ -37,7 +37,7 @@
     "aproba": "^1.0.3",
     "babel-polyfill": "^6.22.0",
     "bluebird": "^3.4.6",
-    "buffertools": "^2.1.4",
+    "buffertools": "^2.1.5",
     "farmhash": "^1.2.1",
     "flac-parser": "othiym23/flac-info-parser#master",
     "glob": "^7.1.1",
